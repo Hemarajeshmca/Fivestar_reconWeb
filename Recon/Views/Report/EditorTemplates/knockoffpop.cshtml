@@ -1,0 +1,85 @@
+﻿@model  Recon_Model.Report_model
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 40%;
+        font-weight: normal;
+    }
+
+    .form-horizontal .form-group {
+        margin-right: 25px;
+        margin-left: -15px;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+</style>
+<div>
+    <table style="border:1px;">
+        <tr>           
+            <td>
+                @Html.Label("Ko Id", new { style = "width:145px;margin-left: 11%; " })
+            </td>           
+            <td>
+                @Html.TextBoxFor(model => model.koid, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>          
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>
+                @Html.Label("Ko date", new { style = "width:145px;margin-left: 11%; " })
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.kodate, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+       
+        <tr>
+            <td>
+                @Html.Label("Recon Name", new { style = "width:145px;margin-left: 11%; " })
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.reconname, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>
+                @Html.Label("Rule Name", new { style = "width:145px;margin-left: 11%; " })
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.rulename, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>
+        </tr>
+        
+
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>
+                @Html.Label("Mappping Type", new { style = "width:145px;margin-left: 11%; " })
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.mappingdesctype, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>
+                @Html.Label("MatchOff Type", new { style = "width:145px;margin-left: 11%; " })
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.matchoff_type, new { style = "height:20px;width: 257px;font-weight:normal; " })
+            </td>
+        </tr>        
+    </table>
+</div>
+
+

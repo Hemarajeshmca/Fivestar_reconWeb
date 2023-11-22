@@ -1,0 +1,543 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+      
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+        .Recon_tallied_no {
+            /*opacity:0.5;*/
+         pointer-events:none;
+         color:red;
+
+        }
+       .Recon_tallied_yes
+       {
+         
+       }
+
+        .k-state-active {
+            display: none;
+        }
+        .btn-success{
+            padding: 2px 16px 4px 10px;
+        }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+         .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+  @foreach (var frm in ViewBag.Message)
+  {
+
+      var session_token = ViewBag.Message;
+
+  }
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Rule Based KO-Automatic</h3>
+                            <input type="hidden" id="token1" value="@ViewBag.Message" />
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label for="AccountNo" class="title">Recon Type</label>  <br />
+                                <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="W" checked> Within Account
+                                <input type="radio" name="Recontype" id="Recontype"  onchange="filetype()" value="B"> Between Account
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="AccountNo" class="title">Date From</label>
+                                <input class="cusDate1" data-role='datepicker' id="period_from" name="period_from"  />
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="AccountNo" class="title">Date To</label>
+                                <input class="cusDate1" data-role='datepicker' id="period_to" name="period_to"  />
+                            </div>
+                            <div class="col-sm-5" >
+                                <div class="row" style="margin-top:4px;">
+                                    
+                                    <div class="col-sm-8">
+                                        <label for="AccountNo" class="title"></label><br />
+                                        <button type="button" id="rundata" onclick="Run()" class="btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;Show Recon</button>
+                                        <button type="button" id="ProcessData" onclick="RunSelected()" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run Selected</button>
+                                        @*<button type="button" id="RunAll" onclick="RunAll()" class="btn btn-success"><i class=" fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>*@
+                                    </div>
+                                    <div class="col-sm-4"></div>
+                                </div>
+                                
+                            </div>
+                            
+                        </div>
+
+                        <div id="withinaccount">
+                            <div class="form-group" style="padding-top:14px">
+                                @* <label for="period_from" style="padding-left:30px">Within Account</label>*@
+                                @using (Html.BeginForm("Individual", "SystemMatchOff", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div>
+                                        @(Html.Kendo().Grid<Recon_Model.SystemMatchOff_model>().Name("WithinGrid")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;height:390px;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))  
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.Select).ClientTemplate("<input type='checkbox' id='checkbox'  #= Select == true ? checked='checked' : '' # />").Width(50);
+                                    columns.Bound(m => m.WSlNo).Title("Sl.no").Width(50).Hidden();
+                                    columns.Bound(m => m.ReconName).Title("Recon Name").Width(100);
+                                    columns.Bound(m => m.recon_tallied).Title("ReconTallied").Width(100);
+                                    columns.Bound(m => m.AccountNo).Title("Account Number").Width(100);
+
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRuleEdit"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Events(e => e.DataBound("onDataBound"))
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                                 //.Events(events => events.Error("error_handler"))
+                             .Model(model =>
+                             {
+                                 model.Id(p => p.WSlNo);
+                                 model.Field(p => p.Select).Editable(false);
+                             })
+
+                             .Create(Create => Create.Action("SaveEmployee", "DedperuleList"))
+                             .Read(read => read.Action("SystemMatchGrid_Read", "SystemMatchOff").Data("getslno"))
+                             .Update(update => update.Action("", "EmployeeMaster"))
+                             ))
+                                    </div>
+                                }
+                                @*<div style="padding-top:10px">
+                                    <button type="button" style="float:right;margin-right:0px;margin-top:-6px" id="ProcessData" onclick="Process()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run Selected</button>
+                                </div>*@
+                            </div>
+                        </div>
+                        <div id="BetweenAccount">
+                            <div class="form-group" style="padding-top:14px">
+                                @*<label for="period_from" style="padding-left:30px">Between Account</label>*@
+                                @using (Html.BeginForm("Individual", "SystemMatchOff", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div >
+                                        @(Html.Kendo().Grid<Recon_Model.SystemMatchOff_model>().Name("BetweenGrid")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;height:390px;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.Select).ClientTemplate("<input type='checkbox' id='checkbox' #= Select == true ? checked='checked' : '' # />").Width(50);
+                                    columns.Bound(m => m.BSlNo).Title("Sl. No").Width(50).Hidden();
+                                    columns.Bound(m => m.ReconName).Title("Recon Name").Width(100);
+                                    columns.Bound(m => m.recon_tallied).Title("ReconTallied").Width(100);
+                                    columns.Bound(m => m.AccountNo1).Title("Account No.1").Width(100).Hidden();
+                                    columns.Bound(m => m.AccountNo2).Title("Account No.2").Width(100).Hidden();
+                                    columns.Bound(m => m.AccountNo1_desc).Title("Account No.1").Width(100);
+                                    columns.Bound(m => m.AccountNo2_desc).Title("Account No.2").Width(100);
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRuleEdit"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Events(e => e.DataBound("onDataBound"))
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                                 //.Events(events => events.Error("error_handler"))
+                             .Model(model =>
+                             {
+                                 model.Id(p => p.BSlNo);
+                                 model.Field(p => p.Select).Editable(false);
+                             })
+
+                           .Read(read => read.Action("SystemMatchGridBET_Read", "SystemMatchOff").Data("getslno1"))
+
+                             ))
+                                    </div>
+                                }
+                                @*<div style="padding-top:10px">
+                                    <button type="button" style="float:right;margin-right:0px;margin-top:-6px" id="Match" onclick="Match()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run Selected</button>
+                                </div>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        $("#withinaccount").hide();
+        $("#BetweenAccount").hide();
+        var mindate= '@Request.RequestContext.HttpContext.Session["mindate"]';
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: mindate,// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+    })
+    $(document).on('change', '.primaryBox:checkbox', function (e) {
+        var isChecked = $(this).is(':checked');
+        if (isChecked) {
+            checkedArray.push($(this).val());
+        } else {
+            checkedArray.remove($(this).val());
+
+        }
+    });
+    var spinnerVisible = false;
+
+    function showProgress() {
+        if (!spinnerVisible) {
+            $("div#spinner").fadeIn("fast");
+            spinnerVisible = true;
+        }
+    }
+    function hideProgress() {
+        if (spinnerVisible) {
+            var spinner = $("div#spinner");
+            spinner.stop();
+            spinner.fadeOut("fast");
+            spinnerVisible = false;
+        }
+    }
+    function Run() {
+        var val = $("input[name='Recontype']:checked").val();
+        if (val == "W") {
+            $("#withinaccount").show();
+            $("#BetweenAccount").hide();
+            $("#WithinGrid").data("kendoGrid").dataSource.read();
+        } else if (val == "B") {
+            $("#withinaccount").hide();
+            $("#BetweenAccount").show();
+            $("#BetweenGrid").data("kendoGrid").dataSource.read();
+        }
+    }
+
+    function RunSelected() {
+        var val = $("input[name='Recontype']:checked").val();
+        if (val == "W") {
+            RunWithInRecon();
+        } else if (val == "B") {
+            RunBetweenRecon();
+        }
+    }
+
+    function getslno() {
+        var val = $("input[name='Recontype']:checked").val();
+        var compsr = "Y";
+        return { fieldtype: val, process: compsr }
+    }
+    function getslno1() {
+        var val = $("input[name='Recontype']:checked").val();
+        var compsr = "Y";
+        return { fieldtype: val, process: compsr }
+    }
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+    function RunWithInRecon() {
+        debugger;
+        var arrString;
+
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+                    var grid = $("#WithinGrid").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    var Attribid = [];
+                    var Attribid1;
+                    for (var i = 0; i < checkedrows.length; i++) {
+
+                        var item = grid.dataItem(checkedrows[i]);
+                        var GridID = item.WSlNo;
+                        Attribid.push(GridID);
+                    }
+                    arrString = Attribid.join(", ");
+
+                    var val = "";
+                    var period_from = $('#period_from').val();
+                    var period_to = $("#period_to").val();
+                    var formatted_period_from = getFormated_StringDate(period_from);
+                    var formatted_period_to = getFormated_StringDate(period_to);
+                    var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+                    var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+                    var ip = '@ViewBag.ip';
+
+                    var obj = { "Select": arrString, "period_from": formatted_period_from, "period_to": formatted_period_to, "Recontype": val, "createdby": user_code, "ip_address": ip, "status": "Y" }
+                    debugger;
+
+                    $.alert({
+                        title: 'Impact',
+                        content: "Knockoff in progress..." + "<br>" + "<br>" +
+                                 "Please check 'Process in progress' under utility menu",
+                        type: 'green',
+                    });
+
+                    $.ajax({
+                        type: "POST",
+                        timeout: 3000,
+                        data: JSON.stringify(obj),
+                        async: true,
+                        //data: '{slno: "' + Attribid + '",period_from: "' + formatted_period_from + '",period_to: "' + formatted_period_to + '",recontype:"' + val + '" }',
+
+                        @*url: '@Url.Action("SystemMatchGrid", "SystemMatchOff")',*@
+                        url: url + "SystemMatchoffWith",
+
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function (xhr) {
+                            debugger;
+                            xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+                        },
+                        //success: function (response) {
+                        //    $.dialog({
+                        //        title: 'Impact',
+                        //        content: response,
+                        //        type: 'green',
+
+                        //    });
+                        //},
+                        //error: function (er) {
+                        //}
+
+                    });
+
+                },
+                cancel: function () {
+                },
+            }
+        });
+
+    }
+    function RunBetweenRecon() {
+        var arrString;
+        debugger;
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+                    var val = "";
+                    var grid = $("#BetweenGrid").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    var Attribid = [];
+                    var Attribid1;
+                    for (var i = 0; i < checkedrows.length; i++) {
+                        var item = grid.dataItem(checkedrows[i]);
+                        var GridID = item.BSlNo;
+                        Attribid.push(GridID);
+                    }
+                    arrString = Attribid.join(", ");
+
+                    var period_from = $('#period_from').val();
+                    var period_to = $("#period_to").val();
+                    var formatted_period_from = getFormated_StringDate(period_from);
+                    var formatted_period_to = getFormated_StringDate(period_to);
+                    var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+                    var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+                    var ip = '@ViewBag.ip';
+
+
+                    var obj = { "Select": arrString, "period_from": formatted_period_from, "period_to": formatted_period_to, "Recontype": val, "createdby": user_code, "ip_address": ip, "status": "Y" }
+
+                    debugger;
+
+                    $.alert({
+                        title: 'Impact',
+                        content: "Knockoff in progress..." + "<br>" + "<br>" +
+                                 "Please check 'Process in progress' under utility menu",
+                        type: 'green',
+
+                    });
+                    //hideProgress();
+                    debugger;
+                    $.ajax({
+                        type: "POST",
+                        timeout: 3000,
+                        data: JSON.stringify(obj),
+                        async: true,
+                        //data: '{slno: "' + Attribid + '",period_from: "' + formatted_period_from + '",period_to: "' + formatted_period_to + '",recontype:"' + val + '" }',
+                        url: url + "SystemMatchoffWith",
+                        @*url: '@Url.Action("SystemMatchGrid", "SystemMatchOff")',*@
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function (xhr) {
+                            debugger;
+                            xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+                        },
+                        //success: function (response) {
+                        //    $.dialog({
+                        //        title: 'Impact',
+                        //        content: response,
+                        //        type: 'green',
+
+                        //    });
+                        //    setTimeout(function () {
+
+                        //    }, 2000);
+                        //},
+                        //error: function (er) {
+                        //}
+                    });
+                    hideProgress();
+                },
+                cancel: function () {
+                },
+            }
+        });
+    }
+
+
+
+    function RunAll() {
+        debugger;
+        var sessiontoken = $("#token1").val();
+
+        $.confirm({
+            title: 'Impact',
+            content: 'Are you sure to Run All',
+            buttons: {
+                confirm: function () {
+                    debugger;
+                    var Attribid = "";
+                    var val = $("input[name='Recontype']:checked").val();
+                    var period_from = $('#period_from').val();
+                    var period_to = $("#period_to").val();
+                    var formatted_period_from = getFormated_StringDate(period_from);
+                    var formatted_period_to = getFormated_StringDate(period_to);
+                    var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+                    var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+                    var ip = '@ViewBag.ip';
+
+
+
+                    var obj = { "Select": Attribid, "period_from": formatted_period_from, "period_to": formatted_period_to, "Recontype": val, "createdby": user_code, "ip_address": ip, "status": "Y" }
+
+                    $.alert({
+                        title: 'Impact',
+                        content: "Knockoff in progress..." + "<br>" + "<br>" +
+                                 "Please check 'Process in progress' under utility menu",
+                        type: 'green',
+
+                    });
+
+
+                    debugger;
+                    $.ajax({
+                        type: "POST",
+                        timeout: 3000,
+                        data: JSON.stringify(obj),
+
+                        async: true,
+
+                        url: url + "SystemMatchoffWith",
+
+
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function (xhr) {
+                            debugger;
+                            xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+                        },
+                        //success: function (response) {
+                        //    $.dialog({
+                        //        title: 'Impact',
+                        //        content: response,
+                        //        type: 'green',
+
+                        //    });
+                        //    setTimeout(function () {
+
+                        //    }, 2000);
+                        //},
+                        //error: function (er) {
+                        //    $.dialog({
+                        //                title: 'Impact',
+                        //                content: response,
+                        //                type: 'green',
+
+                        //            });
+                        //}
+                    });
+                    hideProgress();
+                },
+                cancel: {
+                    text: 'cancel',
+                    btnClass: 'btn-blue',
+                    keys: ['enter', 'shift'],
+                }
+
+            }
+        });
+
+    }
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].recon_tallied == "Yes") {
+
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_yes");
+            }
+
+            else {
+                // $("#Recontype").data("kendoGrid").setOptions({ editable: false });
+                // this.closeCell();
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_no");
+            }
+        }
+    }
+</script>

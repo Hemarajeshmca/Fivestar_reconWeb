@@ -1,0 +1,394 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@{
+    ViewBag.Title = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!Doctype html>
+<html>
+
+<head>
+    <title></title>
+    <style>
+        .HeaderRow {
+            color: blue;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .backgroundcoloryellow{
+            background-color:yellow;
+        }
+       .backgroundcolorBlack
+        {
+            background-color:black;
+        }
+        .forewhite 
+        {
+            color:white;
+            font-weight: bold;
+        }
+        .btn-success {
+            padding: 2px 16px 4px 10px;
+        }
+
+        .RowsText {
+            color: black;
+            font-weight: bold;
+            text-indent:7px;
+        }
+
+        .Total {
+            color: red;
+            font-weight: bold;
+        }
+
+        .k-grid-header th.k-header > .k-link {
+            font-size: 14px;
+        }
+
+        .k-popup.k-list-container {
+            width: 210px !important;
+        }
+
+        .k-pager-sizes {
+            display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+        }
+         .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:600px;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Report-Knockoff MIS</h3>
+                        </div>
+                        <div class="row" style="margin-left:-15px">
+                            <div class="col-sm-3">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="period_to" class="title">Date To</label><br />
+                                <input class="cusDate" data-role='datepicker' style="width:100%" id="period_to" name="period_to" />
+                            </div>
+
+                            <div class="col-sm-3">
+
+                                <label for="filetype1" class="title">Recon Name</label><br />
+                                @(Html.Kendo().DropDownList()
+                                        .Name("ReconName_id")
+                                        .HtmlAttributes(new { style = "width:180px" })
+                                        .DataTextField("ReconName")
+                                        .DataValueField("ReconName_id")
+                                       .Template("<input type='checkbox' name='cb'  value='#:data.ReconName#' /> #:data.ReconName#")
+                                        .Events(e => e.Select("onSelect"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("getuserrecon_All", "Report");
+                                                // read.Action("ApplyRecontype_drop", "ApplyRule");
+                                            });
+                                        }))
+
+                            </div>
+                            <div class="col-sm-3" style="margin-top:24px;">
+
+                                <button type="button" id="knockoff_MIS" onclick="KnockoffMIS()" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i>Run</button>
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class=" fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                                <button type="button" id="" onclick="knockoffMIS_download()" class="btn btn-primary" style="display:none;">&nbsp;Knockoff MIS</button>&nbsp;
+                            </div>
+
+                        </div>
+                        <div class="row" style="overflow:auto;display:block;">
+                            @using (Html.BeginForm("KnockoffMIS", "Report", FormMethod.Post, new { @id = "form1" }))
+                            {
+                                <div style="margin-top:2%;margin-left:1%;overflow:auto;display:block">
+                                    @(Html.Kendo().Grid<Recon_Model.TransactionRpt_model>().Name("KnockoffMIS")
+                                .HtmlAttributes(new { style = "width:99%;line-height:2em;font-weight:normal;height:380px;font-size:14px;" })
+                                    //.ToolBar(toolbar => toolbar.Create().Text("Add New Account")) height:357px;
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.nullvalues).Width(10).Hidden();
+                                    columns.Bound(m => m.rowslabel).Width(150).Title("Row Labels").HtmlAttributes(new { style = "font-size:14px;font-weight:bold;" });
+                                    columns.Bound(m => m.drcount).Title("Dr Count").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                    columns.Bound(m => m.dramount).Title("Dr Amount").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                    columns.Bound(m => m.crcount).Title("Cr Count").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                    columns.Bound(m => m.cramount).Title("Cr Amount").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                    columns.Bound(m => m.TotalcountofNarration).Title("Total Count").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                    columns.Bound(m => m.Totalsumofamount).Title("Total Amount").Width(70).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;text-align:right" });
+                                  //  columns.Bound(m => m.color).Title("color").Width(5).Hidden();
+
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName(""); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(false)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                           
+                             .Scrollable()
+                             .Events(e => e.DataBound("onDataBound"))
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => {
+                                 dataSource
+                                .Ajax()
+                                .PageSize(50)
+                                .ServerOperation(false)
+                                .Model(model => model.Id(""))
+
+                                 .Read(read => read.Action("Report_KnocoffMIS", "Report").Data("getdata"));
+
+                             } ))
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+    $(document).ready(function () {
+        debugger;
+
+        kendodate_format();
+        var findate = '@Request.RequestContext.HttpContext.Session["fin_date"]';
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+
+    })
+
+    function exportExcel() {
+        debugger;
+        // $("#KnockoffMIS").getKendoGrid().saveAsExcel();
+        var Attribid = [];
+        var arrstring = "";
+        var periodfrom = getFormated_StringDate($("#period_from").val());
+        var periodto = getFormated_StringDate($("#period_to").val());
+        //var recon_id = $("#ReconName_id").data("kendoDropDownList").value();
+        var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
+        var reconarray = Config_MetricType.dataSource.data();
+        var cbs = document.getElementsByName("cb");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].ReconName_id;
+                Attribid.push(item);
+            }
+
+        }
+        arrString = Attribid.join(", ");
+
+
+        window.location.href = '@Url.Action("Report_KnocoffMIS_closedxml", "Report")?period_from=' + periodfrom + '&period_to=' + periodto + '&Recongid=' + arrString + '';
+    }
+
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+
+    (function ($) {
+        var MultiSelectBox = window.kendo.ui.DropDownList.extend({
+            _select: function (li) { },//Prevents highlighting
+            _blur: function () { },//Prevents auto close
+        });
+
+        window.kendo.ui.plugin(MultiSelectBox);
+    })(jQuery);
+
+    function onSelect(e) {
+        debugger;
+
+        var cbs = document.getElementsByName("cb");
+        var checkboxes = document.getElementsByTagName('input');
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var id = ddl.element.attr("ReconName_id");
+        multiselect();
+        var item = e.item;
+        var index = item.index();
+        if (index == 0) {
+            for (var i = 1; i < cbs.length; i++) {
+                var selectAll = cbs[0].checked;
+                if (cbs[0].checked) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = true;
+                        }
+                    }
+                    multiselect();
+                }
+
+                else {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = false;
+                        }
+                    }
+                    multiselect();
+                }
+            }
+        }
+
+    }
+
+    function multiselect() {
+        debugger;
+        // var dataItem = this.dataItem(e.item);
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var isAllChecked = $('#cb').prop("checked");
+        var cbs = document.getElementsByName("cb");
+        var display;
+
+        var list = [];
+        for (var i = 1; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                list.push(cbs[i].value);
+            }
+
+        }
+
+
+        if (list.length == 0) {
+            display = "-- SelectAll --";
+        }
+        else {
+
+            display = list.join(", ");
+        }
+
+        ddl.text(display);
+    }
+
+
+    function KnockoffMIS() {
+        debugger;
+        $("#KnockoffMIS").data("kendoGrid").dataSource.read();
+    }
+
+    function knockoffMIS_download() {
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+        var periodfrom = getFormated_StringDate($("#period_from").val());
+        var periodto = getFormated_StringDate($("#period_to").val());
+        //var recon_id = $("#ReconName_id").data("kendoDropDownList").value();
+        var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
+        var reconarray = Config_MetricType.dataSource.data();
+        var cbs = document.getElementsByName("cb");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].ReconName_id;
+                Attribid.push(item);
+            }
+
+        }
+        arrString = Attribid.join(", ");
+
+        window.location.href = '@Url.Action("KnockoffMIS_Download", "Report")?periodfrom=' + periodfrom + '&periodto=' + periodto + '&Recongid=' + arrString + '';
+
+    }
+    function getdata() {
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+        var periodfrom = getFormated_StringDate($("#period_from").val());
+        var periodto = getFormated_StringDate($("#period_to").val());
+        //var recon_id = $("#ReconName_id").data("kendoDropDownList").value();
+        var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
+        var reconarray = Config_MetricType.dataSource.data();
+        var cbs = document.getElementsByName("cb");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].ReconName_id;
+                Attribid.push(item);
+            }
+
+        }
+        arrString = Attribid.join(", ");
+
+        return { period_from: periodfrom, period_to: periodto, Recongid: arrString };
+
+    }
+
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].forecolor == "Blue") {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("HeaderRow");
+            }
+            else if (currentRecords[i].forecolor == "Black") {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("RowsText");
+            }
+            else if (currentRecords[i].forecolor == "White") {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("forewhite");
+            }
+            else {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Total");
+            }
+
+            if (currentRecords[i].backcolor == "Yellow") {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("backgroundcoloryellow");
+            }
+            else if (currentRecords[i].backcolor == "Black") {
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("backgroundcolorBlack");
+            }
+           
+
+        }
+
+    }
+
+</script>

@@ -1,0 +1,137 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@*@model Recon_Model.AcMaster_model;*@
+@model Recon_Model.FileConTemp_model
+
+<style>
+     .k-header.k-grid-toolbar.k-grid-top{
+         background: none;
+        }
+
+     .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+        .k-popup.k-list-container {
+         width:210px !important;
+     }
+          .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+</style>
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 50%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    .form-control {
+        height: 23px;
+        width: 90%;
+    }
+     .k-state-active {
+            display: block;
+        }
+</style>
+<div class="container">
+    <div class="row" style="padding-bottom:5px;padding-left:28px;padding-right:5px">
+        <div class="col-sm-3">
+            <label for="" class="form-label">Sl No</label>
+            <input class="form-control" id="FileTemplatefield_gid" name="FileTemplatefield_gid" type="text" readonly value="" data-bind="value:FileTemplatefield_gid">
+        </div>
+
+        <div class="col-sm-4">
+            <label for="" class="form-label">DB Alias Name</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                            .Name("field_name")
+                                .DataTextField("field_alias_name")
+                                .DataValueField("field_name")
+                         .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal;" })
+                .DataSource(source => { source.Read(read => { read.Action("DbAliasDropTemp", "FileConTempCreate"); }).ServerFiltering(true); }))
+                <input type="hidden" id="Header_id" name="Header_id" value="" data-bind="value:Header_id">
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <label for="" class="form-label">Mandatory Field</label><br />
+            <input type="radio" id="Mandatory_Field" name="Mandatory_Field" value="Y" checked>Yes
+            <input type="radio" id="Mandatory_Field" name="Mandatory_Field" value="N" style="margin-left: 10px;">No
+        </div>
+        
+    </div>
+
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:32px;padding-right:5px">
+        <div class="col-sm-3">
+            <label for="" class="form-label">Field Mapping Type</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                        .Name("fieldmappingtype")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal;" })
+                                        .Events(e => e.Change("mappingtypeCSV"))
+                        .BindTo(new List<SelectListItem>()
+                        {
+                            new SelectListItem()
+                            {
+                                Text = "Exact",
+                                Value = "E"
+                            }
+                            //new SelectListItem()
+                            //{
+                            //    Text = "Formula",
+                            //    Value = "F"
+                            //} ,new SelectListItem()
+                            //{
+                            //    Text = "Blank on Formula",
+                            //    Value = "B"
+                            //}
+                        })
+                               .Value("E")
+                )
+            </div>
+        </div>
+        <div class="col-sm-4" id="SourceColNo">
+            <label for="" class="form-label">Base Column Number</label>
+            <input class="form-control" id="Csv_Column_No" name="Csv_Column_No" type="text" value="" data-bind="value:Csv_Column_No">
+        </div>
+        <div class="col-sm-3">
+            <label for="" class="form-label">Status</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Field_Active_Status" name="Field_Active_Status" value="Y" checked> Active
+                <input type="radio" id="Field_Active_Status" name="Field_Active_Status" value="N" style="margin-left: 10px;"> InActive
+            </div>
+        </div>
+        <div class="col-sm-2" id="CSVConfig">
+            @Html.Label("", new { style = "" })<br />
+            <button type="button" id="configbtnCSV" onclick="configbtnCSV()" class="btn btn-primary">&nbsp;Config</button>
+        </div>        
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#SourceColNo").hide();
+        $("#CSVConfig").hide();
+    });
+</script>
+

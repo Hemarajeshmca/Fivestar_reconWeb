@@ -1,0 +1,70 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model  Recon_Model.TransFieldmap_model
+<style>
+    .k-window-action {
+        visibility: hidden !important;
+        margin-left: -220px;
+    }
+         .k-popup.k-list-container {
+         width:200px !important;
+     }
+ 
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 47%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    div.k-window-content {
+        overflow: hidden;
+    }
+      .form-control{
+        width:100%
+    }
+</style>
+<div class="container">
+    <div class="row" style="padding-bottom:8px;padding-top:5px;padding-left:25px;padding-right:5px">
+        <div class="col-sm-3">
+            <label for="" class="form-label">Field Name&nbsp;</label>
+            <input class="form-control" id="DBfieldName" name="DBfieldName" type="text" value="" data-bind="value:DBfieldName" readonly>
+        </div>
+        <div class="col-sm-3" style="margin-left:16px;">
+            <label for="" class="form-label">DB Alias Name&nbsp;</label>
+            <input class="form-control" id="Alias" name="Alias" type="text" value="" data-bind="value:Alias">
+        </div>
+        <div class="col-sm-3" style="margin-left:16px;">
+            <label for="" class="form-label">Template Flag&nbsp;</label><br/>
+            <input type="radio" id="temflag" name="temflag" value="Y" checked>Yes
+            <input type="radio" id="temflag" name="temflag" value="N" style="margin-left:8px;">No
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:5px;padding-left:27px;padding-right:5px">
+        <div class="col-sm-3" style="width:28%;">
+            <label for="" class="form-label">Type&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                             .Name("Type")
+                                     .DataTextField("Type")
+                             .DataValueField("Type")
+                             .HtmlAttributes(new { style = "height:25px;width: 100%;margin-top:3px;font-weight: normal" })
+                             .DataSource(source => { source.Read(read => { read.Action("Transfielddrop", "TransFieldMap"); }).ServerFiltering(true); }))
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <label for="" class="form-label">Format&nbsp;</label>
+            <input class="form-control" id="Format" name="Format" type="text" value="" data-bind="value:Format">
+        </div>
+    </div>
+</div>

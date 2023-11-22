@@ -1,0 +1,113 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+<style>
+   
+    #ApplyRuleTargetgroupgrid .k-grid-content
+{
+    min-height: 200px;
+    max-height: 300px;
+}
+    .k-icon.k-i-close {
+       /*//visibility:visible!important;*/
+         display:normal !important;
+         visibility:visible!important;
+
+        }
+    
+    #dialog.k-window-action {
+          visibility:visible !important;
+    }
+     #dialog.k-window-action{
+         margin-left:10%;
+     }
+</style>
+
+<html>
+<head>
+    <title>1
+
+    </title>
+</head>
+<body>
+    <div class="row" style="padding:10px;margin-left:-1%;margin-top:0%">
+        <div class="col-sm-4">
+            <label for="" class="form-label">Field Name</label>
+
+            @(Html.Kendo().DropDownList()
+                            .Name("field_name_txt")
+                            .DataTextField("field_alias_name")
+                            .DataValueField("field_name_txt")
+                            //.Events(e => e.Change("onfieldchange1").DataBound("dbaliasname1"))
+                                            .HtmlAttributes(new { style = "" })
+                                            .DataSource(source => { source.Read(read => { read.Action("Fieldnamedropdown", "ApplyRule_New"); }).ServerFiltering(true); }))
+        </div>
+        <div class="col-sm-3">
+            <label for="" class="form-label">Status</label>
+            <div>
+                <input type="radio" class="messageCheckbox" id="status4Act" name="statusActive" value="Y" checked> Active
+                <input type="radio" class="messageCheckbox" id="status4InA" name="statusActive" value="N" style="margin-left: 10px;"> InActive
+            </div>
+        </div>
+        <div class="col-sm-3" style="margin-top:2%;margin-left:-7%;">
+            <button type="button" id="btn_additionalsave" onclick="SaveAdditonalgroup()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+            <button type="button" id="btn_close" onclick="CloseAdditiongroup()" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+        </div>
+    </div>
+    <div class="row" style="margin-top:1%">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleTargetgroupgrid")
+                                        .HtmlAttributes(new { @class="targetgrid",style = "width:93%;font-weight:normal;margin-left:2%;" })
+                    // .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.sno).Title("Sl No").Width(35);
+                                    columns.Bound(m => m.targetField_gid).Title("Target Fielid").Width(5).Hidden();
+                                    columns.Bound(m => m.target_grpfield_alias).Title("Target Group Field").Width(170).HtmlAttributes(new { style = "text-indent:10px;" });
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(50);
+
+                                    ////columns.Command(cmd => { cmd.Edit(); }).Title("Edit").Width(50);
+                                    columns.Command(cmd =>
+                                    {
+                                        //cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;text-align:center'>").Click("Edittargetgroup").HtmlAttributes(new { style = "text-indent:7px;" });
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;text-align:center'>").Click("DeleteTargetgrp");
+                                    }).Title("Action").Width(30);
+                                })
+                                             .Editable(editable =>
+                                                     { editable.Mode(GridEditMode.PopUp).TemplateName(""); })// AdtionalCondition
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                              .Events(events => events.Error("error_handler"))
+                                      .Model(model =>
+                                     {
+                                         model.Id(p => p.sno);
+                                         model.Field(p => p.Select).Editable(false);
+                                     })
+                                 .Create(Create => Create.Action("", ""))
+                             .Read(read => read.Action("ApplyRule_targetgrpgrid", "ApplyRule_New").Data("gettargetfield"))
+                    //.Update(update => update.Action("ApplyRuleGrid_UpdateAdd", "ApplyRule_New"))
+                             ))
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        debugger;
+       
+    });
+</script>
+
+

@@ -1,0 +1,227 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.user_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">User Management</h3>
+                        </div>
+                        @using (Html.BeginForm("Admin", "UserStatus", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.user_model>().Name("userStatus")
+                                .HtmlAttributes(new { style = "height:500px;font-weight:normal" })
+                                //.ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.user_gid).Title("Slno").Width(50);
+                                    columns.Bound(m => m.user_code).Title("User Code").Width(80);
+                                    columns.Bound(m => m.user_name).Title("User Name").Width(80);
+                                    columns.Bound(m => m.user_address).Title("User Address").Width(100);
+                                    columns.Bound(m => m.user_contact_no).Title("Contact No").Width(80);
+                                    columns.Bound(m => m.active_status_desc).Title("Status").Width(100);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");                                      
+                                    }).Title("Action").Width(50);
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("UserStatuspop"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                             .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.user_gid))                            
+                             .Read(read => read.Action("usergridGrid_Read", "Admin"))
+                             .Update(update => update.Action("userStatus_Save", "Admin"))
+                             ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+    $(document).ready(function () {
+
+        $("#userStatus").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#userStatus").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            debugger;
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            var editWindow1 = this.editable.element.data("kendoWindow");
+            editWindow1.unbind("close");
+            editWindow1.bind("close", onWindowEditClose);
+            filetype();
+        });
+        kendodate_format();
+    });
+    var onWindowEditClose = function (e) {
+        debugger;
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#userStatus").data("kendoGrid").dataSource.read();
+        }
+    };
+    function onRequestEnd(e) {
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    content: e.response[0],
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+            }
+            else {
+                $.dialog({
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    content: e.response[0],
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+            }
+            else {
+                $.dialog({
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function account_name1() {
+        var code = $("#account1_desc").val();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/ReconSetup/AccName",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                $("#accname").val(response).trigger("change");
+                $("#acc1").show();
+            },
+            error: function (er) {
+            }
+        });
+    }
+    function account_name2() {
+        var code = $("#account2_desc").val();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/ReconSetup/AccName",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#accname2").val(response).trigger("change");
+                $("#acc2").show();
+            },
+            error: function (er) {
+            }
+        });
+    }
+    function filetype() {
+        var val = $("input[name='MappingType_code']:checked").val();
+        if (val == "P") {
+            $("#acc2drop").hide();
+        } else {
+            $("#acc2drop").show();
+        }
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+
+    }
+</script>
+

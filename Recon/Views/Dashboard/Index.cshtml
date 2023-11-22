@@ -1,0 +1,170 @@
+﻿<style>
+    #table table-bordered {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #table table-bordered td, #table table-bordered th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #table table-bordered tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #table table-bordered tr:hover {
+            background-color: #ddd;
+        }
+
+        #table table-bordered th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: white;
+        }
+
+    .center {
+        margin: auto;
+        width: 60%;
+        padding: 10px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<fieldset>
+    <legend>Sample submission</legend>
+    <div class="center">
+        <select name="Data" id="Dataid" onchange="onclickvalue" style="width:100px;">
+            <option value="Name">Name</option>
+            <option value="Accno">AccNo</option>
+            <option value="Tran_date">Tran_date</option>
+            <option value="Mobilenum">Mobilenum</option>
+        </select>
+        <button id="add" type="button" class="btn btn-primary">Add</button>
+    </div>>
+    <table id="submissionTable" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Orderid</th>
+                <th>Attributes</th>
+                <th>Constraints</th>
+                <th>value</th>
+                <th>joins</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tr id="tablerow0">
+            <td>
+                <div class="editor-field">
+                    <input class="text-box single-line" id="txtattributes"  name="ClientSampleID[0]" type="text" value="" required="required" />
+                </div>
+            </td>
+            <td>
+                <div class="editor-field">
+                    <input class="text-box single-line" name="AdditionalComments[0]" type="text" value="" required="required" />
+                </div>
+            </td>
+            <td>
+                <div class="form-select">
+                    <select name="drpCondition[0]" id="contselect" style="width:100px;">
+                        <option value="is Equal to">is Equal to</option>
+                        <option value="Not equal to">Not equal to</option>
+                        <option value="Greater than equal to">Greater than equal to</option>
+                        <option value="Lesser than to">Lesser than to</option>
+                    </select>/>
+                </div>
+            </td>
+            <td>
+                <div class="editor-field">
+                    <input class="text-box single-line" name="Valueof[0]" type="text" value="" required="required" />
+                </div>
+            </td>
+            <td>
+                <div class="form-select">
+                    <select name="jointst[0]" id="joins" style="width:100px;">
+                        <option value="Acn94839">And</option>
+                        <option value="857948509">OR</option>
+                        <option value="84584">NOT</option>
+                    </select>
+                </div>
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" onclick="removeTr(0);">Delete</button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" onclick="ApplyFilter">ApplyFilter</button>
+            </td>
+        </tr>
+
+    </table>
+    <p>
+        
+    </p>
+    <hr />
+
+    <p>
+        
+    </p>
+</fieldset>
+<script>
+
+    //var selectBox = document.getElementById("Dataid");
+    //selectBox.onchange = function () {
+    //    var textbox = document.getElementById("txtattributes");
+    //    textbox.value = this.value;
+    //};
+
+var counter = 2;
+        $(function () {
+            $('#add').click(function () {
+                $('<tr id="tablerow' + counter + '"><td>' +
+                                 '<input type="text" id="txtvalue'+counter+'" class="text-box single-line" name="ClientSampleID[' + counter + ']" value="" required="required" />' +
+                                 '</td>' +
+                        ' <td>' +
+                '<input type="text" class="text-box single-line" name="AdditionalComments[' + counter + ']" value="" required="required" />' +
+                  '</td>' +
+                    ' <td>' +
+                    '<select id="contselect' + counter + '"  class="form-select"  name="drpCondition[' + counter + ']" value="" required="required" style="width:100px;" /><option value="Is equal to">is equal to</option><option value="Is not equal to">Is not equal to</option><option value="Start with">Start with</option></select>' +
+                   '</td>' +
+                       ' <td>' +
+                '<input type="text" class="text-box single-line" name="Valueof[' + counter + ']" value="" required="required" />' +
+                  '</td>' +
+                 ' <td>' +
+                    '<select id="contbtn' + counter + '"  class="form-select"  name="jointst[' + counter + ']" value="" required="required" style="width:100px;" /><option value="OR">OR</option><option value="AND">AND</option></select>' +
+                   '</td>' +
+                   ' <td>' +
+                '<button type="button" class="btn btn-primary" onclick="removeTr(' + counter + ');">Delete</button>' +
+                  '</td>' +
+                  ' <td>' +
+                '<button type="button" class="btn btn-primary" onclick="ApplyFilter(' + counter + ');">ApplyFilter</button>' +
+                  '</td>' +
+                   '</tr>').appendTo('#submissionTable');
+                
+
+                debugger;
+                var indexval = counter;
+                $('#contselect' + indexval).append('<option value="' + "Is equal to" + '">' + "Is equal to" + '</option>');
+                $('#contselect' + indexval).append('<option value="' + "Is not equal to" + '">' + "Is not equal to" + '</option>');
+                $('#contselect' + indexval).append('<option value="' + "Start with" + '">' + "Start with" + '</option>');
+                $('#contselect' + indexval).append('<option value="' + "End with" + '">' + "End with" + '</option>');
+                $('#contselect' + indexval).append('<option value="' + "Contains" + '">' + "Contains" + '</option>');
+                $('#contselect' + indexval).append('<option value="' + "Does not contains" + '">' + "Does not contains" + '</option>');
+                $('#contbtn' + indexval).append('<option value="' + "AND" + '">' + "AND" + '</option>');
+                $('#contbtn' + indexval).append('<option value="' + "OR" + '">' + "OR" + '</option>');
+                $('#txtvalue' + indexval).val($("#Dataid").s);
+                counter++;
+                return false;
+            });
+        });
+        function removeTr(index) {
+            if (counter > 1) {
+                $('#tablerow' + index).remove();
+                counter--;
+            }
+            return false;
+        }
+
+        </script>

@@ -1,0 +1,206 @@
+﻿
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 45%;
+        font-weight: normal;
+    }
+
+    .k-popup.k-list-container {
+        width: 210px !important;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+        .k-edit-form-container .k-edit-buttons {
+            visibility: hidden !important;
+        }
+
+    .ui-autocomplete {
+        z-index: 2147483647;
+        max-height: 150px;
+        overflow-x: hidden;
+        padding-right: 20px;
+    }
+
+    li.ui-menu-item {
+        font-size: 12px !important;
+        /* font-family: Helvitica, serif; */
+        font-weight: 600;
+    }
+
+        li.ui-menu-item:hover {
+            font-size: 12px !important;
+            /* font-family: Helvitica, serif; */
+            font-weight: 600;
+        }
+
+    div.k-window-content {
+        overflow: inherit;
+    }
+
+    .form-control2 {
+        color: black;
+        display: block;
+        height: 26px;
+        width: 93%;
+        padding: 0.4375rem 0.875rem;
+        font-size: 1.4rem;
+        font-weight: 400;
+        line-height: 1.53;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #d9dee3;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        border-radius: 0.375rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    li.ui-menu-item {
+        font-size: 12px !important;
+        font-weight: 200;
+    }
+
+    .k-edit-form-container {
+        margin-bottom: -42px;
+        margin-right: 20px;
+    }
+</style>
+<div id="spinner">
+    <img src="~/Content/images/spinner.gif" /> <br /><span>Please Wait...</span>
+</div>
+
+<div class="container" id="overlay">
+    <div class="row" style="padding-bottom:5px;padding-left:37px;">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Sl No&nbsp;</label>
+            <input class="form-control2" id="sno" name="sno" type="text" value="" data-bind="value:sno">
+            <input id="slnolist1" name="slnolist" type="hidden">
+            <input id="slno" name="slno" type="hidden">
+            <input id="extraction_filter" name="extraction_filter" type="hidden">
+            <input id="comparision_filter" name="comparision_filter" type="hidden">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Status&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="status" name="status" value="Y" checked>&nbsp;Active &nbsp;
+                <input type="radio" id="status" name="status" value="N" style="margin-left: 10px;">&nbsp;InActive&nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:5px;padding-top:5px;padding-left:36px;">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Source Field&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                            .Name("field_name")
+                            .DataTextField("field_alias_name")
+                            .DataValueField("field_name")
+                            .Events(e => e.Change("onfieldchange").DataBound("sourcefield"))
+                                            .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal" })
+                            .DataSource(source => { source.Read(read => { read.Action("dedupDbaliasdrop", "DedupeRule"); }).ServerFiltering(true); }))
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Target Field&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                    .Name("TargetField")
+                                    .DataTextField("TargetField_alias")
+                                    .DataValueField("TargetField")
+                                                    .Events(e => e.Change("onTargetFieldchange").DataBound("targetfield"))
+                                                            .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal" })
+                                    .DataSource(source => { source.Read(read => { read.Action("dedupDbaliasdrop", "DedupeRule"); }).ServerFiltering(true); }))
+            </div>
+        </div>
+
+    </div>
+    <div class="row" style="padding-bottom:5px;padding-top:8px;padding-left:34px;">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Extraction Criteria&nbsp;</label>
+            <input class="form-control2" id="ExtractionCriteria" name="ExtractionCriteria" type="text" value="" data-bind="value:ExtractionCriteria">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Comparision Criteria&nbsp;</label>
+            <input class="form-control2" id="ComparisonCriteria" name="ComparisonCriteria" type="text" value="" data-bind="value:ComparisonCriteria">
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:5px;padding-top:5px;padding-left:5px;">
+        <div class="col-sm-5" id="extractvisiable" style="margin-left:29px;">
+            <label for="" class="form-label">Extraction Filter&nbsp;</label>
+            <form id="extractionfilter" style="width:227px;height:100px;overflow-y:scroll;">
+                <div id="extractionfilter" class="k-listview form-control2" onchange="Extact()">  </div>
+            </form>
+        </div>
+        <div class="col-sm-5" id="comparisionvisiable" style="margin-left:-12px;">
+            <label for="" class="form-label">Comparision Filter&nbsp;</label>
+            <form id="comparisionfilter" style="width:230px;height:100px;overflow-y:scroll;">
+                <div id="comparisionfilter" class="k-listview form-control2" onchange="Extact()">  </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-sm-12" style="text-align: center;margin-top:10px;margin-left:-33px">
+        <button type="button" id="btn_saveView" onclick="SaveRulePop()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+        <button type="button" id="btn_close" onclick="ClosePopup()" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+    </div>
+</div>
+<script>
+            $(document).ready(function () {
+                debugger;
+
+
+                $('#spinner').fadeIn();
+                var delay = 1000;
+                setTimeout(function () {
+                    $('#spinner').fadeOut("slow");
+                    $("#overlay").fadeIn("fadeIn");
+
+
+
+                },
+                    delay
+                );
+
+
+                $("#comparisionvisiable").show();
+                $("#extractvisiable").show();
+
+
+            });
+
+            $(function () {
+                $("#target_ident_flag").click(function () {
+                    if ($(this).is(":checked")) {
+                        $("#target_ident_value").removeAttr("disabled");
+                        $("#target_ident_value").focus();
+                    } else {
+                        $("#target_ident_value").attr("disabled", "disabled");
+                    }
+                });
+            });
+
+            $(function () {
+                $("#source_ident_flag").click(function () {
+                    if ($(this).is(":checked")) {
+                        $("#source_ident_value").removeAttr("disabled");
+                        $("#source_ident_value").focus();
+                    } else {
+                        $("#source_ident_value").attr("disabled", "disabled");
+                    }
+                });
+            });
+
+</script>

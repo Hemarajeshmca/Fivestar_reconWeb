@@ -1,0 +1,418 @@
+﻿@using System.Configuration;
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        #loader {
+            position: absolute;
+            background: url('http://sampsonresume.com/labs/pIkfp.gif') no-repeat center center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        label.title {
+            font-size: 14px;
+            font-weight: 600 !important;
+        }
+
+        div#spinner {
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            position: fixed;
+            display: block;
+            opacity: 0.6;
+            background: #aaaaaa url('~/Content/themes/base/images/ui-bg_flat_0_aaaaaa_40x100.png');
+            z-index: 1006;
+            text-align: center;
+            display: none;
+            filter: Alpha(Opacity=30); /*{opacityOverlay}*/
+        }
+
+        @@media (min-width: 768px) {
+            .navbar-nav > li > a {
+                padding-top: 18px !important;
+                padding-bottom: 7px !important;
+            }
+        }
+
+        div#spinner img {
+            position: absolute;
+            /*width:100px;
+               height:100px;*/
+            top: 40%;
+            left: 42%;
+            opacity: 4.5;
+            z-index: 1007;
+        }
+
+        span.k-link {
+            color: #fff !important;
+        }
+
+        div#spinner span {
+            font-family: Arial Tahoma;
+            font-size: large;
+            font-weight: bold;
+            opacity: 4.5;
+            margin-top: 100px;
+            color: white;
+        }
+
+        /*grid content should not be wrap*/
+        .k-grid td {
+            white-space: nowrap;
+        }
+
+        /*grid header should not be wrap*/
+        .k-grid-header table {
+            width: 100% !important;
+        }
+
+        /*Boostrap scroll bar*/
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+        }
+    </style>
+
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Recon</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    <link href="~/Content/css/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link href="~/Content/css/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- Ionicons -->
+    <link href="~/Content/css/bower_components/Ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <!-- Theme style -->
+    <link href="~/Content/css/dist/css/AdminLTE.min.css" rel="stylesheet" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link href="~/Content/css/dist/css/skins/_all-skins.min.css" rel="stylesheet" />
+    <!-- Morris chart -->
+    <!-- jvectormap -->
+    <!-- Date Picker -->
+    <link href="~/Content/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <!-- Daterange picker -->
+    <link href="~/Content/css/bower_components/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet" />
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link href="~/Content/css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" />
+    <link href="~/Content/css/dist/css/dms.css" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+    <link href="@Url.Content("~/Content/kendo1/2015.1.318/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo1/2015.1.318/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo1/2015.1.318/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo1/2015.1.318/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo1/2015.1.318/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+
+    <link href="@Url.Content("~/Content/css/jquery-ui-datepicker.css")" rel="stylesheet" type="text/css" />
+    @*<link href="@Url.Content("~/Content/jquery-ui.css")" rel="stylesheet" type="text/css" />*@
+    <script src="@Url.Content("~/Scripts/kendo1/2015.1.318/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo1/2015.1.318/jszip.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo1/2015.1.318/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo1/2015.1.318/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-datepicker.js")" type="text/javascript"></script>
+    @*<script src="~/Content/css/dist/js/pages/dashboard.js"></script>*@
+    @*<script src="~/Scripts/bootstrap.js"></script>*@
+    @*@Scripts.Render("~/bundles/app")*@
+
+    @*side doggle bar script*@
+    <script src="~/Content/css/dist/js/adminlte.min.js"></script>
+
+    @*Css and Js for Jquery alert box*@
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <link href="~/Content/css/jquery-confirm.min.css" rel="stylesheet" />
+    @*/*dashboard chart*/*@
+    @*<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>*@
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+   
+</head>
+@*Tree View Purpose*@
+@*@Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap", "~/Content/css", "~/bundles/app")*@
+
+@*<body class="hold-transition skin-blue sidebar-mini">*@
+@{
+    ViewBag.FooterDate = DateTime.Now.Year.ToString();
+}
+
+<body class="hold-transition skin-blue sidebar-toggle @*sidebar-collapse*@">
+
+
+    <div id="spinner">
+        <img src="~/Content/images/spinner.gif" /> <br /><span>Please Wait...</span>
+    </div>
+    <div class="wrapper">
+
+        <header class="main-header">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <!-- Logo -->
+            <div class="sidebar-header">
+                <!-- Logo -->
+                <a href="#" class="logo">
+                    <!-- mini logo for sidebar mini 50x50 pixels -->
+                    <span>Impact</span>
+                    @*<span class="logo-mini"><img src="~/Content/css/dist/images/webite-updated-logo-1.png" class="img-responsive" style="margin-top:4%"></span>*@
+                    <!-- logo for regular state and mobile devices -->
+                    @*<span class="logo-lg"><b><span style="color:#C0C0C0;">flexi</span><span style="color:#00ccff;">docs</span></span>*@
+                    @*<span class="logo-mini"><img src="~/Content/css/dist/images/flexidocslogo.png" class="img-responsive"></span>*@
+                </a>
+            </div>
+
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <li class="user-menu">
+                            <a>
+                                <img src="~/Content/css/dist/images/user-admin.png" class="user-image" alt="User Image">Welcome  @System.Web.HttpContext.Current.Session["usercode"].ToString()
+                            </a>
+                        </li>
+                        <li><a href="@Url.Action("Dashboard", "Dashboard")" class="elements">Dashboard</a></li>
+                        <li>
+                            <a href="#" data-toggle="modal" class="sign-out-btn" data-target="#Newcust1" >Profile</a>
+                        </li>
+
+                        <li>
+                            <a href="@Url.Action("ChangePassword", "Login")" data-toggle="modal" data-target="#changepwd" onclick="showchangepasswordscreen();">Change Password</a>
+                        </li>
+
+                        <li>
+                            <a href="../Login/Login" data-toggle="modal" class="sign-out-btn" data-target="#Signout" onclick="return Signout();">Sign out</a>
+                        </li>
+                        <!-- Control Sidebar Toggle Button -->
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <aside class="main-sidebar">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+                  @Html.Partial("Menu")
+                @*<ul class="sidebar-menu" data-widget="tree" style="">
+                    <li class="treeview">
+                        <a href="">Admin<i class="fa fa-angle-left fa-pull-left"></i></a>
+                        <ul class="treeview-menu" style="display:none;">
+                            <li class="dropdown">
+                                <a style="max-height:32px;position:relative;" href="../Admin/Users">Setup User</a>
+                                <a style="max-height:32px;position:relative;" href="../Admin/UsersStatus">User Management</a>
+                                <a style="max-height:32px;position:relative;" href="../Admin/UsersMenuMapping">User Mapping</a>
+                                <a style="max-height:32px;position:relative;" href="../Admin/Usersgroup">User Group</a>
+                            </li>
+                        </ul>
+                        <a href="">Maintenance<i class="fa fa-angle-left fa-pull-left"></i></a>
+                        <ul class="treeview-menu" style="display:none;">
+                            <li class="dropdown">
+                                <a style="max-height:32px;position:relative;" href="../AcMaster/ACList">Account Master</a>
+                                <a style="max-height:32px;position:relative;" href="../SetUp/Category">Account Category</a>
+                                <a style="max-height:32px;position:relative;" href="../SetUp/Responsibility">Account Responsibility</a>
+                                <a style="max-height:32px;position:relative;" href="../ReconSetup/ReconSetupList">Recon Setup</a>
+                                <a style="max-height:32px;position:relative;" href="../TransFieldMap/TransFieldMapView">Field Mapping</a>
+                                <a style="max-height:32px;position:relative;" href="../FileConTempCreate/FileConTempCreateView">File Conversion</a>
+                                <a style="max-height:32px;position:relative;" href="../RuleDefinition/RuleDefinitionList">Rule Setup</a>
+                                <a style="max-height:32px;position:relative;" href="../ApplyRule/ApplyList">Apply Rule</a>
+                                <a style="max-height:32px;position:relative;" href="../DedupeRule/DedupeRuleView">Dedup Rule</a>
+                                <a style="max-height:32px;position:relative;" href="../SetUp/Supportfiletype">Support File Type</a> 
+                                <a style="max-height:32px;position:relative;" href="../SetUp/Remark">Remark</a>                                     
+                            </li>
+                        </ul>
+                        <a href="">Transaction<i class="fa fa-angle-left fa-pull-left"></i></a>
+                        <ul class="treeview-menu" style="display:none;">
+                            <li class="dropdown">
+                                <a style="max-height:32px;position:relative;" href="../FileImportByAcNo/FileImportByAcNo">File Import </a>
+                                <a style="max-height:32px;position:relative;" href="../Report/FileReportDel">File Deletion</a>
+                                <a style="max-height:32px;position:relative;" href="../Progress/PostSupFile">File Posting - Rule based</a>
+                                <a style="max-height:32px;position:relative;" href="../Progress/PostSupFilemapping">File Posting - Line Based</a>
+                                <a style="max-height:32px;position:relative;" href="../SystemMatchOff/Individual">Auto Match - Rule Based</a>
+                                <a style="max-height:32px;position:relative;" href="../Manualmatch/Manualmatch">Manual Match - Rule based</a>                               
+                                <a style="max-height:32px;position:relative;" href="../ManualMatchOff/AmountMatchedAll">Manual Match - Amount Based</a>
+                                <a style="max-height:32px;position:relative;" href="../ManualMatchOff/ManualMatchOff">Manual Match - Adhoc</a> 
+                                <a style="max-height:32px;position:relative;" href="../Report/KnockoffReportundo">Undo Match</a>
+                                <a style="max-height:32px;position:relative;" href="../Progress/ProgressView">Processes in progress</a>
+                                <a style="max-height:32px;position:relative;" href="../SetUp/RemarkSupport">Remark Support</a> 
+                            </li>
+                        </ul>                        
+                        <a href="">Report<i class="fa fa-angle-left fa-pull-left"></i></a>
+                        <ul class="treeview-menu" style="display:none;">
+                            <li class="dropdown">
+                                <a style="max-height:32px;position:relative;" href="../Report/withinaccReportBrs">Recon - Within A/cs</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/ReportBrs">Recon - Between A/cs</a>                               
+                                <a style="max-height:32px;position:relative;" href="../Report/ExceptionReport">Exceptions</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/KnockoffReport">Matched Transactions</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/ReversedTransactions">Reversed Transactions</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/BalanceReport">Account Balances</a>
+                                <a style="max-height:32px;position:relative;" href="../AccountBlncMatchingRpt/AccountBlncMatchingRpt">Account Balances - Verification</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/FileReport">File Import</a>                               
+                                <a style="max-height:32px;position:relative;" href="../Report/TransactionReport">All Transactions</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/SupportingReport">Supporting File</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/ProcessStatus">Process Log</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/ErrorReport">Error Report</a>
+                                <a style="max-height:32px;position:relative;" href="../Report/ErrorlogReport">Error log Report</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>*@
+            </section>
+
+        </aside>
+        <div id="Newcust1" class="modal fade" role="dialog" style="">
+
+        </div>
+
+        <footer class="main-footer" style="text-align:center;margin-left:0% !important;">
+            <strong style="text-align:center;position:relative;top:-7px;">Copyright &copy; @ViewBag.FooterDate Flexicode Technologies Pvt Ltd.</strong>
+        </footer>
+
+        @*<aside class="control-sidebar control-sidebar-dark">
+                <!-- Create the tabs -->
+                <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+                    <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+                    <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+                </ul>
+                <!-- Tab panes -->
+
+            </aside>*@
+
+        <div class="control-sidebar-bg"></div>
+        @RenderBody()
+    </div>
+    @*<div id="loader"></div>*@
+    <script>
+        // Show the loader icon
+        $(document).ajaxStart(function () {
+            // $('#loader').show();
+            showProgress();
+        });
+
+        // Hide the loader icon
+        $(document).ajaxStop(function () {
+            // $('#loader').hide();
+            hideProgress();
+        });
+
+
+        var spinnerVisible = false;
+
+        function showProgress() {
+            if (!spinnerVisible) {
+                $("div#spinner").fadeIn("fast");
+                spinnerVisible = true;
+            }
+        }
+        function hideProgress() {
+            if (spinnerVisible) {
+                var spinner = $("div#spinner");
+                spinner.stop();
+                spinner.fadeOut("fast");
+                spinnerVisible = false;
+            }
+        }
+
+        function Editcustdetails() {
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: {},
+                dataType: "html",
+                url: '@Url.Action("EmpProfilePartialView", "_Layout")',
+                success: function (data) {
+
+                    $("#Newcust1").html(data);
+                },
+                error: function (data) {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Error' + data,
+                        type: 'red',
+                    });
+                }
+            });
+        }
+
+        function kendodate_format() {           
+            $(".cusDate").kendoDatePicker({
+                value: new Date(),
+                format: "dd/MM/yyyy"
+            });
+            $(".cusDate1").kendoDatePicker({
+                value: new Date(),
+                format: "yyyy-MM-dd"
+            });
+        }
+        function date_validate(event) {
+            var x = event.charCode;
+            if ((x >= 48 && x <= 57) || (x == 47) || (x == 0) || (x== /^([a-zA-Z]{3,16})$/ ) ) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+        function Signout() {
+
+            @*$.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: {},
+                dataType: "html",
+                url: '@Url.Action("Signout", "Login")',
+                success: function (data) {*@
+            var url = '@Url.Action("Login", "Login")'
+            window.location.href = url;
+            //},
+
+        }
+
+
+        function showchangepasswordscreen() {
+
+            var url = '@Url.Action("ChangePassword", "Login")'
+            window.location.href = url;
+        }
+        function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+            if (date != "" || date != undefined) {
+                var d = date.split("-");
+                return d[2] + "-" + d[1] + "-" + d[0];
+            }
+        }
+    </script>
+
+</body>
+
+</html>

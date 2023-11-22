@@ -1,0 +1,315 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+
+<style>
+    body {
+        font-family: sans-serif;
+        font-weight: 400;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
+
+    .btn-danger {
+        background-color: #d43f3a;
+        border-color: #d43f3a;
+        padding: 2px 16px 4px 10px;
+    }
+
+        .btn-danger:hover, .btn-danger:active, .btn-danger.hover {
+            background-color: #d43f3a;
+        }
+
+         .k-popup.k-list-container {
+    width:210px !important;
+    }
+</style>
+
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 70%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+    .form-control{
+        height:17px;
+        width:80%;
+    }
+</style>
+<style>
+    .k-edit-form-container .k-edit-buttons {
+        visibility: hidden !important;
+    }
+</style>
+<form id="applyrule2" class="form-horizontal" data-role="validator" novalidate="novalidate">
+    <div class="container">
+        <input type="hidden" id="listslno3" name="listslno" value="" data-bind="value:listslno">
+        <input type="hidden" id="slnorule" name="slno" value="" data-bind="value:slno"> 
+        <div class="row">
+            <div class="col-sm-3">
+                <label for="Account1" class="form-label">Rule Name</label><br />
+                    @(Html.Kendo().DropDownList()
+                            .Name("Rulegid")
+                            .DataTextField("RuleName")
+                            .DataValueField("Rulegid")
+                           .Events(e => e.Change("rulecondrop"))
+                            .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                            .DataSource(source => { source.Read(read => { read.Action("ApplyRuletype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+
+            </div>
+            <div class="col-sm-1">
+                <label for="AccountNo" class="form-label">Rule Order</label>                
+                    <input class="form-control" id="Ruleorder" name="Ruleorder" type="text" value="" data-bind="value:Ruleorder">
+                                   
+            </div>
+            <div class="col-sm-6" >
+                @*<label class="form-label">Reversal Flag</label><br />
+    <input  type="radio" id="reversl_flag_yes" name="reversl_flag" value="Y"> Yes
+    <input type="radio" id="reversl_flag_No" name="reversl_flag" value="N" checked> No
+    <div class="col-sm-3">
+        <label class="form-label">Reversal Flag</label><br />
+        <input type="radio" id="reversl_flag_yes" name="reversl_flag" value="Y"> Yes
+        <input type="radio" id="reversl_flag_No" name="reversl_flag" value="N" checked> No
+    </div>*@
+               <div class="row">
+                    <div class="col-sm-3">
+                        <label class="form-label">Reversal Flag</label><br />
+                        <input type="radio" id="reversl_flag_yes" name="reversl_flag" value="Y"> Yes
+                        <input type="radio" id="reversl_flag_No" name="reversl_flag" value="N" checked> No
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label"> Group Flag</label><br />
+                        <input type="radio" id="group_flag_yes" name="group_flag" value="Y"> Yes
+                        <input type="radio" id="group_flag_No" name="group_flag" value="N" checked> No
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label">Status</label><br />
+                        <input type="radio" id="status_yesadd" name="status2" value="Y" checked> Active
+                        <input type="radio" id="status_no" name="status2" value="N"> InActive
+                    </div>
+                </div>
+                
+
+            </div>
+            @*<div class="col-sm-2" >
+                <label class="form-label"> Group Flag</label>
+                <div style="margin-top:5px">
+                    <input type="radio" id="group_flag_yes" name="group_flag" value="Y"> Yes
+                    <input type="radio" id="group_flag_No" name="group_flag" value="N"  checked> No
+
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label">Status</label>
+                <div style="margin-top:5px">
+                    <input type="radio" id="status_yesadd" name="status2" value="Y" checked> Active
+                    <input type="radio" id="status_no" name="status2" value="N" > InActive
+                </div>
+            </div>*@
+        </div>    
+       <div class="row">
+           <div class="col-sm-12" style="text-align:center;margin-top: 10px;margin-bottom:10px;">
+               <button type="button" id="btn_saveview" onclick="SaveApplyRulePop()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+               <button type="button" id="btn_close" onclick="CloserulePopup()" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+           </div>   
+       </div>            
+                    
+       
+    </div>
+
+    <div id="tabs1" style="padding-top:10px">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#tab_3" id="" data-toggle="tab" style="font-weight:bold;font-size:13px">Base Selection</a>
+            </li>
+            <li>
+                <a href="#tab_2" id="" data-toggle="tab" style="font-weight:bold;font-size:13px">Rule Condition</a>
+            </li>
+            <li>
+                <a href="#tab_1" id="" class="active" data-toggle="tab" style="font-weight:bold;font-size:13px">Additional Condition</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div id="tab_1">
+                @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleAdd")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                               .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.sno).Title("Sl No").Width(50);
+                                    columns.Bound(m => m.slnoadd).Title("Sl No").Width(50).Hidden();
+                                    columns.Bound(m => m.field_alias_name).Title("SourceField").Width(100);
+                                    columns.Bound(m => m.ExtractionCriteria).Title("Extraction Criteria").Width(50);
+                                    columns.Bound(m => m.TargetField_alias).Title("Target Field").Width(100);
+                                    columns.Bound(m => m.ComparisonCriteria).Title("Comparison Criteria").Width(100);
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                    ////columns.Command(cmd => { cmd.Edit(); }).Title("Edit").Width(50);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("AddConDel");
+                                    }).Title("Action").Width(50);
+                                })
+                                     .Editable(editable =>
+                                             { editable.Mode(GridEditMode.PopUp).TemplateName("AdtionalCondition"); })// AdtionalCondition
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(5)
+                              .Events(events => events.Error("error_handler"))
+                                      .Model(model =>
+                                     {
+                                         model.Id(p => p.sno);
+                                         model.Field(p => p.Select).Editable(false);
+                                     })
+                             .Create(Create => Create.Action("ApplyRuleGrid_createAdd", "ApplyRule"))
+                             .Read(read => read.Action("ApplyRuleGrid_ReadAdd", "ApplyRule").Data("getslno1"))
+                                             .Update(update => update.Action("ApplyRuleGrid_UpdateAdd", "ApplyRule"))
+                             ))
+            </div>
+
+            <div id="tab_2">
+                @(Html.Kendo().Grid<Recon_Model.DedupeRule_model>().Name("applyrulecon")
+                                            .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                            .Columns(columns =>
+                                                {
+                                                    columns.Bound(m => m.sno).Title("Sl No").Width(50);
+                                                    columns.Bound(m => m.slno).Title("Sl No").Width(50).Hidden();
+                                                    columns.Bound(m => m.field_alias_name).Title("Source Field").Width(80);
+                                                    columns.Bound(m => m.ExtractionCriteria).Title("Extraction Criteria").Width(100);
+                                                    columns.Bound(m => m.TargetField_alias).Title("Target Field").Width(100);
+                                                    columns.Bound(m => m.ComparisonCriteria).Title("Comparison Criteria").Width(100);
+                                                    columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                                    //columns.Command(cmd => { cmd.Edit(); }).Title("Edit").Width(50);
+                                                })
+                                            .Editable(editable =>
+                                                { editable.Mode(GridEditMode.PopUp).TemplateName("Ruledefinationpop"); })
+                                            .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                            .Filterable()
+                                            .Sortable()
+                                            .Resizable(resize => resize.Columns(true))
+                                            .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(5)
+                                               .Events(events => events.Error("error_handler"))
+                                            .Model(model =>
+                                                {
+                                                    model.Id(p => p.slno);
+                                                    model.Field(p => p.Select).Editable(false);
+                                                    //model.Field(f => f.code).DefaultValue(ViewBag.GetDocNameId);
+                                                })
+                                                    .Create(Create => Create.Action("Rulegrid_create", "ApplyRule"))
+                                                                    .Read(read => read.Action("ApplyRuleGrid_ReadRule", "ApplyRule").Data("getslno2"))
+                                                            .Update(update => update.Action("Rulegrid_update", "ApplyRule"))
+                                            ))
+
+
+            </div>
+
+            <div id="tab_3">
+                @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleBase")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                               .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.sno).Title("Sl No").Width(50);
+                                    columns.Bound(m => m.slnobase).Title("Sl No").Width(50).Hidden();
+                                    columns.Bound(m => m.acc_no).Title("Account No").Width(100);
+                                    // columns.Bound(m => m.comparecrtieria).Title("Comparison Criteria").Width(100);
+                                    columns.Bound(m => m.Accountmode_alias_name).Title("Account Mode").Width(100);
+                                    columns.Bound(m => m.Order).Title("Order").Width(150);
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("BaseSelectiondel");
+                                    }).Title("Action").Width(50);
+                                })
+                                     .Editable(editable =>
+                                             { editable.Mode(GridEditMode.PopUp).TemplateName("Supportfilepop"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(5)
+                             .Events(events => events.Error("error_handler"))
+                                     .Model(model =>
+                                     {
+                                         model.Id(p => p.slno);
+                                         model.Field(p => p.Select).Editable(false);
+                                     })
+                                             .Create(Create => Create.Action("ApplyRuleGrid_createBase", "ApplyRule"))
+                                             .Read(read => read.Action("ApplyRuleGrid_ReadBet", "ApplyRule").Data("getslno1"))
+                                             .Update(update => update.Action("ApplyRuleGrid_UpdateBase", "ApplyRule"))
+                             ))
+            </div>
+        </div>
+
+    </div>
+
+</form>
+<script>
+    $(document).ready(function () {
+        $("#tabs1").tabs();
+        $("#Substring").hide();
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+
+    });
+
+    //ApplyRuleBaseFilter
+
+</script>

@@ -1,0 +1,252 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+         .btn-success{
+            padding: 2px 16px 4px 10px;
+        }
+
+               .k-popup.k-list-container {
+    width:210px !important;
+    }
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .balance {
+            color: blue;
+        }
+
+        .total {
+            color: red;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        /*a.k-link {
+            color: #fff !important;
+        }*/
+        .k-grid-header .k-header > .k-link {
+            color: #fff;
+        }
+
+        .panel-body {
+            padding: 0px !important;
+        }
+
+        .k-grid td {
+            font-size: 14px;
+        }
+
+        .k-grid-header th.k-header > .k-link {
+            font-size: 14px;
+        }
+         .k-state-active {
+            display: block;
+        }
+
+          .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="padding:10px;overflow-y: scroll; height:600px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Recon - Within A/cs</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                @Html.Label("Tran Date", new { style = "font-size: 14px;font-weight: 600 !important; " })
+                                <input class="cusDate1" data-role='datepicker' id="trandate" name="trandate" style="width:90%" />
+                            </div>
+                            <div class="col-sm-3">
+                                @Html.Label("Recon Name", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+                                @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                            .HtmlAttributes(new { style = "width: 90%;font-weight: normal" })
+                                                        @*.DataSource(source => { source.Read(read => { read.Action("Recon_type_desc", "ApplyRule", new { fieldtype = "W", process="Y" }); }).ServerFiltering(true); }))*@
+                                                        .DataSource(source => { source.Read(read => { read.Action("getuserrecon_type_within", "Report", new { fieldtype = "W" }); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" id="Runprocess" onclick="validation()"  class=" btn btn-success" style="margin-top: 25px;margin-left:-18px;"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>&nbsp;
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary" style="margin-top: 25px;margin-left:1px;"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                            </div>
+                            <div class="row" style="padding-bottom:20px">
+                                <div class="col-sm-12">
+                                    <div class="panel-body" style="max-height:100%;margin-top:25px;margin-left:-18px;width:100% !important">
+                                        <div class="col-md-12" id="Process">
+                                            <div class="form-group">
+
+                                                <div>
+                                                    @(Html.Kendo().Grid<Recon_Model.Report_model>().Name("ReportBrs")
+                                                .HtmlAttributes(new { style = "height:360px;font-weight:normal;line-height:2em;width:104%" })
+                                                            //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                                        .Columns(columns =>
+                                            {
+                                                columns.Bound(m => m.brs_gid).Title("Brs gid").Width(50).Hidden();
+                                                columns.Bound(m => m.particular).Title("Particular").Width(90).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;" }) ;
+                                                columns.Bound(m => m.amount).Title("Amount").Width(30).HtmlAttributes(new { style = "text-align:right;font-size:14px;font-weight:bold;" }); ;
+                                                columns.Bound(m => m.accmode).Title("Account Mode").Width(30).HtmlAttributes(new { style = "text-align:right;font-size:14px;font-weight:bold;" });
+                                                columns.Bound(m => m.bal_amount).Title("Balance Amount").Width(90).HtmlAttributes(new { style = "text-align:right;font-size:14px;font-weight:bold;" });
+                                            })
+                                      .Editable(editable =>
+                                                            { editable.Mode(GridEditMode.PopUp).TemplateName("knockoffpop"); })
+
+                                      //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                                      .Excel(excel => excel
+                                         .AllPages(true)
+                                         .FileName("Recon - Within A/cs.xlsx"))
+                                                            //.Sortable()
+                                     .Selectable()
+                                     .Scrollable()
+                                     .Events(e => e.DataBound("onDataBound"))
+                                     .DataSource(dataSource => dataSource
+                                     .Ajax()
+                                     .PageSize(20)
+                                     .Model(model =>
+                                        {
+                                            model.Id(p => p.brs_gid);
+                                        })
+                                            .Read(read => read.Action("withinBrs_Read", "Report").Data("getslno"))
+                                     ))
+                                                </div>
+
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        kendodate_format();
+        $("#trandate").kendoDatePicker({
+            value:new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        //$("#period_to").kendoDatePicker({
+        //    value: new Date(),// sets max date
+        //    format: "dd-MM-yyyy"
+        //});
+        getslno();
+        $("#exportExcel").hide();
+    });
+    function exportExcel() {
+        $("#ReportBrs").getKendoGrid().saveAsExcel();
+    }
+   
+    function validation() {
+        debugger;
+        var msg = "";
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        if ($("#trandate").val() != "") {
+
+        }
+        else {
+            msg += "Select Tran Date";
+        }
+
+        if ($("#ReconName_id").val() != "") {
+
+        }
+        else {
+            msg += " Select Recon Name";
+        }
+
+
+        if (recon_gid == "0" || recon_gid == undefined || recon_gid == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Runprocess() {
+        $("#ReportBrs").data("kendoGrid").dataSource.read();
+        $("#exportExcel").show();
+    }
+
+    function getslno() {
+        var trandate = $('#trandate').val();
+        var formatted_trandate = getFormated_StringDate(trandate);
+        var Recon_gid = $("#ReconName_id").val();
+        if (Recon_gid == "") {
+            Recon_gid = 0;
+        }
+        return { trandate: formatted_trandate, Recon_gid: Recon_gid }
+    }
+    function onDataBound(e) {
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].particular) {
+                grid.tbody.find("tr[data-uid='" + currentRecords[0].uid + "']").addClass("balance");
+                grid.tbody.find("tr[data-uid='" + currentRecords[2].uid + "']").addClass("total");
+                grid.tbody.find("tr[data-uid='" + currentRecords[8].uid + "']").addClass("total");              
+            }
+        }
+    }
+</script>

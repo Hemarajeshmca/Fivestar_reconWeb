@@ -1,0 +1,1501 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.FileConTemp_model
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+  
+    </style>
+    <style>
+        .k-header.k-grid-toolbar.k-grid-top {
+            background: none;
+        }
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+            .k-popup.k-list-container {
+         width:230px !important;
+     }
+           .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+    </style>
+    <style>
+          .k-input{
+   background-image: url('textures/highlight.png');
+     /*background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,linear-gradient(to bottom,rgb(51, 122, 183) 0,rgb(51, 122, 183) 100%);
+    background-position: 50% 50%;
+    background-color: #e3e3e3;*/
+   background-color: #e3e3e3 !important;
+}
+    </style>
+    <style>       
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        /*.k-state-active {
+            display: none;
+        }*/
+
+        .k-widget k-grid {
+            width: 60%;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+            top: 3px;
+            font-size: 12px;
+        }
+
+        a.k-link {
+            font-size: 12px;
+            position: relative;
+            top: 2px;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+
+        .k-grid td {
+            font-size: 12px;
+        }
+        .form-control{
+            height:32px;
+        }
+         .k-state-active {
+            display: block;
+        }
+         /*.k-webkit {
+            overflow: hidden !important;
+        }*/
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed"> 
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">File Conversion</h3>
+                        </div>
+                        <div class="row" style="padding-bottom:7px">
+                            <div class="col-md-3">
+                                <label for="Reconname" class="form-label">Template Name</label>
+                                <input class="text-box single-line form-control" id="Template_name" name="Template_name" type="text" data-bind="value:Template_name">
+                                <input type="hidden" id="slno">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="File_Type" class="form-label">File Type</label><br />
+                                @(Html.Kendo().DropDownList()
+                               .Name("FileType")
+                               .DataTextField("FileType_desc")
+                               .DataValueField("FileType")
+                                       .Events(e => e.Change("filetypeone"))
+                                       .HtmlAttributes(new { style = "width:100%;" })
+                               .DataSource(source => { source.Read(read => { read.Action("Filetypedrop", "FileConTempCreate"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-md-3">
+                                <label for="Template_Type" class="form-label"> Template Type</label><br />
+                                @(Html.Kendo().DropDownList()
+                                     .Name("Template_type")
+                                      .DataTextField("Template_type_desc")
+                                     .DataValueField("Template_type")
+                                     .Events(e => e.Change("filetype"))
+                                     .HtmlAttributes(new { style = "width:100%;" })
+                                      .DataSource(source => { source.Read(read => { read.Action("TemplateTypedrop", "FileConTempCreate"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label><br />
+                                <input type="radio" id="status_yes" name="status" value="Y" checked> Active
+                                <input type="radio" id="status_no" name="status" value="N" style="margin-left: 30px;"> InActive
+                                <input type="hidden" id="status_hidden" />
+                            </div>
+                        </div>                      
+                        <div class="row" style="padding-bottom:7px">
+                            <div class="col-sm-3" style="margin-top:2%;">
+                                <input type="checkbox" id="Hflag" value="Y" checked disabled />&nbsp;                              
+                                <label for="Reconname" class="form-label">Is Header Available ?</label>
+                            </div>
+                           
+                            <div class="col-sm-3">
+                                <label for="Csv_Columns" class="form-label">CSV Columns</label><br />
+                                <input class="text-box single-line form-control" id="Csv_Columns" name="Csv_Columns" type="text" data-bind="value:Csv_Columns">                              
+                            </div>
+                            <div class="col-sm-3" id="sepator">
+                                <label for="Csv_seperator" class="form-label">Field Separator</label><br />
+                                <input class="text-box single-line form-control" id="Csv_seperator" name="Csv_seperator" type="text" data-bind="value:Csv_seperator">
+                                <input type="hidden" id="slno">
+                            </div>
+                            <div class="col-md-3" >
+                                <label for="tran_date_format" class="form-label">Transaction Date Format</label><br />
+                                @(Html.Kendo().DropDownList()
+                                             .Name("master_code")
+                                              .DataTextField("master_name")
+                                             .DataValueField("master_code")
+                                        // .Events(e => e.Change("filetype"))
+                                     .HtmlAttributes(new { style = "width:100%;" })
+                                     .DataSource(source => { source.Read(read => { read.Action("Trandatedrop", "FileConTempCreate"); }).ServerFiltering(true); }))
+                            </div>
+                      
+                        </div>
+                     
+                        <div class="row" >
+                                <div class=" col-sm-3" style="margin-top:2%;">
+                            <input type="checkbox" id="ACflag" value="Y" />&nbsp;
+                            <label for="Reconname" class="form-label">Is A/C No Part of Template ?</label>
+                        </div>
+                               
+                                <div class="col-md-3">
+                                    <label for="Template_Type" class="form-label"> Transaction Amount Type</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                      .Name("Transaction_Amount_type")
+                                      .DataTextField("Transaction_Amount_type_desc")
+                                      .DataValueField("Transaction_Amount_type")
+                                            // .Events(e => e.Change("filetype"))
+                                            //        .HtmlAttributes(new { style = "width:100%;", @disabled = true })
+                                                      .HtmlAttributes(new { style = "width:100%" })
+                                     .DataSource(source => { source.Read(read => { read.Action("DropDownBinding", "FileConTempCreate", new { dropdown = "TransactionAmount", param_1 = "T" }); }).ServerFiltering(true); }))
+                                </div>
+                            <div class="col-sm-3" style="margin-top:2%;">
+                                <input type="checkbox" id="Blflag" name="Blflag" value="Y" style="margin-left: 4px;" />
+                                <label for="Reconname" class="form-label" style="margin-top:-6px;margin-bottom:20px">Is Balance Part of Template ?</label>
+
+                            </div>
+                                <div class="col-md-3" >
+                                    <label for="Template_Type" class="form-label">Balance Amount Type</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                             .Name("Balance_Amount_type")
+                                              .DataTextField("Balance_Amount_type_desc")
+                                             .DataValueField("Balance_Amount_type")
+                                            // .Events(e => e.Change("filetype"))
+                                             .HtmlAttributes(new { style = "width:100%;", @disabled = true })
+                                                      .DataSource(source => { source.Read(read => { read.Action("DropDownBinding", "FileConTempCreate", new { dropdown = "BalanceAmount", param_1 = "B" }); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+                        <div class="row" style="margin-top:2px;margin-left:10px;">
+                            <div class="col-md-12" style="margin-top: 6px">
+                                <button type="button" id="btn_close" style="margin-left:15px;float: right;" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+                                <button type="button" id="btn_save" class="btn btn-primary" style="float: right;"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+
+                            </div>
+
+                        </div>
+                        <div class="form-group" style="padding-top:10px">
+                            <div id="tabs" style="padding-top:1px">
+                                <ul class="nav nav-tabs">
+                                    <li>
+                                        <a href="#tab_1" data-toggle="tab" style="font-weight:bold;font-size:11px">Excel Tempalate</a>
+                                    </li>
+                                </ul>
+                                @(Html.Kendo().Window()
+                                              .Name("kwindow_ppx")
+                                              .Title("Formula Details") //set the title of the window
+                                              .Content(@<text>@Html.Partial("FormulaListExcel")</text>)
+                                              .Draggable()
+                                              .Resizable()
+                                              .Width(1000)
+                                              .Height(300)
+                                              .Modal(true)
+                                              .Scrollable(false)
+                                              .Visible(false))
+                                @(Html.Kendo().Window()
+                                              .Name("kwindow_Csv")
+                                              .Title("Formula Details") //set the title of the window
+                                              .Content(@<text>@Html.Partial("FormulaListCSV")</text>)
+                                              .Draggable()
+                                              .Resizable()
+                                              .Width(1000)
+                                              .Height(300)
+                                              .Modal(true)
+                                              .Scrollable(false)
+                                              .Visible(false))
+                                @(Html.Kendo().Window()
+                                              .Name("kwindow_Text")
+                                              .Title("Formula Details") //set the title of the window
+                                              .Content(@<text>@Html.Partial("FormulaListText")</text>)
+                                                                   .Draggable()
+                                                                   .Resizable()
+                                                                   .Width(1000)
+                                                                   .Height(400)
+                                                                   .Modal(true)
+                                                                   .Scrollable(false)
+                                                                   .Visible(false))
+
+
+
+                                <div class="tab-content">
+                                    <div id="tab_1">
+                                        @using (Html.BeginForm("FileConTempCreate", "FileConTempCreateView", FormMethod.Post, new { @id = "form1" }))
+                                        {
+                                            <div>
+                                                @(Html.Kendo().Grid<Recon_Model.FileConTemp_model>().Name("FileConTemp")
+                                                    .HtmlAttributes(new { style = "width:100%;font-weight:normal" })
+                                                    .ToolBar(toolbar => toolbar.Create().Text(" "))
+                                                    .Columns(columns =>
+                                                     {
+                                                         columns.Bound(m => m.FileTemplatefield_gid).Title("Sl No").Width(50).Hidden();
+                                                         columns.Bound(m => m.sno).Title("Sl No").Width(50).Hidden();
+                                                         columns.Bound(m => m.Mandatory_Field).Title("Mandatoryfield").Width(10).Hidden();
+                                                         columns.Bound(m => m.Sourcefieldname).Title("Base Field Name").Width(100);
+                                                         columns.Bound(m => m.field_alias_name).Title("DB Alias Name").Width(150);
+                                                         columns.Bound(m => m.Mandatory_Fielddummy).Title("Mandatoryfield").Width(50);
+                                                         columns.Bound(m => m.Field_Active_Status).Title("Status").Width(80).Hidden();
+                                                         columns.Bound(m => m.Field_Active_desc).Title("Status").Width(30);
+                                                         columns.Command(cmd =>
+                                                         {
+                                                             cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                                             cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                                             cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                                         }).Title("Action").Width(30);
+                                                     })
+                                                    .Editable(editable =>
+                                                        { editable.Mode(GridEditMode.PopUp).TemplateName("Exceltemplatepop"); })
+                                                    .Pageable(pageable => pageable
+                                                        .Refresh(true)
+                                                        .PageSizes(true)
+                                                        .ButtonCount(5))
+                                                    .Filterable()
+                                                    .Sortable()
+                                                    .Scrollable()
+                                                    .Resizable(resize => resize.Columns(true))
+                                                    .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .PageSize(10)
+                                                    .Events(events => events.Error("error_handler"))
+                                                    .Model(model =>
+                                                        {
+                                                            model.Id(p => p.FileTemplatefield_gid);
+                                                            model.Field(p => p.Select).Editable(false);
+                                                        })
+                                                    .Create(Create => Create.Action("FileConTempCreateGrid_Save", "FileConTempCreate"))
+                                                    .Read(read => read.Action("FileConTempGrid_Read", "FileConTempCreate").Data("GetConvTempField"))
+                                                    .Update(update => update.Action("FileConTempCreateGrid_Update", "FileConTempCreate"))//.Data("datapassing"))
+                                                    ))
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:-11px;">
+                            <div id="tabscsv">
+                                <ul class="nav nav-tabs">
+                                    <li>
+                                        <a href="#tab_2" data-toggle="tab" style="font-weight:bold;font-size:13px">CSV Template</a>
+                                    </li>
+                                </ul>
+
+
+                                <div class="tab-content">
+                                    <div id="tab_2">
+                                        @using (Html.BeginForm("FileConTempCreate", "FileConTempCreateView", FormMethod.Post, new { @id = "form1" }))
+                                        {
+
+                                            <div>
+                                                @(Html.Kendo().Grid<Recon_Model.FileConTemp_model>().Name("CSV")
+                                                    .HtmlAttributes(new { style = "width:100%;font-weight:normal" })
+                                                    .ToolBar(toolbar => toolbar.Create().Text(""))
+                                                    .Columns(columns =>
+                                                        {
+                                                            columns.Bound(m => m.FileTemplatefield_gid).Title("Sl No").Width(50).Hidden();
+                                                            columns.Bound(m => m.sno).Title("Sl No").Width(50).Hidden();
+                                                            columns.Bound(m => m.Mandatory_Field).Title("MandatoryField").Width(10).Hidden();
+                                                            columns.Bound(m => m.Csv_Column_No).Title("Base Column Number").Width(100);
+                                                            columns.Bound(m => m.field_alias_name).Title("DB Alias Name").Width(150);
+                                                            columns.Bound(m => m.Mandatory_Fielddummy).Title("Mandatoryfield").Width(50);
+                                                            columns.Bound(m => m.Field_Active_Status).Title("Status").Width(80).Hidden();
+                                                            columns.Bound(m => m.Field_Active_desc).Title("Status").Width(30);
+                                                            columns.Command(cmd =>
+                                                            {
+                                                                cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                                                cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                                                cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                                            }).Title("Action").Width(30);
+                                                        })
+                                                    .Editable(editable =>
+                                                        { editable.Mode(GridEditMode.PopUp).TemplateName("CSVTemplatepop"); })
+                                                    .Pageable(pageable => pageable
+                                                    .Refresh(true)
+                                                    .PageSizes(true)
+                                                    .ButtonCount(5))
+                                                    .Filterable()
+                                                    .Sortable()
+                                                    .Scrollable()
+                                                    .Resizable(resize => resize.Columns(true))
+                                                    .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .PageSize(10)
+                                                    .Events(events => events.Error("error_handler"))
+                                                    .Model(model =>
+                                                        {
+                                                            model.Id(p => p.FileTemplatefield_gid);
+                                                            model.Field(p => p.Select).Editable(false);
+                                                        })
+                                                    .Create(Create => Create.Action("FileConTempCreateGrid_Save", "FileConTempCreate"))
+                                                    .Read(read => read.Action("FileConTempGrid_Read", "FileConTempCreate").Data("GetConvTempField"))
+                                                   .Update(update => update.Action("FileConTempCreateGrid_Update", "FileConTempCreate"))
+                                                    ))
+                                            </div>
+
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div id="tabstext">
+                                <ul class="nav nav-tabs">
+                                    <li>
+                                        <a href="#tab_3" data-toggle="tab" style="font-weight:bold;font-size:13px">Text Template</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div id="tab_3">
+                                        @using (Html.BeginForm("FileConTempCreate", "FileConTempCreateView", FormMethod.Post, new { @id = "form1" }))
+                                        {
+                                            <div>
+                                                @(Html.Kendo().Grid<Recon_Model.FileConTemp_model>().Name("text")
+                                                    .HtmlAttributes(new { style = "width:100%;font-weight:normal" })
+                                                    .ToolBar(toolbar => toolbar.Create().Text(""))
+                                                    .Columns(columns =>
+                                                        {
+                                                            columns.Bound(m => m.FileTemplatefield_gid).Title("Sl No").Width(50).Hidden();
+                                                            columns.Bound(m => m.sno).Title("Sl No").Width(50).Hidden();
+                                                            columns.Bound(m => m.Txt_Start_Position).Title("Start Position").Width(100);
+                                                            columns.Bound(m => m.Txt_End_Position).Title("End Position").Width(100);
+                                                            columns.Bound(m => m.Txt_Length).Title("Length").Width(100).Hidden();
+                                                            columns.Bound(m => m.field_alias_name).Title("DB Alias Name").Width(150);
+                                                            columns.Bound(m => m.Field_Active_Status).Title("Status").Width(30).Hidden();
+                                                            columns.Bound(m => m.Field_Active_desc).Title("Status").Width(30);
+                                                            columns.Command(cmd =>
+                                                            {
+                                                                cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                                                cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                                                cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                                            }).Title("Action").Width(30);
+                                                        })
+                                                    .Editable(editable =>
+                                                         { editable.Mode(GridEditMode.PopUp).TemplateName("TextTemplatepop"); })
+                                                    .Pageable(pageable => pageable
+                                                        .Refresh(true)
+                                                        .PageSizes(true)
+                                                        .ButtonCount(5))
+                                                    .Filterable()
+                                                    .Sortable()
+                                                    .Scrollable()
+                                                    .Resizable(resize => resize.Columns(true))
+                                                    .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .PageSize(10)
+                                                    .Events(events => events.Error("error_handler"))
+                                                    .Model(model =>
+                                                        {
+                                                            model.Id(p => p.FileTemplatefield_gid);
+                                                            model.Field(p => p.Select).Editable(false);
+                                                        })
+                                                    .Create(Create => Create.Action("FileConTempCreateGrid_Save", "FileConTempCreate"))
+                                                    .Read(read => read.Action("FileConTempGrid_Read", "FileConTempCreate").Data("GetConvTempField"))
+                                                    .Update(update => update.Action("FileConTempCreateGrid_Update", "FileConTempCreate"))
+                                                    ))
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    var headerflag = "";
+    var accountnumberflag = "";
+    var balanceamount = "";
+    var res = "";
+
+    $(document).ready(function () {
+        debugger;
+        $("#Csv_Columns").attr('disabled', true);
+        $("#Hflag").prop('checked', false);
+       
+       
+    });
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Recon',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+    $('#btn_close').click(function () {
+        debugger;
+        //location.href = "../FileConTempCreate/FileConTempCreateView";
+        location.href = '@Url.Action("FileConTempCreateView", "FileConTempCreate")';
+        
+    });
+    $(document).ready(function () {
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+        var viewmode = mode.substring(4, 0);
+        $("#FileConTemp").data("kendoGrid").dataSource.bind("requestEnd", onRequestEndExcel);
+        $("#text").data("kendoGrid").dataSource.bind("requestEnd", onRequestEndText);
+        $("#CSV").data("kendoGrid").dataSource.bind("requestEnd", onRequestEndCSV);
+        var grid = $("#FileConTemp").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+            if (viewmode == "View") {
+                $(".k-grid-edit").hide();
+                $(".k-grid-Delete").hide();
+            } 
+        })
+        grid.bind("edit", function (event) {
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepopone()" style="margin-left:574px;border:none;background-color:#357ab8;cursor:pointer;color:white;">x</button>');
+            var filetype1 = event.model.fieldmappingtype;
+
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+
+            if (event.model.isNew() != true) {
+                var gid = event.model.FileTemplatefield_gid
+                localStorage.setItem("Fieldgidformula", gid);
+                if (filetype1 == "E") {
+                    $("#sourcefield").show();
+                    $("#config").hide();
+                }
+                else {
+                    $("#sourcefield").hide();
+                    $("#config").show();
+                }
+            }
+           
+            var lislno = $("#slno").val();
+            if (lislno == "") {
+                $("#Header_id").val(koopId).trigger("change");
+            } else {
+                $("#Header_id").val(lislno).trigger("change");
+            }
+        });
+        var grid_text = $("#text").data("kendoGrid");
+        grid_text.bind("edit", function (event) {
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            var filetype1 = event.model.fieldmappingtype;
+            var lislno = $("#slno").val();
+            if (lislno == "") {
+                $("#Header_id").val(koopId).trigger("change");
+            } else {
+                $("#Header_id").val(lislno).trigger("change");
+            }
+            if (event.model.isNew() != true) {
+                var gid = event.model.FileTemplatefield_gid
+                localStorage.setItem("Fieldgidformula", gid);
+                if (filetype1 == "E") {
+                    $("#startno").show();
+                    $("#endno").show();
+                    $("#TextConfig").hide();
+                }
+                else {
+                    $("#startno").hide();
+                    $("#endno").hide();
+                    $("#TextConfig").show();
+                }
+            }
+        });
+
+        var grid_csv = $("#CSV").data("kendoGrid");
+        grid_csv.bind("edit", function (event) {
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            var filetype1 = event.model.fieldmappingtype;
+            if (event.model.isNew() != true) {
+                var gid = event.model.FileTemplatefield_gid
+                localStorage.setItem("Fieldgidformula", gid);
+                if (filetype1 == "E") {
+                    $("#SourceColNo").show();
+                    $("#CSVConfig").hide();
+                }
+                else {
+                    $("#SourceColNo").hide();
+                    $("#CSVConfig").show();
+                }
+            }
+            var lislno = $("#slno").val();
+            if (lislno == "") {
+                $("#Header_id").val(koopId).trigger("change");
+            } else {
+                $("#Header_id").val(lislno).trigger("change");
+            }
+        });
+        $("#tabs").tabs();
+        $("#tabstext").tabs();
+        $("#tabscsv").tabs();
+        $("#tabstext").hide();
+        $("#tabscsv").hide();
+        //  $("#sepator").hide();
+        $("#sepator").attr('disabled',true);
+        filetype();
+
+        $('#Hflag').change(function () {
+            if (this.checked) {
+                headerflag = "Y";
+            }
+            else {
+                headerflag = "N";
+            }
+        }); 
+        //$('#ACflag').change(function () {
+        //    debugger;
+        //    var dropdownlist = $("#Transaction_Amount_type").data("kendoDropDownList");
+        //    if (this.checked) {
+        //        dropdownlist.enable(true);
+        //        accountnumberflag = "Y";
+        //    }
+        //    else {
+        //       dropdownlist.enable(false);
+        //        accountnumberflag = "N";
+        //    }
+        //});
+        $('#Blflag').change(function () {
+            debugger;
+            var dropdownlist = $("#Balance_Amount_type").data("kendoDropDownList");
+            if (this.checked) {
+                dropdownlist.enable(true);
+                balanceamount = "Y";
+            }
+            else {
+                dropdownlist.enable(false);
+                balanceamount = "N";
+                $("#Balance_Amount_type").data("kendoDropDownList").value('');
+            }
+        });
+    })
+    var onWindowEditClose = function (e) {
+
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#FileConTemp").data("kendoGrid").dataSource.read();
+            $("#CSV").data("kendoGrid").dataSource.read();
+            $("#text").data("kendoGrid").dataSource.read();
+        }
+    };
+
+    function closepopone() {
+        debugger;
+        $("#FileConTemp").data("kendoGrid").dataSource.read();
+    }
+
+
+    function getlistText() {
+        debugger;
+        var gid = localStorage.getItem("Fieldgidformula");
+        var filetemplatefieldformula_gid = 0;
+        var status = "Y";
+        return { filetemplatefield_gid: gid, filetemplatefieldformula_gid: filetemplatefieldformula_gid, status: status }
+    }
+    function getlistexcel() {
+        debugger;
+        var gid = localStorage.getItem("Fieldgidformula");
+        var filetemplatefieldformula_gid = 0;
+        var status = "Y";
+        return { filetemplatefield_gid: gid, filetemplatefieldformula_gid: filetemplatefieldformula_gid, status: status }
+    }
+    function getlistCSV() {
+        debugger;
+        var gid = localStorage.getItem("Fieldgidformula");
+        var filetemplatefieldformula_gid = 0;
+        var status = "Y";
+        return { filetemplatefield_gid: gid, filetemplatefieldformula_gid: filetemplatefieldformula_gid, status: status }
+    }
+    function GetConvTempField() {
+        debugger;
+        //var grid = $("#FileTemplate").data("kendoGrid");
+        //var model = grid._data[0];
+        var returnvalue = ""
+
+        var sno = $("#slno").val();
+
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var urlid = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var koopId = urlid.replace("#", "");
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+
+        var viewmode = mode.substring(4, 0);
+
+        if (viewmode == "View") {
+            //$("#btn_save").hide();
+            $("#btn_save").prop('disabled', true); 
+            $(".k-grid-add").hide();
+        }
+
+        var slno = koopId;
+        
+       
+        if (slno == "" || slno == undefined || slno == "0") {
+            if (sno != "")
+            {
+                returnvalue = sno;
+            }
+            else
+            {
+                returnvalue = -1;
+            }
+           
+        }
+        else {
+            returnvalue = slno
+        }
+
+        $.ajax({
+            type: 'POST',
+            //url: "/FileConTempCreate/FileConTempGrid_ListEdit",
+          url: '@Url.Action("FileConTempGrid_ListEdit","FileConTempCreate")',
+            data: { id: returnvalue },
+            dataType: "json",
+            success: function (data) {
+                debugger;
+                if (returnvalue==-1)
+                {
+                    //var value = "";
+                    //var res = "";
+                    //var blflag = "";
+                    //$("#slno").val('');
+                    //$("#Template_name").val('');
+                    //$("#FileType").data("kendoDropDownList").value('');
+                    //$("#Template_type").data("kendoDropDownList").value('');
+                    //$("#Csv_seperator").val('');
+                    //$("#Csv_Columns").val('');
+                    //$("#Transaction_Amount_type").data("kendoDropDownList").value('');
+                    //$("#Balance_Amount_type").data("kendoDropDownList").value('');
+                    //$("#master_code").data("kendoDropDownList").value('');
+                    //var value_status =''
+
+                }
+                else {
+
+                
+
+                var value = data[0].Template_gid;
+                var res = data[0].Acflag;
+                var blflag = data[0].Blflag;
+                $("#slno").val(data[0].Template_gid);
+                $("#Template_name").val(data[0].Template_name);
+                $("#FileType").data("kendoDropDownList").value(data[0].FileType);
+                var fitype = data[0].FileType;
+                $("#Template_type").data("kendoDropDownList").value(data[0].Template_type);
+                $("#Csv_seperator").val(data[0].Csv_seperator);
+                $("#Csv_Columns").val(data[0].Csv_Columns);
+             //   $("#Transaction_Amount_type").attr('disabled', true);
+              //  $("#Transaction_Amount_type").data("kendoDropDownList").enable(false);
+                if (data[0].Hflag == "Y") {
+                    $("#Hflag").prop('checked',true);
+                }
+                //if (data[0].Blflag == "Y") {
+                //    $("#Blflag").prop('checked', true);
+                //    //$("#Balance_Amount_type").data("kendoDropDownList").enable();
+                //}
+                if (res == "Y") {
+                    $("#ACflag").prop('checked', true);
+                    $("#Transaction_Amount_type").data("kendoDropDownList").enable();
+                }
+                if (data[0].Template_type == "E") {
+                    //$("#Blflag").prop('checked', true);
+                   // $("#Blflag").attr('disabled', true);
+                    $("#Csv_Columns").attr('disabled', true);
+                    $("#Csv_seperator").attr('disabled', true);
+                    $("#Tran_date_format").attr('disabled',false);
+                }
+                if (blflag=="Y") {
+                    $("#Blflag").prop('checked', true);
+                    $("#Blflag").attr('disabled', false);
+                    $("#Balance_Amount_type").data("kendoDropDownList").enable();
+                    //$("#Csv_Columns").attr('disabled', true);
+                    //$("#Csv_seperator").attr('disabled', true);
+                }
+                else {
+                    $("#Blflag").prop('checked', false);
+                    $("#Blflag").attr('disabled', false);
+                    $("#Balance_Amount_type").data("kendoDropDownList").enable(false);
+                }
+                if (fitype == "S" || fitype == "M" || fitype == "P") {
+                    document.getElementById("Blflag").disabled = true;
+                    document.getElementById("Blflag").checked = false;
+                    //  $("#Blflag").attr('disabled', false);
+
+                }
+                //else {
+                //    document.getElementById("Blflag").disabled = false;
+                //}
+                if (fitype == "M" || fitype == "P") {
+                    document.getElementById("ACflag").disabled = true;
+                    document.getElementById("ACflag").checked = false;
+                    $('#Transaction_Amount_type').data("kendoDropDownList").enable(false);
+                }
+
+                var date = data[0].Tran_date_format;
+                $("#Transaction_Amount_type").data("kendoDropDownList").value(data[0].Transaction_Amount_type);
+                $("#Balance_Amount_type").data("kendoDropDownList").value(data[0].Balance_Amount_type);
+                $("#master_code").data("kendoDropDownList").value(date);
+                var value_status = data[0].Active_status;
+                $("input[name=status][value=" + value_status + "]").attr('checked', 'checked');
+                filetype();
+                    }
+                
+
+            },
+
+            error: 
+                function (data){
+                    alert("Error" + result);
+                    console.log(result);
+                    $.alert({
+                        //icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: result,
+                        type: 'red',
+                        animationSpeed: 700,
+                    });
+            }
+        });
+        return {
+            slno: returnvalue
+        }
+    }
+
+    function onRequestEndExcel(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            var msg = e.response[0];
+            localStorage.setItem("Fieldgidformula", e.response[1]);
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_ppx").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#FileConTemp").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            var msg = e.response[0];
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                })
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_ppx").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#FileConTemp").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function onRequestEndText(e) {
+        debugger;
+        //Check request type
+
+        if (e.type == "create") {
+            var msg = e.response[0];
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_Text").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#text").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            var msg = e.response[0];
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                })
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_Text").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#text").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function onRequestEndCSV(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            var msg = e.response[0];
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_Csv").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#CSV").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            var msg = e.response[0];
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                })
+                var maptype = $("#fieldmappingtype").data("kendoDropDownList").value();
+                if (maptype != "E") {
+                    var window = $("#kwindow_Csv").data("kendoWindow"); //get the Window widget's instance
+                    window.open();  //and call its open method
+                }
+                $("#CSV").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: msg,
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function filetypeone() {
+        debugger;
+        var filetype = $("#FileType").data("kendoDropDownList").value();
+        if (filetype == "M" || filetype == "P")
+        {
+            document.getElementById("ACflag").disabled = true;
+            document.getElementById("ACflag").checked = false;
+            $('#Transaction_Amount_type').data("kendoDropDownList").enable(false);
+            $('#Transaction_Amount_type').data("kendoDropDownList").value('');
+        }
+        else {
+            document.getElementById("ACflag").disabled = false;
+            $('#Transaction_Amount_type').data("kendoDropDownList").enable(true);
+        }
+        if (filetype == "S" || filetype == "M" || filetype == "P")
+        {
+            document.getElementById("Blflag").disabled = true;
+            document.getElementById("Blflag").checked = false;
+            $('#Balance_Amount_type').data("kendoDropDownList").enable(false);
+            $('#Balance_Amount_type').data("kendoDropDownList").value('');
+          //  $("#Blflag").attr('disabled', false);
+
+        }
+        else
+        {
+            //document.getElementById("Blflag").disabled = false;
+            $('#Transaction_Amount_type').data("kendoDropDownList").enable(true);
+        }
+        if(filetype=="B")
+        {
+            document.getElementById("Blflag").checked = true;
+            document.getElementById("Blflag").disabled =false;
+            $('#Balance_Amount_type').data("kendoDropDownList").enable(true);
+            $('#Balance_Amount_type').data("kendoDropDownList").value('');
+            $('#Transaction_Amount_type').data("kendoDropDownList").enable(false);
+            $('#Transaction_Amount_type').data("kendoDropDownList").value('');
+        }
+        if (filetype=="T")
+        {
+            document.getElementById("Blflag").checked = false;
+            document.getElementById("Blflag").disabled = false;
+            $('#Balance_Amount_type').data("kendoDropDownList").value('');
+            $('#Balance_Amount_type').data("kendoDropDownList").enable(false);
+        }
+    }
+    function filetype() {
+        debugger;
+        var code1 = $('#Template_type').data("kendoDropDownList").value();
+        var filetype = $("#FileType").data("kendoDropDownList").value();
+        
+        if (code1 == "C") {
+            $("#tabs").hide();
+            $("#tabstext").hide();
+            $("#tabscsv").show()
+            $("#sepator").show();
+            $("#Csv_Columns").attr('disabled', false);
+            $("#Csv_seperator").attr('disabled', false);
+            $('#master_code').data("kendoDropDownList").enable(true);
+           // $("#Hflag").prop('checked', false);
+            $("#Hflag").attr('disabled', false);
+        } else if (code1 == "E") {
+            $("#tabs").show();
+            $("#tabstext").hide();
+            $("#tabscsv").hide();   
+            // $("#sepator").hide();
+            $("#Csv_Columns").attr('disabled', true);
+            $("#Csv_seperator").attr('disabled', true);
+            $('#master_code').data("kendoDropDownList").enable(false);
+            $('#master_code').data("kendoDropDownList").value('');
+           
+            $("#Hflag").prop('checked',false);
+            $("#Hflag").attr('disabled', true);
+        }
+        //else if (code1 == "N") {
+        //    $("#tabs").hide();
+        //    $("#tabstext").show();
+        //    $("#tabscsv").hide()
+        //    $("#sepator").hide();
+        //}
+    }
+    function mappingtype() {
+        var filetype = $('#fieldmappingtype').data("kendoDropDownList").value();
+        if (filetype == "E") {
+            $("#sourcefield").show();
+            $("#config").hide();
+        }
+        else {
+            $("#sourcefield").hide();
+            $("#config").show();
+        }
+    }
+    function mappingtypeCSV() {
+        var filetype = $('#fieldmappingtype').data("kendoDropDownList").value();
+        if (filetype == "E") {
+            $("#SourceColNo").show();
+            $("#CSVConfig").hide();
+        }
+        else {
+            $("#SourceColNo").hide();
+            $("#CSVConfig").show();
+        }
+    }
+    function mappingtypeText() {
+        var filetype = $('#fieldmappingtype').data("kendoDropDownList").value();
+        if (filetype == "E") {
+            $("#startno").show();
+            $("#endno").show();
+            $("#TextConfig").hide();
+        }
+        else {
+            $("#startno").hide();
+            $("#endno").hide();
+            $("#TextConfig").show();
+        }
+    }
+    function configbtn() {
+        debugger;
+        var slnoadd = $("#FileTemplatefield_gid").val();
+        if (slnoadd == "0") {
+            var grid1 = $("#FileConTemp").data("kendoGrid");
+            grid1.saveChanges();
+        } else {
+            var window = $("#kwindow_ppx").data("kendoWindow"); //get the Window widget's instance
+            window.open();  //and call its open method           
+            $("#formula_grid").data("kendoGrid").dataSource.read();
+        }
+    };
+    function configbtnCSV() {
+        debugger;
+        var slnoadd = $("#FileTemplatefield_gid").val();
+        if (slnoadd == "0") {
+            var grid2 = $("#CSV").data("kendoGrid");
+            grid2.saveChanges();
+        } else {
+            var window = $("#kwindow_Csv").data("kendoWindow"); //get the Window widget's instance
+            window.open();  //and call its open method
+            $("#formula_gridcsv").data("kendoGrid").dataSource.read();
+        }
+    };
+    function configbtnText() {
+        debugger;
+        var slnoadd = $("#FileTemplatefield_gid").val();
+        if (slnoadd == "0") {
+            var grid2 = $("#text").data("kendoGrid");
+            grid2.saveChanges();
+        } else {
+            var window = $("#kwindow_Text").data("kendoWindow"); //get the Window widget's instance
+            window.open();  //and call its open method
+            $("#formula_gridText").data("kendoGrid").dataSource.read();
+        }
+    };
+    function ClosePopupCSV() {
+        $("#formula_gridcsv").data("kendoGrid").dataSource.read();
+    }
+    function ClosePopupTEXT() {
+        $("#formula_gridText").data("kendoGrid").dataSource.read();
+    }
+    function ClosePopupEXCEL() {
+        $("#formula_grid").data("kendoGrid").dataSource.read();
+    }
+
+    $('#btn_save').click(function () {
+        debugger;
+        var bb = "";
+        var cc = "";
+        var item = $("#slno").val();
+        var checkBox = document.getElementById("ACflag");
+        var checkBox1 = document.getElementById("Blflag");
+        var Temptype = $('#Template_type').data("kendoDropDownList").value();
+
+        if (checkBox.checked==true)
+        {
+             bb = "Y";
+        }
+       
+        if ($("input:checkbox[id='Blflag']").is(":checked")==true) {
+             cc = "Y";
+        }
+       
+
+      //  var cc = $("#ACflag").prop('checked', true);
+        var FileConvTemp = {};
+        if (item == "" || item == "0") {
+            FileConvTemp.Template_name = $("#Template_name").val();
+            FileConvTemp.Template_type = $('#Template_type').data("kendoDropDownList").value();
+            FileConvTemp.FileType = $('#FileType').data("kendoDropDownList").value();
+            FileConvTemp.Csv_seperator = $("#Csv_seperator").val();
+            var tran_date_format = $("#master_code").data("kendoDropDownList").value();
+            
+
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                FileConvTemp.Active_status = "Y";
+            }
+            else {
+                FileConvTemp.Active_status = "N";
+            }
+
+            var headflag = document.getElementById("Hflag");
+
+            if (headflag.checked == true)
+            {
+                FileConvTemp.Hflag = "Y";
+            }
+            else
+            {
+                FileConvTemp.Hflag = "N";
+            }
+
+            if (bb == "Y") {
+                FileConvTemp.Acflag = "Y";
+            } else {
+                FileConvTemp.Acflag = "N";
+            }
+            if (cc == "Y") {
+                FileConvTemp.Blflag = "Y";
+            } else {
+                FileConvTemp.Blflag = "N";
+            }
+            FileConvTemp.Action = "INSERT";
+            var csvcoloumns = $("#Csv_Columns").val();
+            var separators = $("#Csv_seperator").val();
+            var file_types = $('#FileType').data("kendoDropDownList").value();
+            var baltype = $('#Balance_Amount_type').data("kendoDropDownList").value();
+            var trantype = $('#Transaction_Amount_type').data("kendoDropDownList").value();
+            if (file_types == "C") {
+                if (separators == "" || separators == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'File Separator should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (csvcoloumns == "undefined" || csvcoloumns == "" || csvcoloumns == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Csv Column should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                } else if (csvcoloumns == "0") {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Csv Column should not be zero.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (accountnumberflag == "Y") {
+                if (trantype == "undefined" || trantype == "" || trantype == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Transaction Amount Type should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (balanceamount == "Y") {
+                if (baltype == "undefined" || baltype == "" || baltype == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Balance Amount Type should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (Temptype != "E") {
+
+
+                if (tran_date_format == "" || tran_date_format == "undefined") {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Transaction Date Format should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if(csvcoloumns == "undefined" || csvcoloumns == "" || csvcoloumns == null) {
+                csvcoloumns = 0;
+            }
+            FileConvTemp.Csv_Columns = csvcoloumns;
+            FileConvTemp.Transaction_Amount_type = trantype;
+            FileConvTemp.Balance_Amount_type = baltype;
+            FileConvTemp.Tran_date_format = $("#master_code").data("kendoDropDownList").value();
+            //alert(JSON.stringify(FileConvTemp));
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                url: '@Url.Action("FileConTemp_Create", "FileConTempCreate")',
+                data: '{FileConvmodel: ' + JSON.stringify(FileConvTemp) + '}',
+                success: function (data) {
+                    debugger;
+                    if (data[0] == "Record saved successfully") {
+                        $("#slno").val(data[1]);
+                        document.getElementById("Template_name").setAttribute("disabled", false);
+                    }
+                    $.dialog({
+                        title: 'Impact',
+                        content: data[0],
+                        type: 'green',
+                    });
+                    $("#slno").val(data[1]);
+                },
+                error: function (er) {
+                }
+            });
+        }
+        else {
+            FileConvTemp.Template_gid = item;
+            FileConvTemp.Template_name = $("#Template_name").val();
+            FileConvTemp.Template_type = $('#Template_type').data("kendoDropDownList").value();
+            FileConvTemp.FileType = $('#FileType').data("kendoDropDownList").value();
+            FileConvTemp.Csv_seperator = $("#Csv_seperator").val();
+            FileConvTemp.Tran_date_format = $("#master_code").data("kendoDropDownList").value();
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                FileConvTemp.Active_status = "Y";
+            }
+            else {
+                FileConvTemp.Active_status = "N";
+            }
+
+            var headflag = document.getElementById("Hflag");
+
+            if (headflag.checked == true)
+            {
+                FileConvTemp.Hflag = "Y";
+            }
+            else
+            {
+                FileConvTemp.Hflag = "N";
+            }
+
+            if (bb == "Y") {
+                FileConvTemp.Acflag = "Y";
+            } else {
+                FileConvTemp.Acflag = "N";
+            }
+            if (cc == "Y") {
+                FileConvTemp.Blflag = "Y";
+            } else {
+                FileConvTemp.Blflag = "N";
+            }
+            FileConvTemp.Action = "UPDATE";
+            var csvcoloumns = $("#Csv_Columns").val();
+            var separators = $("#Csv_seperator").val();
+            var file_types = $('#FileType').data("kendoDropDownList").value();
+            var baltype = $('#Balance_Amount_type').data("kendoDropDownList").value();
+            var trantype = $('#Transaction_Amount_type').data("kendoDropDownList").value();
+            if (file_types == "C") {
+                if (separators == "" || separators == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'File Separator should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (csvcoloumns == "undefined" || csvcoloumns == "" || csvcoloumns == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Csv Column should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                } else if (csvcoloumns == "0") {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Csv Column should not be zero.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (accountnumberflag == "Y") {
+                if (trantype == "undefined" || trantype == "" || trantype == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Transaction Amount Type should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (balanceamount == "Y") {
+                if (baltype == "undefined" || baltype == "" || baltype == null) {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Balance Amount Type should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (Temptype != "E") {
+
+
+                if (tran_date_format == "" || tran_date_format == "undefined") {
+                    $.alert({
+                        title: 'RECON',
+                        content: 'Transaction Date Format should not be empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+            }
+            if (csvcoloumns == "undefined" || csvcoloumns == "" || csvcoloumns == null) {
+                csvcoloumns = 0;
+            }
+            FileConvTemp.Csv_Columns = csvcoloumns;
+            FileConvTemp.Transaction_Amount_type = trantype;
+            FileConvTemp.Balance_Amount_type = baltype;
+           // alert(JSON.stringify(FileConvTemp));
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                url: '@Url.Action("FileConTemp_Create", "FileConTempCreate")',
+                data: '{FileConvmodel: ' + JSON.stringify(FileConvTemp) + '}',
+                success: function (data) {
+                    debugger;
+                    if (data[0] == "Record saved successfully") {
+                        $("#slno").val(data[1]);
+                        document.getElementById("Template_name").setAttribute("disabled", false);
+                    }
+                    $.dialog({
+                        title: 'Impact',
+                        content: data[0],
+                        type: 'green',
+
+                    });
+                    $("#slno").val(data[1]);
+                },
+                error: function (er) {
+                }
+            });
+        }
+    });
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+    }
+    function datapassing()
+    {
+        debugger;
+        if ($("input:radio[id='Mandatory_Field_yes']").is(":checked")) {
+            mandatoryfield = "Y";
+        }
+        else {
+            mandatoryfield = "N";
+        }
+
+        return { mandatory_field: mandatoryfield }
+
+    }
+    function myDeleteJs() {
+        var code = $('#Template_type').data("kendoDropDownList").value();
+        if (code == "E") {
+            var grid = $("#FileConTemp").data("kendoGrid");
+            var model = grid.dataItem($(event.target).closest("tr"));
+            var FileTemplatefield_gid = (model.FileTemplatefield_gid);
+        } else if (code == "C") {
+            var grid = $("#CSV").data("kendoGrid");
+            var model = grid.dataItem($(event.target).closest("tr"));
+            var FileTemplatefield_gid = (model.FileTemplatefield_gid);
+        }
+        else {
+            var grid = $("#text").data("kendoGrid");
+            var model = grid.dataItem($(event.target).closest("tr"));
+            var FileTemplatefield_gid = (model.FileTemplatefield_gid);
+        }
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("FileConTempCreateGrid_Delete", "FileConTempCreate")',
+                        data: "{ FileTemplatefield_gid:'" + FileTemplatefield_gid + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                $("#FileConTemp").data("kendoGrid").dataSource.read();
+                                $("#text").data("kendoGrid").dataSource.read();
+                                $("#CSV").data("kendoGrid").dataSource.read();
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+</script>

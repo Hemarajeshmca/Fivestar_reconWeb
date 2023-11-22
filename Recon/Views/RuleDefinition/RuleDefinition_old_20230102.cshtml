@@ -1,0 +1,820 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.DedupeRule_model
+@*@model Recon_Model.dropdowm_model*@
+@*@model Recon_Model.drop*@
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+
+        span.k-icon.k-i-close {
+            display: none;
+        }
+
+        a.k-window-action.k-link {
+            display: none;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding-bottom:15px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Rule Setup</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-6">
+                                <label class="title">Rule Name</label>
+                                <input type="text" class="form-control" id="Rule_name" name="Rule_name" data-bind="value:AccountNo" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:100%" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="title">Date To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" style="width:100%" />
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="checkbox" name="untillactive" id="untillactive" value="Y" style="margin-top:35px">Untill Active
+                            </div>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-2">
+                                <label class="title" style="margin-bottom:12px;">Status</label>
+                                <br />
+                                <input type="radio" id="status_yes" name="status1" value="Y" checked> Active
+                                <input type="radio" id="status_no" name="status1" value="N" style="margin-left: 10px;"> InActive
+                                <input type="hidden" id="fieldtype">
+                                <input type="hidden" id="slno">
+                                <input type="hidden" id="slnolist">
+                                <input type="hidden" id="datafilter">
+                            </div>
+                            <div class="col-sm-4" style="margin-top: 25px;">
+                                <button type="button" id="btn_save" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+                                <button type="button" id="btn_close" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+                            </div>
+                        </div>
+
+
+                        <div class="row" style="padding-top:10px" id="Rulegrid">
+                            <div class="form-group" style="padding-top:30px">
+                                @using (Html.BeginForm("RuleDefinition", "RuleDefinition", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div style="padding-left:20px;padding-right:20px">
+                                        @(Html.Kendo().Grid<Recon_Model.DedupeRule_model>().Name("ruleDefinition")
+                                            .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                                            .ToolBar(toolbar => toolbar.Create().Text(""))
+                                            .Columns(columns =>
+                                                {
+                                                    columns.Bound(m => m.sno).Title("Sl No").Width(20);
+                                                    columns.Bound(m => m.slno).Title("Sl No1").Width(5).Hidden();
+                                                    columns.Bound(m => m.field_alias_name).Title("Source Field").Width(100);
+                                                    columns.Bound(m => m.field_name).Title("field_name").Width(100).Hidden();
+                                                    columns.Bound(m => m.ExtractionCriteria).Title("Extraction Criteria").Width(100);
+                                                    columns.Bound(m => m.TargetField_alias).Title("Target Field").Width(100);
+                                                    columns.Bound(m => m.TargetField).Title("TargetField").Width(100).Hidden();
+                                                    columns.Bound(m => m.ComparisonCriteria).Title("Comparison Criteria").Width(100);
+                                                    columns.Bound(m => m.status_desc).Title("Status").Width(50);
+                                                    //columns.Command(cmd => { cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>"); }).Title("Action").Width(40);
+                                                    columns.Command(cmd =>
+                                                    {
+                                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs"); ;
+                                                    }).Title("Action").Width(50);
+                                                })
+                                            .Editable(editable =>
+                                                { editable.Mode(GridEditMode.PopUp).TemplateName("Ruledefinationpop"); })
+                                            .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                            .Filterable()
+                                            .Sortable()
+                                            .Scrollable()
+                                            .Resizable(resize => resize.Columns(true))
+                                            .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(10)
+                                               .Events(events => events.Error("error_handler"))
+                                            .Model(model =>
+                                                {
+                                                    model.Id(p => p.sno);
+                                                    model.Field(p => p.Select).Editable(false);
+                                                    //model.Field(f => f.code).DefaultValue(ViewBag.GetDocNameId);
+                                                })
+                                            .Create(Create => Create.Action("Rulegrid_create", "ruleDefinition"))
+                                            .Read(read => read.Action("Rulegrid_Read", "RuleDefinition").Data("getslno"))
+                                            .Update(update => update.Action("Rulegrid_update", "RuleDefinition"))
+                                            ))
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        debugger;
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId1 = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+        var viewmode = mode.substring(4, 0);
+        $("#comparisionvisiable").hide();
+        $("#extractvisiable").hide();
+
+        $('#ruleDefinition').find('.k-button').addClass('k-state-disabled')
+        $("#ruleDefinition").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#ruleDefinition").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+            if (viewmode == "View") {
+                $(".k-grid-edit").hide();
+                $(".k-grid-Delete").hide();
+            }
+        })
+        grid.bind("edit", function (event) {
+            debugger;
+            if (event.model.extraction_filter != 0) {
+                $("#e").prop("checked", true).trigger("change");
+            }
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            //filetype();
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+
+            if (event.model.isNew() == true) {
+                var slnolist1 = $("#slnolist").val();
+                if (slnolist1 == "") {
+                    $("#slnolist1").val(koopId1).trigger("change");
+                } else {
+                    $("#slnolist1").val(slnolist1).trigger("change");
+                }
+            }
+
+        });
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+    });
+
+
+    var onWindowEditClose = function (e) {
+        debugger;
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#ruleDefinition").data("kendoGrid").dataSource.read();
+        }
+       
+    };
+    $('#btn_close').click(function () {
+        debugger;
+        //location.href = "../RuleDefinition/RuleDefinitionList";
+        location.href = '@Url.Action("RuleDefinitionList", "RuleDefinition")';
+    });
+
+
+    $('#btn_save').click(function () {
+        debugger;
+        var item = $("#slnolist").val();
+        if (item == "") {
+            var cmb_code = $("#Rule_name").val();
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDate(period_from);
+            var formatted_period_to = null;
+            if (period_to != "") {
+                formatted_period_to = getFormated_StringDate(period_to);
+            }
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+            var ingroup = 'Y';
+
+            $.ajax({
+                type: "POST",
+                data: '{Rule_name: "' + cmb_code + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",status:"' + status + '",untill:"' + untillactive + '" ,ingroup:"' + ingroup + '"}',
+                url: "/RuleDefinition/Rule_create",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        $("#slnolist").val(response[1]);
+                        $("#ruleDefinition .k-grid-toolbar").show();
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        var preventCloseOnSave = true;
+                    }
+
+
+                },
+
+            });
+        }
+        else {
+
+            var cmb_code = $("#Rule_name").val();
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDate(period_from);
+            var formatted_period_to = null;
+            if (period_to != "") {
+                formatted_period_to = getFormated_StringDate(period_to);
+            }
+
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+            var ingroup = 'Y';
+
+
+            $.ajax({
+                type: "POST",
+                data: '{Rule_name: "' + cmb_code + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",status:"' + status + '",untill:"' + untillactive + '" ,ingroup:"' + ingroup + '",slno:"' + item + '"}',
+                url: "/RuleDefinition/Rule_update",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        var preventCloseOnSave = true;
+
+                    }
+                }
+
+            });
+
+        }
+    });
+    function getslno() {
+        debugger;
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var urlid = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var koopId = urlid.replace("#", "");
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+        var viewmode = mode.substring(4, 0);
+        if (viewmode == "View") {
+            //$("#btn_save").hide();
+            $("#btn_save").prop('disabled', true);
+            $(".k-grid-add").hide();
+
+        }
+        var slno = "";
+        slno = $("#slnolist").val();
+        if (slno == "") {
+            koopId = koopId;
+
+        }
+        else {
+            koopId = slno;
+        }
+        $.ajax({
+            type: 'POST',
+            url: "/RuleDefinition/Rulegrid_ListEdit",
+            data: { id: koopId },
+            dataType: "json",
+            success: function (data) {
+                debugger;
+                $("#Rule_name").val(data[0].Rule_name);
+                $("#slnolist").val(data[0].slno);
+                $("#period_from").val(data[0].period_from);
+                $("#period_to").val(data[0].period_To);
+                var tf = data[0].target_ident_flag;
+                var sf = data[0].source_ident_flag;
+                if (tf == "Y") {
+                    $('#extractconstcheck').prop('checked', true)
+                }
+                else {
+                    $('#extractconstcheck').prop('checked', false);
+                }
+                if (sf == "Y") {
+                    $('#comparsionconscheck').prop('checked', true)
+                }
+                else {
+                    $('#comparsionconscheck').prop('checked', false);
+                }
+
+                $("#ExtractionConstant").val(data[0].target_ident_value);
+                $("#ComparisionConstant").val(data[0].source_ident_value);
+                var value = data[0].status;
+                $("input[name=status1][value=" + value + "]").attr('checked', 'checked');
+                var value1 = data[0].untillactive;
+                $("input[name=untillactive][value=" + value1 + "]").attr('checked', 'checked');
+                $("#ruleDefinition .k-grid-add").addClass("k-state-default")
+                //$("#ruleDefinition .k-grid-toolbar").show();
+            },
+        });
+        var getslno = $("#slno").val();
+        return { slno: koopId }
+    }
+    function Rule() {
+        var code1 = $('#code2').data("kendoDropDownList").value();
+        if (code1 == "SubString") {
+            $("#Substring").show();
+        }
+        else {
+            $("#Substring").hide();
+        }
+    }
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("/");
+
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+
+    }
+
+    function onRequestEnd(e) {
+        //Check request type
+        debugger;
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#ruleDefinition").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+
+                $("#ruleDefinition").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function sourcefield() {
+        onfieldchange();
+    }
+    function targetfield() {
+        onTargetFieldchange();
+    }
+    function onfieldchange() {
+        //field type
+        debugger;
+        var sno = $("#sno").val();
+        var code1 = $("#field_name").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code1 + '"}',
+            url: "/DedupeRule/field_type",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                ExtractionCriteria();
+                Extraction();
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function onTargetFieldchange() {
+        debugger;
+        //field type
+        var code = $("#TargetField").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/DedupeRule/field_type",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                comparisionCriteria();
+                comparision();
+
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function comparision() {
+        //comparision
+        var fieldtype = $("#fieldtype").val();
+        var filter_flag;
+        if ($("#comparision_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#comparision_filter").val()
+        }
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupconditiondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                if (response.length == 0) {
+                    $("#comparisionvisiable").hide();
+                } else {
+                    $("#comparisionvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    $("#comparisionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate1").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingcomparisionfilter();
+                        }
+                    });
+                }
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+    }
+    function Extraction() {
+        //Extraction
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var filter_flag;
+        if ($("#extraction_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#extraction_filter").val()
+        }
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupExtraciondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                if (response.length == 0) {
+                    $("#extractvisiable").hide();
+                } else {
+                    $("#extractvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingExtractionfilter();
+                        }
+                    });
+                }
+                //filetype();
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function SaveRulePop() {
+        debugger;
+        var Fextraction = $("#extractionfilter").serialize();
+        var extract = Fextraction.split("&")
+        var Attribid = [];
+        var extraction_filter = 0;
+        var item;
+        var filter_flag = 0;
+
+        var extractcretia = $("#ExtractionCriteria").val();
+        var compcretia = $("#ComparisonCriteria").val();
+        for (var i = 0; i < extract.length; i++) {
+            item = extract[i];
+            filter_flag = parseInt(item.replace("extractionfilter=", ""));
+            extraction_filter = extraction_filter | filter_flag;
+        }
+
+        $("#extraction_filter").val(extraction_filter).trigger("change");
+        $("#ExtractionCriteria").val(extractcretia).trigger("change");
+        $("#ComparisonCriteria").val(compcretia).trigger("change");
+        var Fcomparision = $("#comparisionfilter").serialize();
+        var comparsion = Fcomparision.split("&")
+        var Attribid1 = [];
+        var comparsion_filter = 0;
+        for (var i = 0; i < comparsion.length; i++) {
+            item = comparsion[i];
+            filter_flag = parseInt(item.replace("comparisionfilter=", ""));
+            comparsion_filter = comparsion_filter | filter_flag;
+            /*
+            if (comparsionfinal == '') {
+                comparsionfinal += GridID1;
+            }
+            else {
+                comparsionfinal += "||" + GridID1;
+            }
+           */
+        }
+        $("#comparision_filter").val(comparsion_filter).trigger("change");
+        var grid1 = $("#ruleDefinition").data("kendoGrid");
+        grid1.saveChanges();
+    }
+    function ClosePopup() {
+        $("#ruleDefinition").data("kendoGrid").dataSource.read();
+    }
+    function checkboxEventBindingExtractionfilter() {
+        debugger;
+        $('.1_ID').attr('checked', 'checked')
+    }
+    function checkboxEventBindingcomparisionfilter() {
+        $('.1_ID').attr('checked', 'checked')
+    }
+    function comparisionCriteria() {
+        //comparision
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "COMPARISON";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleconditioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+
+                var comparision = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    comparision[i] = response[i].ComparisonCriteria;
+                }
+
+                $("#ComparisonCriteria").autocomplete({
+                    source: comparision,
+                    minLength: 0,
+                    maxShowItems: 5
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+    }
+    function ExtractionCriteria() {
+        //Extraction
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "EXTRACTION";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleExtracioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var selected = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    selected[i] = response[i].ExtractionCriteria;
+                }
+                debugger;
+                //$("#ExtractionCriteria").data("kendoDropDownList").dataSource.data(response);
+
+                $("#ExtractionCriteria").autocomplete({
+                    source: selected,
+                    minLength: 0
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+
+
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $("#btn_saveView").prop('disabled', true).trigger("change");
+        $(".k-window-title").text("View");
+    }
+    function myDeleteJs() {
+        var grid = $("#ruleDefinition").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var slno = (model.slno);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("Rulegrid_Delete", "RuleDefinition")',
+                        data: "{ slno:'" + slno + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+</script>
+
+<script type="text/x-kendo-tmpl" id="myTemplate">
+    <div class="item click" data="${filter_flag}">
+        <input type="checkbox" name="extractionfilter" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>
+<script type="text/x-kendo-tmpl" id="myTemplate1">
+    <div class="item click" id="div_comparison" data="${filter_flag}">
+        <input type="checkbox" name="comparisionfilter" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>

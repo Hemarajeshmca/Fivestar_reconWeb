@@ -1,0 +1,309 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+         /*//*/
+       .Recon_tallied_no {
+           
+         pointer-events:none;
+          /*background-color:red;*/
+          color:red;
+          /*opacity:0.2;*/
+        }
+       .Recon_tallied_yes
+       {
+           
+         
+       }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+     
+       .k-webkit {
+            overflow: hidden !important;
+        }
+        
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">File Posting - Rule based</h3>
+                        </div>
+                        <div class="row" style="margin-left:-5px;">
+                            <div class="col-sm-4">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="period_To" class="title"> Date To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" />
+                            </div>
+                            <div class="col-sm-4" style="margin-top:24px;">
+                                <button type="button" id="Runprocess" onclick="Runprocess()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Post</button>
+                            </div>
+                        </div>
+                      
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="panel-body" style="width:103%;max-height:100%;margin-left:-19px;">
+                                    <div class="col-md-12" id="Process">
+                                        <div class="form-group">
+                                            @using (Html.BeginForm("ReconSetup", "ReconSetupList", FormMethod.Post, new { @id = "form1" }))
+                                            {
+                                                <div>
+                                                    @(Html.Kendo().Grid<Recon_Model.Recontype_model>().Name("Recontype")
+                                .HtmlAttributes(new { style = "width:100%;height:380px;line-height:2em;font-weight:normal" })
+                                                    //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.select).ClientTemplate("<input type='checkbox' id='checkbox'  #= select == true ? checked='checked' : '' # />").Width(50).Title("Select");
+                                    columns.Bound(m => m.ReconName).Title("Recon Name").Width(100);
+                                    columns.Bound(m => m.account1_desc).Title("Account 1").Width(120);
+                                    columns.Bound(m => m.account2_desc).Title("Account 2").Width(120);
+                                    columns.Bound(m => m.recon_tallied).Title("ReconTallied").Width(120);
+                                    columns.Bound(m => m.MappingType_name).Title("Mapping Type").Width(60);
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(50);
+                                    columns.Bound(m => m.untillactive).Title("untillactive").Width(100).Hidden();
+                                   
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("Recontypepop"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Events(e => e.DataBound("onDataBound"))
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(20)
+                             .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.recon_id))
+                             .Create(Create => Create.Action("RecontypeGrid_Save", "ReconSetup"))
+                             .Read(read => read.Action("RecontypeGrid_Read", "Progress"))
+                             .Update(update => update.Action("RecontypeGrid_Update", "ReconSetup"))
+                             ))
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        kendodate_format();
+        var mindate = '@Request.RequestContext.HttpContext.Session["mindate"]';
+        $("#period_from").kendoDatePicker({
+            value: mindate,// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+    });
+    var spinnerVisible = false;
+
+    function showProgress() {
+        if (!spinnerVisible) {
+            $("div#spinner").fadeIn("fast");
+            spinnerVisible = true;
+        }
+    }
+    function hideProgress() {
+        if (spinnerVisible) {
+            var spinner = $("div#spinner");
+            spinner.stop();
+            spinner.fadeOut("fast");
+            spinnerVisible = false;
+        }
+    }
+
+    function validation() {
+        var msg = "";
+        if ($("#period_from").val() != "") {
+
+        }
+        else {
+            msg += "Select Period From Date";
+        }
+
+        if ($("#period_to").val() != "") {
+
+        }
+        else {
+            msg += " Select Period To Date";
+        }
+
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+    function Runprocess() {
+        debugger;
+        var arrString;
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+
+
+                    var period_from = $('#period_from').val();
+                    var period_to = $("#period_to").val();
+                    var formatted_period_from = getFormated_StringDate(period_from);
+                    var formatted_period_to = getFormated_StringDate(period_to);
+                    var grid = $("#Recontype").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    debugger;
+                    var Attribid = [];
+                    for (var i = 0; i < checkedrows.length; i++) {
+                        var item = grid.dataItem(checkedrows[i]);
+                        var slno = item.recon_id;
+                        Attribid.push(slno);
+                    }
+                    //var user_code = "admin";
+                    arrString = Attribid.join(", ");
+
+                    var usercode = '@Request.RequestContext.HttpContext.Session["usercode"]';
+                    var ip = '@ViewBag.ip';
+                    var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+
+                    var obj = { "period_from": formatted_period_from, "period_to": formatted_period_to, "user_code": usercode, "rec_id": arrString, "ip_address": ip }
+                    $.alert({
+                        title: 'Impact',
+                        content: "Support file posting is in progress..." + "<br>" + "<br>" +
+                                 "Please check 'Process in progress' under utility menu",
+                        type: 'green',
+
+                    });
+
+                    $.ajax({
+                        type: "POST",
+                        timeout: 3000,
+                        data: JSON.stringify(obj),
+                        async: true,
+                       // data: '{period_from: "' + formatted_period_from + '",period_to: "' + formatted_period_to + '",recon_gid: "' + Attribid + '",user_code: "' + user_code + '"}',
+
+                        @*//url: '@Url.Action("postSupportfilecreate", "Progress")',*@
+                        url: url + "postSupportfilecreate",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function (xhr) {
+                            debugger;
+                            xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+                        },
+                        //success: function (response) {
+                        //    if (response[1] > 0) {
+                        //        $.dialog({
+                        //            title: 'Impact',
+                        //            content: response,
+                        //            type: 'green',
+                        //        });
+                        //    }
+                        //    else {
+                        //        $.dialog({
+                        //            title: 'Impact',
+                        //            content: response,
+                        //            type: 'green',
+                        //        });
+                        //    }
+
+                        //}
+                    });
+                    hideProgress();
+                },
+                cancel: function () {
+                },
+            }
+        });
+    }
+
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].recon_tallied == "Yes") {
+             
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_yes");
+            }
+
+            else
+            {
+               // $("#Recontype").data("kendoGrid").setOptions({ editable: false });
+               // this.closeCell();
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_no");
+            }
+        }
+    }
+
+</script>

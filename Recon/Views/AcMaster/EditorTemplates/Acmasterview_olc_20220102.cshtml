@@ -1,0 +1,118 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.AcMaster_model
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 60%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+</style>
+<div>
+    <table style="border:1px;">
+        <tr>
+            <td>@Html.Label("A/c No", new { style = "width:80px;margin-left: 11%;font-size: 14px;font-weight: 600 !important; " })</td>
+            <td>@Html.TextBoxFor(model => model.AccountNo, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; " })</td>
+            <td>@Html.Label("A/c Name", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:20%;" })</td>
+            <td>@Html.TextBoxFor(model => model.AccountName, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%" })</td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Category", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left: 11%; " })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                             .Name("Category_name")
+                                             .DataTextField("Category_name")
+                                             .DataValueField("Category_name")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasCatdrop", "AcMaster"); }).ServerFiltering(true); })
+                                             //.OptionLabel("-----Select------")
+                                              )
+                @Html.ValidationMessageFor(model => model.Category_name)
+            </td>
+            <td>@Html.Label("Responsibility", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left:20%;" })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                                     .Name("Respon_name")
+                                             .DataTextField("Respon_name")
+                                             .DataValueField("Respon_name")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasRESdrop", "AcMaster"); }).ServerFiltering(true); })
+                                             //.OptionLabel("-----Select------")
+                                             )
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Dedup Validation", new { style = "font-size: 14px;font-weight: 600 !important; width:159px;margin-left: 11%;" })</td>
+            <td>
+                @*@Html.RadioButtonFor(model => model.Dedupvalidateion, "Y") Required
+                @Html.RadioButtonFor(model => model.Dedupvalidateion, "N") Not Required*@
+                <input type="radio" id="Dedupvalidateion" name="Dedupvalidateion" value="Y" >  Required
+                <input type="radio" id="Dedupvalidateion" style="margin-left: 10px;" name="Dedupvalidateion" value="N" checked>Not Required
+            </td>
+            <td>@Html.Label("Dedup Rule", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left:20%;" })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                             .Name("Deduperule_id")
+                                             .DataTextField("Dedup_rule")
+                                             .DataValueField("Deduperule_id")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasDupdrop", "AcMaster"); }).ServerFiltering(true); })
+                                             //.OptionLabel("-----Select------")
+                                             )               
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Recon Type", new { style = "font-size: 14px;font-weight: 600 !important;width:80px;margin-left: 11%; " })</td>
+            <td>
+                <input type="checkbox" name="withinflag" id="withinflag" >Within A/c             
+                <input type="checkbox" name="Recontype" style="margin-left: 10px;" id="Recontype">Between A/c's              
+            </td>
+            <td>@Html.Label("A/c Type", new { style = "font-size: 14px;font-weight: 600 !important;width:142px;margin-left:20%;" })</td>
+            <td>
+                @*@Html.RadioButtonFor(model => model.Accounttype, "I") Internal
+                @Html.RadioButtonFor(model => model.Accounttype, "E") External*@
+                <input type="radio" id="Accounttype" name="Accounttype" value="I" checked>  Internal
+                <input type="radio" id="Accounttype" style="margin-left: 10px;" name="Accounttype" value="E">External
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Status", new { style = "font-size: 14px;font-weight: 600 !important;width:80px;margin-left: 11%; " })</td>
+            <td>
+                @*@Html.RadioButtonFor(model => model.Status, "Y") Active
+                @Html.RadioButtonFor(model => model.Status, "N") InActive*@
+                <input type="radio" id="Status" name="Status" value="Y" checked>  Active
+                <input type="radio" id="Status" style="margin-left: 10px;" name="Status" value="N">InActive
+            </td>
+        </tr>
+    </table>
+
+</div>
+<script>
+   
+    function onDataBound(e) {
+        var defaultItem = e.sender.dataSource.at(10);
+        e.sender.value(defaultItem.ProductID);
+       
+    }
+</script>

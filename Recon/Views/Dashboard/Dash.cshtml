@@ -1,0 +1,612 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.DashboardModel
+
+@*@model  IList<Recon_Model.DashboardModel>*@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Pie Charts</title>
+    <style>
+        .border {
+            border: 1px solid #d9dee3 !important;
+            background: #fff;
+        }
+
+        .card-body {
+            position: relative;
+            display: flexbox;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid #d9dee3;
+            border-radius: 0.5rem;
+        }
+
+        #chartdiv {
+            width: 100%;
+            height: 370px;
+        }
+
+        #chartdivs {
+            width: 100%;
+            height: 370px;
+        }
+
+        .amcharts-chart-div > a {
+            display: none !important;
+        }
+
+        text.highcharts-credits {
+            display: none;
+        }
+
+        path.highcharts-button-symbol {
+            display: none;
+        }
+         .k-popup.k-list-container {
+            width: 300px !important;
+        }
+    </style>
+
+</head>
+<body>
+    <div>
+        <div class="row" style="height:auto;">
+            <div class="col-md-12">
+                <div class="content-wrapper">
+                    <div class="row" style="margin-left:0%;padding-top:1%">
+                        <div class="col-md-2" style="width:21%;">
+                            <label for="period_from" class="title">Date From</label>
+                            <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:100%" />
+                        </div>
+                        <div class="col-md-2" style="width:21%">
+                            <label for="period_from" class="title">Date To</label><br />
+                            <input class="cusDate" data-role='datepicker' style="width:100%" id="period_to" name="period_to" />
+                        </div>
+                        <div>
+                            <label for="" class="title" style="margin-left:18px">Recon Name</label><br />
+                        </div>
+                        <div class="col-md-3" style="margin-top:0px;width:30%;">
+
+                            @(Html.Kendo().DropDownList()
+                                        .Name("ReconName_id")
+                                        .HtmlAttributes(new { style = "width:180px" })
+                                        .DataTextField("ReconName")
+                                        .DataValueField("ReconName_id")
+                                       .Template("<input type='checkbox' name='cb' id='cb'  value='#:data.ReconName#' /> #:data.ReconName#")
+                                        .Events(e => e.Select("onSelect")
+                                                    )
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                //read.Action("ApplyRecontype_drop", "ApplyRule");
+                                                read.Action("getuserrecon", "Dashboard");
+                                            });
+                                        }))
+
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" id="btn_search" class="btn btn-primary" onclick="submit()">
+                                &nbsp;Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:15px;margin-left:-6px;">
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-primary mb-3" style="border-radius: 20px;border-color: #ff6a00 !important;margin: 25px;margin-left: 4px;margin-right: -15px;">
+                                <div class="card-body" style="background:#ff6a00;border-radius: 15px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;">@ViewBag.recon_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="recon_count"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Recons</p></center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-secondary mb-3" style="border-radius: 20px;border-color: #71DD37  !important;margin: 25px;margin-right: -45px;position: relative;left: -25px;">
+                                <div class="card-body" style="background:#71DD37 ;border-radius: 14px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;">@ViewBag.acc_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="acc_count"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Accounts</p></center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-success mb-3" style="border-radius: 20px;border-color: #FFAB00 !important;margin: 25px;margin-right: -41px;position: relative;left: -22px;">
+                                <div class="card-body" style="background:#FFAB00;border-radius: 17px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;">@ViewBag.tran_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="tran_count"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Transactions</p></center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-success mb-3" style="border-radius: 20px;border-color: #8592A3 !important;margin: 25px;margin-right: -38px;position: relative;left: -22px;">
+                                <div class="card-body" style="background:#8592A3;border-radius: 21px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"> @ViewBag.ko_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="ko_count"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Matches</p></center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-success mb-3" style="border-radius: 20px;border-color:#ef8737 !important;margin: 25px;margin-right: -36px;position: relative;left: -24px;">
+                                <div class="card-body" style="background: #ef8737;border-radius: 20px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"> @ViewBag.ko_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="ko_Partialcount"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Partial</p></center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="card shadow-none bg-transparent border border-success mb-3" style="border-radius: 20px;border-color:#696cff  !important;margin: 25px;margin-right: -22px;position: relative;left: -28px;">
+                                <div class="card-body" style="background:#696cff ;border-radius: 20px;padding:17px">
+                                    @*<h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;">@ViewBag.excp_count</h5>*@
+                                    <h5 class="card-title" style="color: #fff;text-align: center;font-size: 20px !important;"><span id="excp_count"></span></h5>
+                                    <center><p class="card-text" style="font-weight:600;">Exceptions</p></center>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row" style="margin-top:-2%;">
+                        <div class="col-sm-3" style="margin-left:81%;margin-top:-1%">
+                            <label for="Exception" class="title" style="color:red;"><span id="openingexcp_count"></span></label>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-left:10px;padding-bottom:10px">
+                        <div class="col-md-6 col-xl-4 border">
+                            <h5 style="text-align: center;font-weight:400;">Auto Match Vs Manual Match</h5>
+                            <div id="chart" class="chart"></div>
+                        </div>
+                        <div class="col-md-6 col-xl-4 border">
+                            <h5 style="text-align: center;font-weight:400;">Ageing of Exceptions</h5>
+                            <div id="pie-chart" class="pie-chart" style="width: 500px;height: 300px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    var dataone = [];
+
+    (function ($) {
+        var MultiSelectBox = window.kendo.ui.DropDownList.extend({
+            _select: function (li) { },//Prevents highlighting
+            _blur: function () { },//Prevents auto close
+        });
+
+        window.kendo.ui.plugin(MultiSelectBox);
+    })(jQuery);
+
+    function onSelect(e) {
+        debugger;
+
+        var cbs = document.getElementsByName("cb");
+        var checkboxes = document.getElementsByTagName('input');
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var id = ddl.element.attr("ReconName_id");
+        multiselect();
+        var item = e.item;
+        var index = item.index();
+        if (index == 0) {
+            for (var i = 1; i < cbs.length; i++) {
+                var selectAll = cbs[0].checked;
+                if (cbs[0].checked) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = true;
+                        }
+                    }
+                    multiselect();
+                }
+
+                else {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = false;
+                        }
+                    }
+                    multiselect();
+                }
+            }
+        }
+
+    }
+
+    function multiselect() {
+        debugger;
+        // var dataItem = this.dataItem(e.item);
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var isAllChecked = $('#cb').prop("checked");
+        var cbs = document.getElementsByName("cb");
+        var display;
+
+        var list = [];
+        for (var i = 1; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                list.push(cbs[i].value);
+            }
+
+        }
+
+
+        if (list.length == 0) {
+            display = "-- SelectAll --";
+
+            $("#ReconAttr").html("Recon - All");
+        }
+        else {
+
+            display = list.join(", ");
+            $("#ReconAttr").html("Recon - " + display + "");
+        }
+
+        ddl.text(display);
+
+    }
+
+
+    function subtractMonths(date, months) {
+        debugger;
+        date.setMonth(date.getMonth() - months);
+        return date;
+    }
+    $(document).ready(function () {
+        call();
+        debugger;
+
+        $("#ReconName_id").data("kendoDropDownList").text("All");
+
+
+        //var texts = document.querySelector('#chart').querySelectorAll('text'); //replace "googleLineChart" with your chart's name/id
+
+        //for (var i = 0; i < texts.length; i += 1) {
+        //    var text = texts[i];
+        //    if (text.textContent.trim() == "Auto Match Vs Manual Match") { //replace "My Chart Title" with your chart's title
+        //        text.setAttribute("text-anchor", "middle");
+        //        text.setAttribute("x", "60%");
+        //        break;
+        //    }
+        //};
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),//new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+        $(".accordion_head").click(function () {
+            debugger;
+
+            if ($(this).next(".accordion_body").is(':visible')) {
+                $(this).next(".accordion_body").slideUp(300);
+                $(this).children(".plusminus").text('+');
+            } else {
+                $(this).next(".accordion_body").slideDown(300);
+                $(this).children(".plusminus").text('-');
+            }
+        });
+
+
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+
+        debugger;
+
+        var d = $('#period_to').data('kendoDatePicker').value();
+        const date = new Date(d);
+        const newDate = subtractMonths(date, 2);
+        var dd = "0" + 1;
+        var mm = (newDate.getMonth() + 1).toString().padStart(2, "0");
+        var yyyy = newDate.getFullYear();
+
+        var Dat = dd + "-" + mm + "-" + yyyy;
+        $("#period_from").val(Dat);
+
+
+        var period_from = getFormated_StringDate($("#period_from").val());
+        var period_to = getFormated_StringDate($("#period_to").val());
+        var Dateconcat = $("#period_from").val();
+        var Dateconcat1 = $("#period_to").val();
+        $("#plusAttr").html("Period From &nbsp; " + Dateconcat + " &nbsp;&nbsp To &nbsp  " + Dateconcat1);
+        $("#ReconAttr").html("Recon - All");
+        var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
+        var reconarray = Config_MetricType.dataSource.data();
+        var cbs = document.getElementsByName("cb");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].ReconName_id;
+                Attribid.push(item);
+            }
+
+        }
+        arrstring = Attribid.join(", ");
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Dashboard_read", "Dashboard")',
+            dataType: "json",
+            data: '{period_from:"' + period_from + '",period_to:"' + period_to + '",Recongid:"' + arrstring + '"}',
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                var res = Data1["objcats"];
+                var excp_count = res.excp_count;
+                var acc_count = res.acc_count;
+                var ko_count = res.ko_count;
+                var recon_count = res.recon_count;
+                var tran_count = res.tran_count;
+                var Kopartialcount = res.Ko_partialcount;
+                var openexcp_count = res.openingexcp_count;
+                var open = "*Opening Exception " + openexcp_count;
+
+                $("#recon_count").html(recon_count);
+                $("#acc_count").html(acc_count);
+                $("#tran_count").html(tran_count);
+                $("#ko_count").html(ko_count);
+                $("#excp_count").html(excp_count);
+                $("#ko_Partialcount").html(Kopartialcount);
+                $("#openingexcp_count").html(open);
+
+
+
+                dataone = Data1;
+
+                drawVisualization();
+                drawChart1();
+
+            }
+        });
+
+    });
+
+    function submit() {
+        debugger;
+        var item;
+        var Attribid = [];
+        var arrstring = "";
+        var period_from = getFormated_StringDate($("#period_from").val());
+        var period_to = getFormated_StringDate($("#period_to").val());
+        var Dateconcat = $("#period_from").val();
+        var Dateconcat1 = $("#period_to").val();
+        $("#plusAttr").html("Period From  &nbsp; " + Dateconcat + " &nbsp;&nbsp To &nbsp  " + Dateconcat1);
+
+        var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
+        var reconarray = Config_MetricType.dataSource.data();
+        var cbs = document.getElementsByName("cb");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].ReconName_id;
+                Attribid.push(item);
+            }
+
+        }
+        arrstring = Attribid.join(", ");
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Dashboard_read", "Dashboard")',
+            dataType: "json",
+            data: '{period_from:"' + period_from + '",period_to:"' + period_to + '",Recongid:"' + arrstring + '"}',
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                dataone = Data1;
+
+                var res = Data1["objcats"];
+                var excp_count = res.excp_count;
+                var acc_count = res.acc_count;
+                var ko_count = res.ko_count;
+                var recon_count = res.recon_count;
+                var tran_count = res.tran_count;
+                var Kopartialcount = res.Ko_partialcount;
+                var openexcp_count = res.openingexcp_count;
+                var open = "*Opening Exception " + openexcp_count;
+
+                $("#recon_count").html(recon_count);
+                $("#acc_count").html(acc_count);
+                $("#tran_count").html(tran_count);
+                $("#ko_count").html(ko_count);
+                $("#excp_count").html(excp_count);
+                $("#ko_Partialcount").html(Kopartialcount);
+                $("#openingexcp_count").html(open);
+                drawVisualization();
+                drawChart1();
+
+            }
+        });
+    }
+
+
+
+    function call() {
+        debugger;
+        $(".accordion_body").slideUp(300)
+        $(".plusminus").text('+');
+
+
+
+
+    }
+    function openNav() {
+        $(document).ready(function () {
+            $('#layout-menu').toggleClass('active');
+        });
+    }
+
+
+
+    function drawVisualization() {
+
+        debugger;
+
+        google.charts.load('current', {
+            callback: function () {
+                var manual_ko_count;
+                var system_ko_count;
+                var tags = '@Html.Raw(Json.Encode(Model))';
+                //  var tags = dataone.objcat_lst;
+                var tags = dataone.objlist;
+                var opt1 = [];
+                var opt2 = [];
+                for (var i = 0; i < tags.length; i++) {
+                    var str = i;
+                    system_ko_count = tags[i].ko_system_count;
+                    manual_ko_count = tags[i].ko_manual_count;
+
+                }
+                new google.visualization.PieChart(document.getElementById('chart')).draw(
+                  google.visualization.arrayToDataTable([
+                    ['Manual Match', 'System Match'],
+        ['Manual', { v: manual_ko_count }],
+        ['System', { v: system_ko_count }]
+                  ]),
+                  {
+                      height: 280,
+                      // legend: { 'position': 'right', 'alignment': 'end' },
+                      legend: { position: 'bottom' },
+
+                      pieSliceText: 'value',
+                      //sliceVisibilityThreshold: 0.0000000000000001,
+                      sliceVisibilityThreshold: 0,
+                      title: 'Auto Match Vs Manual Match',
+
+                      //titlePosition: center,
+                      titleTextStyle: {
+                          bold: true,
+                          //  italic: true,
+                          fontSize: 14,
+
+                      },
+
+                      tooltip: {
+                          //showColorCode: true,
+                          //text: 'value',
+                          trigger: 'selection'
+                      },
+                      //width: 525
+                  }
+                );
+            },
+            packages: ['corechart', 'table']
+        });
+
+    }
+
+
+    function drawChart1() {
+        debugger;
+        google.charts.load('current', {
+            callback: function () {
+                var tags = '@Html.Raw(Json.Encode(Model))';
+                var tags = dataone.objcat_lst1;
+                var opt1 = [];
+                var opt2 = [];
+                for (var i = 0; i < tags.length; i++) {
+                    var aging_desc = tags[i].aging_desc;
+                    var excpcount = tags[i].excp_count;
+                    var opt1 = [aging_desc, excpcount];
+                    if (i == 0) {
+
+                        opt2.push(['Task', 'Hours per Day']);
+                        opt2.push(opt1);
+                    } else {
+                        opt2.push(opt1);
+                    }
+                }
+
+                new google.visualization.PieChart(document.getElementById('pie-chart')).draw(
+             google.visualization.arrayToDataTable(opt2),
+
+             {
+                 height: 280,
+                 //legend: { 'position': 'right', 'alignment': 'end' },
+                 legend: { position: 'bottom' },
+                 floating: true,
+                 pieSliceText: 'value',
+                 //sliceVisibilityThreshold: 0.0000000000000001,
+                 sliceVisibilityThreshold: 0,
+                 title: 'Ageing of Exceptions',
+                 titleTextStyle: {
+                     bold: true,
+                     //  italic: true,
+                     fontSize: 14,
+
+                 },
+                 tooltip: {
+                     //showColorCode: true,
+                     //text: 'value',
+                     trigger: 'selection'
+                 },
+                 //width: 525
+             }
+           );
+            },
+            packages: ['corechart', 'table']
+        });
+    }
+
+    @*function drawChart1() {
+        debugger;
+
+
+
+        var tags = '@Html.Raw(Json.Encode(Model))';
+        var tags = dataone.objcat_lst1;
+        var opt1 = [];
+        var opt2 = [];
+        for (var i = 0; i < tags.length; i++) {
+            var aging_desc = tags[i].aging_desc;
+            var excpcount = tags[i].excp_count;
+            var opt1 = [aging_desc, excpcount];
+            if(i == 0){
+
+                opt2.push(['Task','Hours per Day']);
+                opt2.push(opt1);
+            }else{
+                opt2.push(opt1);
+            }
+        }
+
+        //var data = google.visualization.arrayToDataTable([
+        //  ['Task', 'Hours per Day'],
+        //  ['0-5 Days', 2512],
+        //  ['6-10 Days', 1305],
+        //  ['10-20 Days', 706],
+        //  ['>20 Days', 281]
+        //]);
+
+        var data = google.visualization.arrayToDataTable(opt2);
+        var options = {
+            title: '',
+            is3D: true,
+            fontSize: 12,
+            legend: { 'position': 'bottom', 'alignment': 'end' },
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('pie-chart'));
+        chart.draw(data, options);
+    }*@
+</script>
+

@@ -1,0 +1,197 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@{
+    ViewBag.Title = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<html>
+<head>
+    <title>
+
+    </title>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div id="grid" style="width:1000px;"></div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>
+<script>
+    var dateFields = [];
+    $(document).ready(function () {
+        debugger;
+        //example data received from remote source via jQuery ajax merthod
+        var data = [{
+            "Name": "John",
+            "Role": "Developer",
+            "Dept": "Dev",
+            "Date": "\/Date(836438400000)\/",
+            "Balance": 23
+        }, {
+            "Name": "Jane",
+            "Role": "Developer",
+            "Dept": "Dev",
+            "Date": "\/Date(836438400000)\/",
+            "Balance": 23
+        }, {
+            "Name": "James",
+            "Role": "QA",
+            "Dept": "Dev",
+            "Date": "\/Date(836438400000)\/",
+            "Balance": 23
+        }, {
+            "Name": "Jimmy",
+            "Role": "Designer",
+            "Dept": "Dev",
+            "Date": "\/Date(836438400000)\/",
+            "Balance": 23
+        }];
+
+        //in the success handler of the AJAX method call the function below with the received data:
+
+        generateGrid(data);
+    });
+
+    function generateGrid(gridData) {
+        debugger;
+        var model = generateModel(gridData[0]);
+
+        var parseFunction;
+
+        if (dateFields.length > 0) {
+            parseFunction = function (response) {
+                for (var i = 0; i < response.length; i++) {
+                    for (var fieldIndex = 0; fieldIndex < dateFields.length; fieldIndex++) {
+                        var record = response[i];
+                        record[dateFields[fieldIndex]] = kendo.parseDate(record[dateFields[fieldIndex]]);
+                    }
+                }
+                return response;
+            };
+        }
+
+        var grid = $("#grid").kendoGrid({
+            dataSource: {
+                data: gridData,
+                schema: {
+                    model: model,
+                    parse: parseFunction
+                }
+            },
+            editable: true,
+            sortable: true
+        });
+    }
+
+    function generateModel(gridData) {
+        debugger;
+        var model = {};
+        model.id = "ID";
+        var fields = {};
+        for (var property in gridData) {
+            var propType = typeof gridData[property];
+
+            if (propType == "number") {
+                fields[property] = {
+                    type: "number",
+                    validation: {
+                        required: true
+                    }
+                };
+            } else if (propType == "boolean") {
+                fields[property] = {
+                    type: "boolean",
+                    validation: {
+                        required: true
+                    }
+                };
+            } else if (propType == "string") {
+                var parsedDate = kendo.parseDate(gridData[property]);
+                if (parsedDate) {
+                    fields[property] = {
+                        type: "date",
+                        validation: {
+                            required: true
+                        }
+                    };
+                    dateFields.push(property);
+                } else {
+                    fields[property] = {
+                        validation: {
+                            required: true
+                        }
+                    };
+                }
+            } else {
+                fields[property] = {
+                    validation: {
+                        required: true
+                    }
+                };
+            }
+
+        }
+        model.fields = fields;
+
+        return model;
+    }
+</script>
+ public ActionResult Report_KnocoffMIS(string period_from, string period_to, string Recongid)
+        {
+            try
+            {
+                DataRow dr;
+                List<transactionrpt_model>
+    objcat_3st = new List<transactionrpt_model>
+        ();
+        List<reportknockoffmis>
+            objcat_rpt = new List<reportknockoffmis>
+                ();
+                DataSet result2 = new DataSet();
+                DataTable Table = new DataTable();
+                DataTable Table1 = new DataTable();
+                DataTable dts = new DataTable();
+                TransactionRpt_model DedupList = new TransactionRpt_model();
+
+                DedupList.Period_from = period_from;
+                DedupList.Period_To = period_to;
+                DedupList.Recon_gid = Recongid;
+                DedupList.user_code = user_codes;
+                string post_data = objcommon.getApiResult(JsonConvert.SerializeObject(DedupList), "ReportKnocoffMIS");
+                result2 = (DataSet)JsonConvert.DeserializeObject(post_data, result2.GetType());
+
+
+
+                for (int i = 0; i < result2.Tables[0].Rows.Count; i++)
+                {
+
+                ReportKnockoffMIS objcat3 = new ReportKnockoffMIS();
+                objcat3.nullvalues = 1;
+                objcat3.rowslabel = (result2.Tables[0].Rows[i]["Row Labels"].ToString());
+                objcat3.drcount = (result2.Tables[0].Rows[i]["Dr Count"].ToString());
+                objcat3.dramount = (result2.Tables[0].Rows[i]["Dr Amount"].ToString());
+                objcat3.crcount = (result2.Tables[0].Rows[i]["Cr Count"].ToString());
+                objcat3.cramount = (result2.Tables[0].Rows[i]["Cr Amount"].ToString());
+                objcat3.TotalcountofNarration = (result2.Tables[0].Rows[i]["Total Count"].ToString());
+                objcat3.Totalsumofamount = (result2.Tables[0].Rows[i]["Total Amount"].ToString());
+                objcat3.backcolor = (result2.Tables[0].Rows[i]["backcolor"].ToString());
+                objcat3.forecolor = (result2.Tables[0].Rows[i]["forecolor"].ToString());
+                objcat_rpt.Add(objcat3);
+                }
+                return Json(objcat_rpt, JsonRequestBehavior.AllowGet);
+
+                }
+                catch (Exception e)
+                {
+                return Json(e.Message);
+                }
+                ///return View();
+                }

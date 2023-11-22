@@ -1,0 +1,232 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grouping-header {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Error Log</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-3">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="period_To" class="title"> Date To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" />
+                            </div>                           
+                            <div class="col-sm-2" style="margin-top:24px;">
+                                <button type="button" id="Runprocess" onclick="validation()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12" style="padding-left:0px">
+                                <div class="panel-body" style="padding-right:0px;width:100%;max-height:100%">
+                                    <div class="col-md-12">
+                                        <div id="Maingrid" class="col-md-12" style="margin:auto;height:auto;top:10px;width:101%;"> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#exportExcel").hide();
+    });
+  
+    function validation() {
+        var msg = "";
+        if ($("#period_from").val() != "") {
+
+        }
+        else {
+            msg += "Select Period From Date";
+        }
+
+        if ($("#period_to").val() != "") {
+
+        }
+        else {
+            msg += " Select Period To Date";
+        }
+
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function exportExcel() {
+        $("#grid").getKendoGrid().saveAsExcel();
+    }
+    function Runprocess() {      
+        var period_from = $('#period_from').val();
+        var period_to = $("#period_to").val();       
+        var formatted_period_from = getFormated_StringDate(period_from);
+        var formatted_period_to = getFormated_StringDate(period_to); 
+        $.ajax({
+            type: "POST",
+            data: '{period_from: "' + formatted_period_from + '",period_to:  "' + formatted_period_to + '" }',
+            url: "/Report/Reporterrorlog_Read",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $("#exportExcel").show();
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+
+                    var propType = typeof data[0][key];
+                    if (key != "") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            type: propType,
+                            width: 200,
+                            //attributes: { style: "text-align: right;" }
+                        });
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 450,
+                    navigatable: true,
+                    groupable: true,
+                    editable: false,
+                    sortable: true,
+                    scrollable: true,
+                    filterable: true,
+                    pagable: false,
+                    resizable: true,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    excel: {
+                        fileName: "Error log.xlsx",
+                        filterable: true,
+                        allPages: false
+                    },
+                    rows: viewModel
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');              
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+                kendo.bind($("#grid"), viewModel);
+                var grid = $("#grid").data("kendoGrid");
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+        }
+
+
+</script>
+
+
+

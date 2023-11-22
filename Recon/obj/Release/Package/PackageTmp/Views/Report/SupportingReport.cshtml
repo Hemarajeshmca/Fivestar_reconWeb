@@ -1,0 +1,441 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.TransactionRpt_model
+
+
+<!Doctype html>
+
+<html>
+<head>
+    <title></title>
+
+    <style>
+        .btnsubmit {
+            color: #fff;
+            border-radius: 5px;
+            padding: 8px 25px;
+            border: 0 none;
+            background-color: #337ab7;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        /*.k-header {
+            font-weight: bold;
+        }*/
+        .k-grouping-header {
+            color: #ffffff;
+        }
+        label.title {
+            font-size: 14px;
+            font-weight: 600 !important;
+        }
+         .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:5px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Supporting File</h3>
+                        </div>
+                     
+                            <div class="row" style="margin-top:10px;margin-left:10px">
+                                <div class="col-sm-2">
+                                    <label for="period_from" class="title">Date From</label>
+                                    <input class="cusDate" data-role='datepicker' style="width: 78%" id="Period_from" name="Period_from"  />
+                                </div>
+                                <div class="col-sm-2"style="margin-left: -44px;">
+                                    <label for="period_To" class="title">Date To</label><br />
+                                    <input class=" cusdate" data-role='datepicker' style="width: 78%" id="Period_To" name="Period_To" />
+                                </div>
+                                <div class="col-sm-4" style="margin-left:-32px">
+                                    <label for="filetype" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                    .Name("ReconName_id")
+                                                    .DataTextField("ReconName")
+                                                    .DataValueField("ReconName_id")
+                                                    .HtmlAttributes(new { style = "width:100%" })
+                                                    .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+                                </div>
+                                <div class="col-sm-5" style="margin-top:22px;margin-left:-20px">
+                                    <button type="button" value="filter" onclick="OnFilter()" id="btn_submit" class="btn btn-primary">&nbsp;Advance Filter</button>&nbsp;
+                                    <button type="button" value="Refresh" onclick="OnRefresh()" id="btn_submit" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Refresh</button>&nbsp;
+                                    <button type="button" id="btn_back" class="btn btn-primary">&nbsp;Back</button>&nbsp;
+                                    <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                                </div>
+                            </div>                        
+
+                         <div class="row" style="margin-top:10px;">
+                             <div class="col-sm-12">                                 
+                                     <div id="Supportinggrid"> </div>                                 
+                             </div>
+                         </div>
+                    </div>
+                    <div id="dialog">
+                        <div class="row" style="margin-top:5px;margin-left:10px">
+                            <div class="col-sm-3">
+                                <label for="Reconname" class="title">Account No</label><br />
+                                @Html.TextBoxFor(model => model.account_no, new { style = "width: 72%" })
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="Reconname" class="title">Amount</label><br />
+                                @Html.TextBoxFor(model => model.Amount, new { style = "width: 72%" })
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="Reconname" class="title">Exception Amount</label>
+                                @Html.TextBoxFor(model => model.Exception_amount, new { style = "width: 72%" })
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:10px;margin-left:10px">
+                            <div class="col-sm-3">
+                                <label for="filetype" class="title">Account Mode</label>
+                                @(Html.Kendo().DropDownList()
+                                .Name("Account_flag")
+                                .DataTextField("Account_desc")
+                                .DataValueField("Account_flag")
+                                .HtmlAttributes(new { style = "" })
+                                .DataSource(source => { source.Read(read => { read.Action("GetAccountMode_Flag", "Report"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="filetype" class="title">Status</label><br />
+                                @(Html.Kendo().DropDownList()
+                                                    .Name("status_flag")
+                                                    .DataTextField("status_desc")
+                                                    .DataValueField("status_flag")
+                                                    .HtmlAttributes(new { style = "" })
+                                                    .DataSource(source => { source.Read(read => { read.Action("GetStatus_Flag", "Report"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-sm-3" style="margin-top: 16px;">
+                                <button type="button" value="Refresh" onclick="OnRefresh()" id="btn_submit" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Refresh</button>&nbsp;
+                                <button type="button" value="Clear" onclick="OnClear()" id="btn_sendmail" class="btn btn-primary"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;Clear</button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script>
+    var refreshclick = 'N';
+    var add_or_edit;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'IMPACT',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+    function onDataBound(e) {
+        debugger;
+        var count = $("#kgrid_AccBlncMatchRpt").data("kendoGrid").dataSource.data().length;
+
+        if (refreshclick == 'Y') {
+            if (count == 0) {
+                var upload = document.getElementById("Grid");
+                upload.style.display = "none";
+
+                $.alert({
+                    title: 'IMPACT',
+                    content: 'No Records to Found.',
+                    type: 'red',
+                    animationSpeed: 700,
+                });
+            }
+        }
+    }
+   
+    $('#btn_back').click(function () {
+        debugger;
+        //location.href = "../Dashboard/Dashboard";
+        location.href = '@Url.Action("Dashboard", "Dashboard")';
+    });
+    function OnRefresh() {
+        debugger;
+        var wnd = $("#dialog").data("kendoWindow");
+        if (wnd) {
+            wnd.close();
+        }
+        var Transaction_Rpt = {};
+        //Transaction_Rpt.Table_Name = "recon_trn_vtranbrkp";
+        Transaction_Rpt.Table_Name = "recon_rpt_vtranbrkp";
+        //var Table_Name = "recon_trn_vtranbrkp";
+        var Table_Name = "recon_rpt_vtranbrkp";
+        var Period_from = $("#Period_from").val();
+        var Period_To = $("#Period_To").val();
+        var Recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        var account_no = $("#account_no").val();
+        var amount = $("#Amount").val();
+        var exception_amount = $("#Exception_amount").val();
+        var account_flag = $("#Account_flag").data("kendoDropDownList").value();
+        var status_flag = $("#status_flag").data("kendoDropDownList").value();
+        var formatted_Period_from = " and tran_date >= \'" + getFormated_StringDate(Period_from) + "\'";
+        var formatted_Period_To = " and tran_date <= \'" + getFormated_StringDate(Period_To) + "\'";
+        var str1 = "and";
+        var str2 = "tran_date>="
+        var str3 = "tran_date<="
+        var reportcondition;
+        var reportcondition = formatted_Period_from + formatted_Period_To;
+
+        if (Recon_gid != 0) {
+            //reportcondition += " and Tran_Recon_Id = " + Recon_gid.toString() + " ";
+        }
+
+        if (account_no != "") {
+            reportcondition += " and acc_no = \'" + account_no + "\'";
+        }
+
+        if (amount != 0) {
+            reportcondition += " and amount = " + amount.toString() + " ";
+        }
+
+        if (exception_amount != "") {
+            reportcondition += " and excp_amount = " + exception_amount.toString() + " ";
+        }
+
+        if (account_flag != "A") {
+            reportcondition += " and acc_mode = \'" + account_flag + "\' ";
+        }
+        if (status_flag != "A") {
+            reportcondition += " and  " + status_flag + " ";
+        }
+      
+
+        Transaction_Rpt.Report_condition = reportcondition;
+        $.ajax({
+            type: "POST",
+            data: '{table_name: "' + Table_Name + '",condition:  "' + reportcondition + '" }',
+            url: "/Report/ReportExpenceGrid_Read",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response)
+            {
+                $.alert({
+                    title: 'Impact',
+                    content: "File downloaded in server",
+                    type: 'green',
+                });
+            },
+            //{
+            //    debugger
+            //    $("#exportExcel").show();
+            //    var columns = [];
+            //    var chkval = JSON.parse(Data1);
+            //    var arr = [];
+            //    $.each(chkval, function (i, e) {
+                  
+            //        $.each(e, function (key, val) {
+            //            arr.push(val);
+            //        });
+
+            //    });
+            //    if (arr == "No Records Found!" || arr == "Error in Data!") {
+            //        alert("No Records found..!");
+            //        return false;
+            //    }
+
+
+            //    var data = JSON.parse(Data1);
+            //    // var data2 = JSON.parse(result.Data2);
+            //    var i = 0;
+
+            //    var entryIndex = "entries[" + i + "]";
+            //    for (var key in data[0]) {
+            //        debugger;
+            //        var propType = typeof data[0][key];
+            //        if (key != "") {
+            //            columns.push({
+            //                field: entryIndex,
+            //                title: key,
+            //                type: propType,
+            //                width:200,
+            //                //attributes: { style: "text-align: right;" }
+            //            });
+            //        }
+                    
+            //        i = i + 1;
+            //        entryIndex = "entries[" + i + "]";
+            //    }
+
+            //    var rows = [];
+            //    var data1 = JSON.parse(Data1);
+
+            //    $.each(data1, function (i, e) {
+            //        var entryArray = [];
+            //        $.each(e, function (key, val) {
+
+            //            entryArray.push(val);
+            //        });
+            //        rows.push(kendo.observable({
+            //            entries: entryArray
+            //        }));
+
+            //    });
+
+            //    var viewModel = kendo.observable({
+            //        gridRows: rows
+            //    });
+
+            //    var configuration = {
+            //        //dataBound: onDataBound,
+            //        height: 440,
+            //        navigatable: true,
+            //        groupable: true,
+            //        editable: false,
+            //        sortable: true,
+            //        scrollable: true,
+            //        filterable: true,
+            //        pageable: {
+            //            refresh: false,
+            //            pageSizes: true,
+            //            buttonCount: 5
+            //        },
+            //        resizable: true,
+            //        persistSelection: true,
+            //        selectable: "false",
+            //        columns: columns,
+            //        //toolbar: ["excel"],
+            //        excel: {
+            //            fileName: "SupportingFile.xlsx",
+            //            filterable: true,
+            //            allPages: false
+            //        },
+            //        rows: viewModel
+            //    };
+            //    $("#example").remove();
+            //    $('#Supportinggrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width: 108%;"></table></div>');
+            //    //$("#example").remove();
+            //    //$('#Maingrid').append('<div id="example" style="position:inherit";width: 80%; class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:75%"></table></div>');
+            //    var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+
+            //    kendo.bind($("#grid"), viewModel);
+
+            //    var grid = $("#grid").data("kendoGrid");
+            //    //grid.columns[0].width = 100;
+            //    //grid.setOptions({ columns: grid.columns });
+            //    //for (var i = 0; i < grid.columns.length; i++) {
+            //    //    grid.columns[i].width = 100;
+            //    //    grid.setOptions({ columns: grid.columns });
+            //    //}
+
+            //},
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+   
+    $(document).ready(function () {
+        debugger;
+       
+        $("#Period_from").kendoDatePicker({
+            value: "01-01-2000",// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#Period_To").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-/yyyy"
+        });
+        $("#exportExcel").hide();
+        $("#dialog").hide();
+       
+    })
+    function exportExcel() {
+        $("#grid").getKendoGrid().saveAsExcel();
+    }
+    function OnFilter() {
+        var msg = "";
+        if ($("#Period_from").val() != "" || $("#Period_from").val() != undefined) {
+
+        }
+        else {
+            msg += "Select Period From Date";
+        }
+
+        if ($("#Period_To").val() != "") {
+
+        }
+        else {
+            msg += " Select Period To Date";
+        }
+        if ($("#ReconName_id").data("kendoDropDownList").value() != "0") {
+
+        }
+        else {
+            msg += "Select Recon Name";
+        }
+        if (msg == "") {
+            window_open();
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+
+    }
+    function window_open() {
+        debugger
+
+        $("#dialog").kendoWindow();
+        var dialog = $("#dialog").data("kendoWindow");
+        dialog.open().element.closest(".k-window").css({
+            top: 121,
+            left: 300, height: 178, width: 800
+        });
+        dialog.title("Advance Filter");
+        dialog.bind("open", window_open);
+    }
+    function OnClear() {
+        $("#account_no").val("");
+        $("#Amount").val("");
+        $("#Exception_amount").val("");
+        $("#Account_flag").data("kendoDropDownList").value("A");
+        $("#status_flag").data("kendoDropDownList").value("A");
+    }
+</script>
+
+@*/*not allow numbers,characters*/*@
+<script>
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31)
+            return false;
+
+        return true;
+    }
+
+
+</script>

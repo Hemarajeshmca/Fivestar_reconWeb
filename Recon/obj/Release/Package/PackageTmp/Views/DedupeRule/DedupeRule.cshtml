@@ -1,0 +1,535 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .btn-primary{
+            padding: 2px 8px 4px 4px;
+        }
+        .k-header.k-grid-toolbar.k-grid-top{
+         background: none;
+        }
+
+           .k-button.k-button-icontext.k-grid-add
+        {
+            background:green;
+            color:white;
+        }
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+       
+     .form-control {      
+        height: 35px;
+        width: 110%;       
+      }
+      .form-label {
+        font-weight:600;
+    }
+
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Dedup Rule</h3>
+                        </div>
+                        <input type="hidden" id="fieldtype">
+                        <input type="hidden" id="slno">
+                        <input type="hidden" id="slnolist1">
+                        <input type="hidden" id="ComparisonCriteria1">
+                        <input type="hidden" id="externalCriteria1">
+                        <div class="row" style="padding-bottom:5px;padding-left:5px;padding-top:10px;padding-right:5px">
+                            <div class="col-md-3">
+                                <label for="Reconname" class="form-label">Dedup Rule</label>
+                                <input class="form-control" id="Rule_name" name="Rule_name" type="text" data-bind="value:Rule_name" style="width:96%;height:32px;">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="period_from" class="form-label">Period From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:80%" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="organization" class="form-label">
+                                    <span>Period To&nbsp;&nbsp;</span>&nbsp;&nbsp;<input class="form-check-input" type="checkbox" value="Y" style="margin-left:-8px" id="untillactive" />&nbsp;<span style="font-size:13px;">Until Active</span>
+                                </label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" style="width:80%" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label><br/>
+                               
+                                    <input type="radio" id="status_yes" name="status_yes" value="Y" checked> Active
+                                    <input type="radio" id="status_no" name="status_no" value="N" style="margin-left: 7px;"> InActive
+                                    <button type="button" style="margin-left:8%;" id="btn_save" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+                                    
+                         
+                            </div>
+                           
+                            </div>
+                        <!--<div class="row" style="padding-top:10px">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="Reconname" class="col-sm-4">Dedup Rule</label>
+                                    <div class="col-sm-6">
+                                        <input class="text-box single-line" id="Rule_name" name="Rule_name" type="text" data-bind="value:Rule_name">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top:20px">
+                            <div class="col-sm-4">
+                                <div class=" form-group">
+                                    <label for="period_from" class=" col-sm-4" style="margin-top: 10px;">Period From</label>
+                                    <div class="col-sm-5">
+                                        <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:100%" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class=" form-group">
+                                    <label for="period_To" class=" col-sm-4" style="margin-top: 10px;"> Period To</label>
+                                    <div class="col-sm-5">
+                                        <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" style="width:100%" />
+                                    </div>
+                                    <input type="checkbox" name="untillactive" id="untillactive" value="Y" style="margin-top:10px">Untill Active
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top:20px">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4">Status</label>
+                                    <div class="col-sm-7">
+                                        <input type="radio" id="status_yes" name="status_yes" value="Y" checked> Active
+                                        <input type="radio" id="status_no" name="status_no" value="N" style="margin-left: 10px;"> InActive
+                                        <input type="hidden" id="fieldtype">
+                                        <input type="hidden" id="slno">
+                                        <input type="hidden" id="slnolist1">
+                                        <input type="hidden" id="ComparisonCriteria1">
+                                        <input type="hidden" id="externalCriteria1">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" style="float:right;margin-right:60px" id="btn_save" class="btn btn-primary">Save</button>
+                            </div>
+                        </div>-->
+                        <div class="row" style="padding-top:10px" id="dedup">
+                            <div class="form-group" style="padding-top:20px;padding-right:30px">
+                                @using (Html.BeginForm("DedupeRule", "DedupeRule", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div style="padding-left:20px;padding-right:20px">
+                                        @(Html.Kendo().Grid<Recon_Model.DedupeRule_model>().Name("Dedperule")
+                                    .HtmlAttributes(new { style = "width:103%;line-height:2em;font-weight:normal" })
+                                    .ToolBar(toolbar => toolbar.Create().Text(""))
+                                    .Columns(columns =>
+                                         {
+                                             columns.Bound(m => m.sno).Title("Sl No").Width(50);
+                                             columns.Bound(m => m.slno).Title("Sl No").Width(50).Hidden();
+                                             columns.Bound(m => m.slnolist).Hidden();
+                                             columns.Bound(m => m.field_alias_name).Title("DB Alias Name").Width(100);
+                                             columns.Bound(m => m.ComparisonCriteria).Title("Comparison Criteria").Width(100);
+                                             columns.Bound(m => m.ExtractionCriteria).Title("Extraction Criteria").Width(100);
+                                             columns.Bound(m => m.status).Width(100).Hidden();
+                                             columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                             columns.Command(cmd => { cmd.Edit().Text("<span class='' style='font-size: 12px;'>").HtmlAttributes(new { style = "background-color:transparent" }); }).Title("Action").Width(50);
+                                         })
+                                    .Editable(editable =>
+                                        { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRulepop"); })
+                                    .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                                    .Filterable()
+                                    .Sortable()
+                                    .Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(10)
+                                    .Events(events => events.Error("error_handler"))
+                                    .Model(model =>
+                                         {
+                                             model.Id(p => p.sno);
+                                                                                        
+                                         })
+                                    .Read(read => read.Action("DedupeGrid_Read", "DedupeRule").Data("getslno"))
+                                    .Create(Create => Create.Action("DedupeRulegrid_create", "DedupeRule"))
+                                    .Update(update => update.Action("DedupeRulegrid_update", "DedupeRule"))
+                                    ))
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        $("#dedup").hide();
+        $("#Dedperule").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#Dedperule").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            debugger;
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+
+            var slnolist1 = $("#slnolist1").val();
+            if (slnolist1 == "") {
+                $("#slnolist").val(koopId).trigger("change");
+            } else {
+                $("#slnolist").val(slnolist1).trigger("change");
+            }
+            var compar = event.model.ComparisonCriteria
+            $("#ComparisonCriteria1").val(compar);
+            var compar1 = event.model.ExtractionCriteria
+            $("#externalCriteria1").val(compar1);
+
+        });
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        //getslno();
+    });
+   
+   
+
+    var onWindowEditClose = function (e) {
+      
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#Dedperule").data("kendoGrid").dataSource.read();
+        }
+    };
+    $('#btn_save').click(function () {
+        debugger;
+        var item = $("#slnolist1").val();
+        if (item == "") {
+            var cmb_code = $("#Rule_name").val();
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDate(period_from);
+            var formatted_period_to = null;
+            if (period_to != "") {
+                var formatted_period_to = getFormated_StringDate(period_to);
+            }
+
+
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+
+            $.ajax({
+                type: "POST",
+                data: '{Rule_name: "' + cmb_code + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",status:"' + status + '",untill:"' + untillactive + '" }',
+                url: '@Url.Action("DedupeRule_create", "DedupeRule")',
+               // url: "/DedupeRule/DedupeRule_create",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        $("#slnolist1").val(response[1]);
+                        $("#dedup").show();
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        //event.container.data("kendoWindow").one("close", onEditorTemplateClosing);
+                    }
+
+
+                },
+
+            });
+        }
+
+        else {
+            var cmb_code = $("#Rule_name").val();
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDate(period_from);
+            var formatted_period_to = null;
+            if (period_to != "") {
+                var formatted_period_to = getFormated_StringDate(period_to);
+            }
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+
+            $.ajax({
+                type: "POST",
+                data: '{Rule_name: "' + cmb_code + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",status:"' + status + '",untill:"' + untillactive + '" ,slno:"' + item + '"}',
+                // url: "/DedupeRule/DedupeRule_update",
+                url: '@Url.Action("DedupeRule_update", "DedupeRule")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        //event.container.data("kendoWindow").one("close", onEditorTemplateClosing);
+                    }
+                }               
+            });
+        }
+    });
+    function getslno() {
+        debugger;
+        var returnvalue = ""
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var slno = $("#slnolist1").val()
+        if (slno == "") {
+            returnvalue = koopId;
+        }
+        else {
+            returnvalue = slno
+        }
+        $.ajax({
+            type: 'POST',
+            ///url: "/DedupeRule/DedupeGrid_ListEdit",
+            url: '@Url.Action("DedupeGrid_ListEdit", "DedupeRule")',
+            data: { id: returnvalue },
+            dataType: "json",
+            success: function (data) {
+                debugger;
+                $("#Rule_name").val(data[0].Deduperule);
+                $("#slnolist1").val(data[0].slno);
+                $("#period_from").val(data[0].period_from);
+                $("#period_to").val(data[0].period_To);
+                var value = data[0].status;
+                $("input[name=status_yes][value=" + value + "]").attr('checked', 'checked');
+                var values = data[0].untillactive;
+                $("input[name=untillactive][value=" + values + "]").attr('checked', 'checked');
+                $("#dedup").show();
+            },
+        });
+        // var getslno = $("#slno").val();
+        return {
+            slno: returnvalue
+        }
+    }
+    function test1() {
+        debugger;
+        setTimeout(function () {
+            onfieldchange();
+        }, 2000);
+
+    }
+    function onRequestEnd(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#Dedperule").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#Dedperule").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function onfieldchange() {
+        //field type
+        var code = $("#field_name").val();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            //  url: "/DedupeRule/field_type",
+            url: '@Url.Action("field_type", "DedupeRule")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                //comparision();
+            },
+            error: function (er) {
+            }
+        });
+    }
+    function comparision() {
+        //comparision
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "COMPARISON";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            //url: "/DedupeRule/dedupconditiondrop",
+            url: '@Url.Action("dedupconditiondrop", "DedupeRule")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response1) {
+                debugger;
+                //var ComparisonCriteria = $("#ComparisonCriteria").data("kendoComboBox");
+                $("#ComparisonCriteria").kendoAutoComplete({
+                    dataTextField: "ComparisonCriteria",
+                    dataValueField: "ComparisonCriteria",
+                    filter: "contains",
+                    autoBind: false,
+                    minLength: 1,
+                    dataSource: response1,
+                    //dataSource: { data: response1 },
+                    height: 100
+                })
+                var compa = $("#ComparisonCriteria1").val()
+                $("#ComparisonCriteria").data("kendoAutoComplete").value(compa);
+
+            },
+            error: function (er) {
+            }
+        });
+        //Extraction
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "EXTRACTION";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            // url: "/DedupeRule/dedupExtraciondrop",
+            url: '@Url.Action("dedupExtraciondrop", "DedupeRule")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response2) {
+                var ExtractionCriteria = $("#ExtractionCriteria").data("kendoAutoComplete");
+                $("#ExtractionCriteria").kendoAutoComplete({
+                    dataTextField: "ExtractionCriteria",
+                    dataValueField: "ExtractionCriteria",
+                    autoBind: false,
+                    dataSource: response2,
+                    //dataSource: { data: response1 },
+                    height: 100
+                })
+                var compa = $("#externalCriteria1").val()
+                $("#ExtractionCriteria").data("kendoAutoComplete").value(compa);
+            },
+            error: function (er) {
+            }
+        });
+    }
+</script>
+
+
+

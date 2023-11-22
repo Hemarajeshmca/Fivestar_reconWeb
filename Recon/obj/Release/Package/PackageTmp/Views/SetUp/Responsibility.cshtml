@@ -1,0 +1,299 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model  Recon_Model.CategoryViewModel
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .k-header.k-grid-toolbar.k-grid-top {
+            background: none;
+        }
+
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+
+            
+            /*display: inline-block !important;
+            padding-top: 1px;
+            font-size: 12px;*/
+         }
+
+         /*.k-grid-pager{
+            height:30px !important;
+        }
+
+     
+     
+        .k-state-default{
+            margin-top:-24px;
+        }*/
+       
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+          .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">                   
+                        <div class="box box-orange" style="height:auto;padding:10px">
+                            <div class="box-header text-center with-border">
+                                <h3 class="box-title">Account Responsibility</h3>
+                            </div>
+                            @using (Html.BeginForm("SetUp", "Responsibility", FormMethod.Post, new { @id = "form1" }))
+                            {
+                                <div>
+                                    @(Html.Kendo().Grid<Recon_Model.Responsibility_model>().Name("Responsibility_grid")
+                                .HtmlAttributes(new { style = "height:450px;font-weight:normal" })
+                                .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.Respon_name).Title("Responsibility").Width(100);
+                                    columns.Bound(m => m.Status_desc).Title("Status").Width(30);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                    }).Title("Action").Width(30);
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("Responsibility_gridview"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(20)
+                              .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.Respon_id))
+                             .Create(Create => Create.Action("ResponsibilityGrid_Save", "SetUp"))
+                             .Read(read => read.Action("ResponsibilityGrid_Read", "SetUp"))
+                             .Update(update => update.Action("ResponsibilityGrid_Update", "SetUp"))
+                             ))
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+              
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Recon',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        
+        $("#Responsibility_grid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#Responsibility_grid").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepopone()" style="margin-left:345px;border:none;background-color: #357ab8;cursor:pointer;color:white;">x</button>');
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+
+        });
+
+
+    })
+    //$(".k-grid-cancel").on("mousedown", function (e) {
+    //    preventCloseOnSave = false;
+    //    window.location.reload(1);
+    //});
+    //$(e.container).find(".k-grid-cancel").add($(e.container).parent().find(".k-i-close")).click(function (e) {
+    //    // event handler code
+    //    window.location.reload(1);
+    //});
+    var onWindowEditClose = function (e) {
+
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        } else {
+            $("#Responsibility_grid").data("kendoGrid").dataSource.read();
+        }
+    };
+    function onRequestEnd(e) {
+        
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //setTimeout(function () {
+                //    window.location.reload(1);
+                //}, 2000);
+                preventCloseOnSave = true;
+                
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+
+    function closepopone() {
+        debugger;
+        $("#Responsibility_grid").data("kendoGrid").dataSource.read();
+    }
+    function myDeleteJs() {
+        var grid = $("#Responsibility_grid").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var Respon_id = (model.Respon_id);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ResponsibilityGrid_Delete", "SetUp")',
+                        data: "{ Respon_id:'" + Respon_id + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+    }
+</script>
+

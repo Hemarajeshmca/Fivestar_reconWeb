@@ -1,0 +1,1761 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ManualMatchoff_model
+
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+   
+    <style>
+       .secondgrid {
+         
+                 text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+
+            }
+            .Recon_tallied_no {
+        /*opacity:0.5;*/
+        pointer-events:none;
+        color:red;
+
+        }
+       .Recon_tallied_yes
+        {
+        
+        }
+        
+      
+    </style>
+
+    <style>
+        .btn-danger {
+            color: #fff;
+            background-color: #d9534f;
+            border-color: #d43f3a;
+        }
+        .k-pager-nav k-state-disabled{
+            border-radius:72%
+        }
+           .k-popup.k-list-container {
+                width:210px !important;
+                 }
+
+          .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+           
+
+      .k-input{
+   background-image: url('textures/highlight.png');
+     /*background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,linear-gradient(to bottom,rgb(51, 122, 183) 0,rgb(51, 122, 183) 100%);
+    background-position: 50% 50%;
+    background-color: #e3e3e3;*/
+   background-color: #e3e3e3 !important;
+}
+
+        .accordion_container {
+            width: 100%;
+        }
+
+        .accordion_head {
+            background-color: #337ab7;
+            color: white;
+            cursor: pointer;
+            /*font-family: arial;*/
+            font-size: 14px;
+            margin: 0 0 1px 0;
+            padding: 1px 3px;
+            /*font-weight: normal;*/
+        }
+
+        .accordion_footer {
+            background-color: #337ab7;
+            color: white;
+            cursor: pointer;
+            font-family: arial;
+            font-size: 14px;
+            margin: 0 0 1px 0;
+            padding: 1px 3px;
+            font-weight: bold;
+        }
+
+        .accordion_body p {
+            padding: 18px 5px;
+            margin: 0px;
+        }
+
+        .plusminus {
+            float: right;
+        }
+
+        .ioniconplus {
+            width: 15px;
+            background-image: url('../images/minus-circled.png');
+            background-repeat: no-repeat;
+            background-position: -50px -128px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /*.ob-right {
+            text-align: right;
+        }*/
+        .gj-unselectable {
+            margin-left: -10%;
+            overflow-y: auto !important;
+            height: 500px;
+        }
+    </style>
+
+    <style>
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 60%;
+            font-weight: normal;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 120%;
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-window > div.k-popup-edit-form {
+            padding: 1em 0;
+            overflow: hidden;
+        }
+
+        a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+           /*color: #357ab8;*/
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+     </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+
+
+
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+
+        .k-grouping-header {
+            color: #ffffff;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+    </style>
+
+    @*Pagination*@
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+           // width:22px;
+           // text-align:center;
+           // padding: 8px 16px;
+        }
+
+            a:hover {
+                background-color: #ddd;
+                color: black;
+                margin-left:2px;
+            }
+
+        .previous {
+            background-color: #84b6e1;
+            color: black;
+              margin-left:2px;
+        }
+
+        .next {
+            background-color: #367fa9;
+            color: white;
+              margin-left:2px;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+
+        .page_bg {
+            width: 100%;
+            background-color: #E7E9EB;
+        }
+    </style>
+    @*pagination end*@
+    <style>
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 60%;
+            font-weight: normal;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 120%;
+ 
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-window > div.k-popup-edit-form {
+            padding: 1em 0;
+            overflow: hidden;
+        }
+
+        a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+    </style>
+
+    <style>
+        .btnsubmit {
+            color: #fff;
+            border-radius: 5px;
+            padding: 8px 25px;
+            border: 0 none;
+            background-color: #337ab7;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grouping-header {
+            color: #ffffff;
+        }
+
+        /*.k-header {
+                font-weight: bold;
+            }*/
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 40%;
+            font-weight: normal;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+            color: #fff !important;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit {
+            background: rgb(51, 122, 183);
+            border-color: rgb(51, 122, 183);
+        }
+
+          a.k-button.k-button-icontext.k-grid-View {
+            background:transparent;
+            border-color:transparent;
+        }
+
+         /*a.k-button.k-button-icontext.k-grid-View {
+            background: transparent;
+            border-color:transparent;
+        }*/
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-link {
+            color: #fff !important;
+        }
+
+        /*.k-state-selected{
+
+             background:transparent;
+        }*/
+
+        /*.k-grid td
+        {
+            background:transparent;
+        }*/
+         
+    </style>
+   
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Manual KO</h3>
+                        </div>
+                        <div class="row" style="padding-bottom:20px;margin-top:17px;">
+
+
+                            <div class="col-md-3">
+                                <label for="filetype" class="title">Recon Name </label>&nbsp;
+
+
+                                @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                        .HtmlAttributes(new { style = "width:30%;font-weight: normal" })
+                                                        .Events(e =>
+                                                            {
+                                                             e.DataBound("onDataBound");
+                                                             e.Select("onselect");
+                                                             })
+                                                        @*.DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))*@
+                                @*.DataSource(source => { source.Read(read => { read.Action("getuserrecon", "ManualMatchOff"); }).ServerFiltering(true); }))*@
+                                .DataSource(source => { source.Read(read => { read.Action("getuserrecon_tallied", "ManualMatch"); }).ServerFiltering(true); }))
+
+
+
+                                </div>
+                            <div class="col-md-2" style="margin-top:24px;">
+
+                                <button type="button" value="Refresh" onclick="OnRefresh()" id="btn_submit" class="btn btn-success"><i class="fa fa-filter" aria-hidden="true"></i>&nbsp;Refresh</button>&nbsp;
+
+                            </div>
+
+                            <div class="col-md-2" style="margin-top:24px;margin-left:-7%;">
+                                <button type="button" value="Refresh" onclick="OnProgress()" id="btn_submit" class="btn btn-success">
+                                <i class="fa fa-share-square" aria-hidden="true"></i>&nbsp;Move selected</button>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row" style="padding-bottom:7px;margin-top:-4px;">
+                            <div class="col-md-12">
+                                <div class="accordion_container">
+                                    <div class=" panel panel-primary" style="margin-bottom:5px;">
+                                        @*<div class="container">*@
+                                        <div class="accordion_head">Attribute Search <span class="plusminus">+</span> </div>
+                                        <div class="accordion_body">
+                                            <div class="panel-body" style="padding-right:50px;width:100%;max-height:100%">
+                                                @*<div style="margin:auto;height:110px;overflow:auto;width:104%;">
+                                    <div id="AttributeDataPartial" style="border-top:groove thin;border-top-style:ridge;border-bottom:groove thin;border-bottom-style:ridge;"> </div>
+                                </div>*@
+                                                <div id="Partialone" style="margin:auto;height:200px;overflow:auto;width:104%;">
+                                                    @Html.Partial("AdhocEditpartialview")
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion_footer">
+                                            <div class="row">
+                                                @*<div class="col-sm-2">
+                                    <label>Filter Applied : </label>
+                                </div>*@
+                                                <div class="col-sm-10">
+                                                    @Html.TextArea("Message", new { rows = 1, columns = 40, id = "framevalue", style = "width:90%;background-color:#337ab7;border:none;color:white;font-size:smaller;" })
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row" id="ForAttributeDetailsPartialView"></div>
+                        @*<div>
+                                <label for="Filter_Applied" class="title" style="margin-top:62px;margin-left:-4px">FilterApplied</label>
+                                <label for="Filter_Applied" id="framevalue" class="title" style="margin-top:31px;margin-left:48px"> </label>
+                            </div>*@
+                        <div class="accordion_container">
+                            <div class=" panel panel-primary" style="margin-bottom:5px;">
+                                <div class="accordion_head">Exception List<span class="plusminus">+</span> </div>
+                                <div class="accordion_body1">
+                                    <div class="panel-body" style="padding-right:50px;width:100%;max-height:100%">
+
+                                        <div id="gridload" style="width:100%;margin-top:10px;margin-left:10px;">
+
+                                            @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("Griddatload")
+                                .HtmlAttributes(new { style = "height:400px;font-weight:normal" })
+                                                    // .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.select).ClientTemplate("<input type='checkbox' id='checkbox'  onchange='onchangeEvent()' #= select == true ? checked='checked' : '' # />").Width(60).Title("Select");
+                                    columns.Bound(m => m.sessiongid).Title("Sessiongid").Width(0).Hidden();
+                                    columns.Bound(m => m.tran_gid).Title("Trangid").Width(0).Hidden();
+                                    columns.Bound(m => m.TranDate).Title("Tran Date").Width(80);
+                                    columns.Bound(m => m.ValueDate).Title("Value Date").Width(80);
+                                    //columns.Bound(m => m.TranDate).Title("Tran Date").ClientTemplate("#= TranDate  ? kendo.toString(kendo.parseDate(TranDate, 'dd/MM/yyyy'), 'dd-MM-yyyy') : '' #").Width(80);
+                                    //columns.Bound(m => m.ValueDate).Title("Value Date").ClientTemplate("#= ValueDate  ? kendo.toString(kendo.parseDate(ValueDate, 'dd/MM/yyyy'), 'dd-MM-yyyy') : '' #").Width(80);
+                                    columns.Bound(m => m.Particulars).Title("Particulars").Width(80);
+                                    columns.Bound(m => m.Accountmode).Title("A/C Mode").Width(80);
+                                    columns.Bound(m => m.acc_no).Title("A/C No").Width(80);
+                                    columns.Bound(m => m.amount).Title("Amount").Width(80);
+                                    columns.Bound(m => m.excp_amount).Title("Exception Amount").Width(100);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                    }).Title("Action").Width(50);
+                                })
+                                                .Editable(editable =>
+                                                 { editable.Mode(GridEditMode.PopUp).TemplateName("ManualMatchoff_pop"); })
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+
+                                     .Model(model => model.Id(p => p.report_gid))
+                                           .Read(read => read.Action("ManualmatchoffGridRead", "ManualMatchOff").Data("additionalinfo"))
+
+
+                             ))
+                                            <div class="page_bg">
+                                                <a href="#" onclick="pagination('first')" class="previous round" style="text-align:center!important; width:22px;">&#171;</a>
+                                                &nbsp;<a href="#" onclick="pagination('previous')" class="previous round" style="text-align:center!important; width:22px;">&#8249;</a>&nbsp; <input type="text" id="gotoPage" style="width:30px">
+                                                &nbsp;<a href="#" onclick="pagination('next')" class="next round" style="text-align:center!important; width:22px;">&#8250;</a>
+                                                &nbsp;<a href="#" onclick="pagination('last')" class="next round" style="text-align:center!important; width:22px;">&#187;</a>
+                                                &nbsp;<select name="items" id="items" onchange="gridpage()">
+                                                    <option value="100">100</option>
+                                                    <option value="500">500</option>
+                                                    <option value="1000">1000</option>
+                                                      <option value="2000">2000</option>
+                                                </select>
+                                                &nbsp;<label>items per page </label>
+                                                &nbsp; &nbsp; &nbsp; &nbsp;<label style="margin-left:109px;">Total No Of Records : </label><input type="text" readonly id="total" style="width:auto;border:none;background-color:#E7E9EB;margin-left:0px;">
+                                                &nbsp;<label style="margin-left:-111px;">Total pages : </label><input type="text" readonly id="totalpage" style="width:auto;border:none;background-color:#E7E9EB;margin-left:-1px;">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion_container">
+                            <div class=" panel panel-primary" style="margin-bottom:5px;">
+                                <div class="accordion_head">Knock Off<span class="plusminus">+</span> </div>
+                                <div class="accordion_body2">
+                                    <div class="panel-body" style="padding-right:50px;width:100%;max-height:100%">
+
+                                        <div id="gridloadone" class="secondgrid" style="width:100%;margin-left:10px;">
+                                            
+                                            @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("Gridsecondload")
+                                        .HtmlAttributes(new { style = "height:400px;line-height:2em;font-weight:normal" })
+                                                    // .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    //columns.Bound(m => m.select).ClientTemplate("<input type='checkbox' id='checkbox'  #= select == true ? checked='checked' : '' # />").Width(50).Title("Select");
+                                    columns.Bound(m => m.tran_gid).Title("Trangid").Width(50).Hidden();
+                                    columns.Bound(m => m.TranDate).Title("Tran Date").Width(80);
+                                    columns.Bound(m => m.ValueDate).Title("Value Date").Width(80);
+                                    columns.Bound(m => m.Accountmode).Title("A/C Mode").Width(80);
+                                    columns.Bound(m => m.Particulars).Title("Particulars").Width(80);
+                                    columns.Bound(m => m.acc_no).Title("A/C No").Width(80);
+                                    columns.Bound(m => m.amount).Title("Amount").Width(80);
+                                    columns.Bound(m => m.excp_amount).Title("Exception Amount").Width(80);
+                                    // columns.Bound(m => m.MappedAmount).Title("MappedAmount").Width(80);
+
+                                    columns.Command(cmd =>
+                                    {
+                                        // cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;background-color:white'>").Click("ViewModeone");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;background-color:white'>").Click("Deletejs");
+                                    }).Title("Action").Width(50).HtmlAttributes(new { style = "background-color:transparent;" });
+                                })
+                                                            //.Editable(editable =>
+                                                            // { editable.Mode(GridEditMode.PopUp).TemplateName("ManualMatchoff_pop"); })
+                                                 .Editable(editable => editable.Mode(GridEditMode.InCell))
+                                                 
+                                                           
+                                                 .Pageable(pageable => pageable
+                                                            .Refresh(true)
+                                                            .PageSizes(true)
+                                                            .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .Selectable(selectable => selectable
+                                         .Mode(GridSelectionMode.Multiple)
+                                         .Type(GridSelectionType.Cell))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+
+                             
+                             .Events(events => events
+                                                .Change("onChange")
+                                                
+
+                                     )
+                                             .Model(model =>
+                                             {
+                                                 model.Id(p => p.report_gid);
+                                                 model.Field(p => p.tran_gid).Editable(false);
+                                                 model.Field(p => p.TranDate).Editable(false);
+                                                 model.Field(p => p.ValueDate).Editable(false);
+                                                 model.Field(p => p.Accountmode).Editable(false);
+                                                 model.Field(p => p.Particulars).Editable(false);
+                                                 model.Field(p => p.acc_no).Editable(false);
+                                                 model.Field(p => p.amount).Editable(false);
+                                             })
+
+                                 .Read(read => read.Action("ManualMatchoffdependgrid", "ManualMatchOff").Data("Additionvalue"))
+
+
+                             ))
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="panel-body" style="padding-right:50px;width:100%;max-height:100%">
+                                <div class="row" style="width:100%;margin-left:10px;">
+                                    <div class="col-sm-4">
+                                        <label for="TotalknockoffDebit" class="title">Total Debit Exception</label>
+                                        <label for="TotalknockDebitvalue" id="Debitvalue" class="title" style="margin-left: 20%;">0</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="Totalknockoffcredit" class="title">Total Credit Exception</label>
+                                        <label for="Totalknockcreditvalue" id="creditvalue" class="title" style="margin-left: 20%;">0</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="DifferenceAmount" class="title">Difference</label>
+                                        <label for="DifferenceAmountvalue" id="Differencevalue" class="title" style="margin-left: 20%;">0</label>
+                                    </div>
+                                </div>
+                                <div class="row" style="width:100%;margin-left:10px;">
+                                    <div class="col-sm-2">
+                                        <label for="Knockoffreason" class="title">Knockoffreason</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    </div>
+                                    <div class="col-sm-10">
+                                        @*<input type="text" name="knockoff" id="knockoffidone" value="" size="80" width="48" height="48">*@
+                                        <textarea id="knockoffidone" rows="3" cols="100"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4"></div>
+                                <div class="col-sm-4">
+                                    <button type="button" id="btn_match" class="btn btn-success" onclick="Matchselected()">&nbsp;Match Selected</button>
+                                    @*<button type="button" id="btn_close" class="btn btn-primary" style="margin-left:6px;">&nbsp;Close</button>*@
+
+                                    <button type="button" id="btn_clearall" class="btn btn-danger" onclick="cleartext()">&nbsp;Clear All Selected</button>
+                                </div>
+                                <div class="col-sm-4"></div>
+
+                            </div>
+                            <div id="dialog">
+                                <div id="Maingrid" class="col-md-12" style="margin:auto;height:auto;top:10px;width:100%;"> </div>
+                            </div>
+                            @(Html.Kendo().Window()
+                        .Name("wndWindow")
+                                .Title("Add")
+                                .Visible(false)
+                               // .Draggable(true)
+                                .Width(650)
+                                .Height(250)
+                                .Modal(true)
+                                //.Resizable()
+                        .Content(@<text>
+                            <div id="wndContent">
+
+                            </div>
+                        </text>)
+                            )
+
+                            
+
+                        </div>
+                    </div>
+                </div>
+
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function onChange(arg) {
+
+        debugger
+        var grid = $("#Gridsecondload").data("kendoGrid");
+        var Totalgridvalue = grid.dataSource.total();
+        if (progressvalue != "progreeson")
+        {
+            if (grid._data != undefined) {
+                Debitscore = 0;
+                creditscore = 0;
+                for (var i = 0; i < grid._data.length; i++) {
+                
+                    refer = "valueon";
+                    if (grid._data[i].Accountmode == "D") {
+                   
+                        var excpamount = grid._data[i].excp_amount;
+                        Debitscore += parseFloat(excpamount);
+                   
+                    } else {
+                        var excpamount = grid._data[i].excp_amount;
+                        creditscore += parseFloat(excpamount);
+                   
+                    }
+                    Labeldisplay_value();
+                
+                }
+            
+            }
+     
+            if (firstload == "valueoff" && cd=="")
+            {
+                onchangeEvent();
+            }
+     
+        }
+        progressvalue = "";
+          
+    }
+    function Labeldisplay_value() {
+        debugger;
+        cd = "one";
+        differentvalue = Math.abs(Debitscore - creditscore).toFixed(2);
+
+        differentvalue = Number(differentvalue).toString();
+
+        var _debitscore = parseFloat(Debitscore).toFixed(2);
+        var _creditscore = parseFloat(creditscore).toFixed(2);
+
+            $("#Debitvalue").text(_debitscore);
+            $("#creditvalue").text(_creditscore);
+            $("#Differencevalue").text(differentvalue);
+            if (differentvalue != "0") {
+                $('#btn_match').attr('disabled', true);
+            }
+            else {
+                $('#btn_match').attr('disabled', false);
+            }
+
+    }
+    function onchangeEvent() {
+
+        debugger;
+        var grid = $("#Griddatload").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        var res = checkedrows.length;
+        debugger;
+        Debitscore = 0;
+        creditscore = 0;
+        differentvalue = 0;
+        arrString = "";
+        Attribid = [];
+        for (var i = 0; i < checkedrows.length; i++) {
+            var item = grid.dataItem(checkedrows[i]);
+            firstload = "valueoff";
+            sessionid = item.sessiongid;
+            Accountmode = item.Accountmode;
+            if (Accountmode == 'D') {
+                var a = item.excp_amount;
+                Excptamount = parseFloat(a);
+                Debitscore += Excptamount;
+
+            }
+            else {
+                var b = item.excp_amount;
+                Excptamount = parseFloat(b);
+                creditscore += Excptamount;
+
+            }
+
+            trangid = item.tran_gid;
+            Attribid.push(trangid);
+        }
+
+        Labeldisplay_value();
+
+
+        arrString = Attribid.join(", ");
+
+    }
+    function OnProgress() {
+        debugger;
+
+        if ($('.accordion_body1').is(':visible')) {
+            $(".accordion_body2").slideDown(300);
+            $(".accordion_body1").slideUp(300);
+            $(".plusminus").text('-');
+        }
+
+        var grid = $("#Griddatload").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        var res = checkedrows.length;
+        arrString = "";
+        Attribid = [];
+
+        for (var i = 0; i < checkedrows.length; i++) {
+            var item = grid.dataItem(checkedrows[i]);
+            trangid = item.tran_gid;
+            Attribid.push(trangid);
+        }
+
+        arrString = Attribid.join(", ");
+
+        $("#Gridsecondload").data("kendoGrid").dataSource.read();
+       
+        progressvalue = "progreeson";
+
+    }
+
+    function Additionvalue() {
+
+        debugger;
+        return {
+            attrbid: arrString
+        }
+
+    }
+</script>
+
+
+
+<script>
+    var refer;
+    var cd="";
+    var orgindata = "";
+    var radiochecked;
+    var one;
+    var Rec_id;
+    var viewflag;
+    var griddeletecount = 0;
+    var result = 0;
+    var count;
+    var Attribid = [];
+    var tranidframe = [];
+    var trangid;
+    var sessionid;
+    var arrString;
+    var arrStrings;
+    var firstload;
+    var progressvalue;
+
+    var matchres;
+
+
+    var objDialog;
+    var Table_Name = "";
+
+    objDialog = $("[id$='ForAttributeDetailsPartialView']");
+    objDialog.dialog({
+        autoOpen: false,
+        modal: true,
+        width: 1250,
+        height: 680
+    });
+
+    $(document).ready(function () {
+        $("#gotoPage").val(1);
+        $("#total").val(0);
+    });
+    
+
+
+    function onDataBound(arg) {
+        debugger;
+        kendoConsole.log("Grid data bound");
+    }
+
+    var pageno = 1;
+    var pagesize = 100;
+    var Accountmode;
+    var Excptamount = 0;
+    var creditscore = 0;
+    var Debitscore = 0;
+    var differentvalue = 0;
+
+    var Recon_gid;
+
+    var currentpage = 0;
+    function pagination(data) {
+        debugger;
+        if (data == "next") {
+            currentpage = $("#gotoPage").val();
+            pageno = parseInt(currentpage) + 1;
+            pagesize = $("#items").val();
+            $("#gotoPage").val(pageno);
+            $("#Griddatload").data("kendoGrid").dataSource.read();
+
+        } else if (data == "last") {
+            pageno = parseInt(parseInt(count) / parseInt(pagesize));
+            pagesize = $("#items").val();
+            $("#gotoPage").val(pageno);
+            $("#Griddatload").data("kendoGrid").dataSource.read();
+        } else if (data == "first") {
+            pageno = 1;
+            pagesize = $("#items").val();
+            $("#gotoPage").val(pageno);
+            $("#Griddatload").data("kendoGrid").dataSource.read();
+        }
+        else {
+            currentpage = $("#gotoPage").val();
+            pageno = currentpage - 1;
+            pagesize = $("#items").val();
+            $("#gotoPage").val(pageno);
+            $("#Griddatload").data("kendoGrid").dataSource.read();
+        }
+        
+    }
+
+    function gridpage() {
+        debugger;
+        pagesize= $('#items').val();
+        var Actpageno = parseInt(parseInt(count) / parseInt(pagesize));
+        $('#totalpage').val(Actpageno);
+    }
+
+    function OnRefresh() {
+        debugger;
+        var rflag = "";
+
+        parcheck = 0;
+        parchecksec = 0;
+
+        $.confirm({
+            icon: 'fa fa-warnings',
+            title: 'Apply Filter',
+            autoClose: 'cancel|10000',
+            //theme: 'dark',
+            animationSpeed: 700,
+            content: 'Please Confirm to Download the File',
+            type: 'blue',
+            buttons: {
+                confirm: function () {
+                    debugger;
+                    confirm() 
+                    debugger;
+                    // rez();
+                    // $("#radgrid").trigger("change");
+
+
+                },
+
+
+
+
+
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Apply filter',
+                        //  theme: 'dark',
+                        content: 'Cancelled.!',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+
+                }
+            },
+        });
+
+
+        // $("#gridload").show();
+
+    }
+
+    function confirm() {
+
+        debugger;
+
+        if (clicks == 0) {
+            $('#framevalue').text('');
+        }
+        // textinput();
+
+        var checkflag = "";
+        var reportcondition = "";
+
+
+        var reportgid = 0;
+        var Transaction_Rpt = {};
+        // Transaction_Rpt.Table_Name = "recon_trn_vtranrecon";
+
+
+        Recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        //  Rec_id = $("#report_gid").data("kendoDropDownList").value();
+        Rec_id = $("#report_gid").data("kendoDropDownList").value();//report_gid
+
+
+        var str1 = "and";
+        var str2 = "tran_date>="
+        var str3 = "tran_date<="
+        radiochecked = false;
+        //reportcondition = Recon_gid;//formatted_Period_from + formatted_Period_To;
+        //if (document.getElementById('radgrid').checked) {
+        //    radiochecked =false;
+        //}
+        //if (document.getElementById('fileid').checked) {
+        //    radiochecked = true;
+        //}
+
+       
+
+        Transaction_Rpt.Report_condition = reportcondition;
+        dataresponse = "";
+        orgindata = "";
+        getdata(reportcondition);
+
+        orgindata = dataresponse;
+
+
+        if (ran == "emptyvalue") {
+            $.alert({
+                title: 'Impact',
+                content: "please fill the value",
+                type: 'blue',
+
+
+            });
+
+        }
+        else if(Recon_gid == "0") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+        }
+        else if (orgindata == "" || orgindata == undefined) {
+            $.alert({
+                title: 'Impact',
+                content: "Minimum one filter need to be Add.",
+                type: 'blue',
+
+
+            });
+        }
+        else if (parcheck != parchecksec) {
+            $.alert({
+                title: 'Impact',
+                content: "Open and close paranthesis mismatch",
+                type: 'blue',
+
+
+            });
+        }
+
+
+        else {
+
+            if (radiochecked == true) {
+
+                //  additionalinfo();
+                // $("#Griddat").data("kendoGrid").dataSource.read();
+
+            }
+
+            else {
+                debugger;
+                // $("#Griddatload").data("kendoGrid").dataSource.read();
+
+
+                $.ajax({
+                    type: "POST",
+                    data: '{table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '",Recon_gid:"' + Recon_gid + '"}',
+                    url: '@Url.Action("ManualFirstgridload", "ManualMatchOff")',
+                   // url: "/ManualMatchOff/ManualFirstgridload",
+                    dataType: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (Data1) {
+                        debugger;
+                        result = Data1[1];
+                        count = Data1[2];
+                        call();
+                        if (Data1[1] != "0") {
+                            $.alert({
+                                icon: 'fa fa-success',
+                                title: 'Impact',
+                                content: Data1[0],
+                                type: 'green',
+                                animationSpeed: 700,
+                            });
+                        } else {
+                            $.alert({
+                                icon: 'fa fa-warning',
+                                title: 'Impact',
+                                content: Data1[0],
+                                type: 'red',
+                                animationSpeed: 700,
+                            });
+                        }
+
+
+                    },
+
+                    error: function (result) {
+                        alert("Error" + result);
+                        console.log(result);
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Impact',
+                            content: result,
+                            type: 'red',
+                            animationSpeed: 700,
+                        });
+                    }
+                });
+            }
+
+
+        }
+
+
+    }
+
+    function show_filter() {
+        debugger;
+        $("#gotoPage").val(1);
+        pagesize = $("#items").val();
+        $('#Partialone').show();
+        //$('#collapse_div').show();
+    }
+
+    //function ViewMode(e) {
+    //    debugger;
+    //    viewflag = "Firstgridview";
+    //    var grid = this,
+    //     selectedRow = $(e.target).closest("tr")[0];
+    //    grid.editRow(selectedRow);
+    //    $(".k-grid-update").hide();
+    //    $(".k-window-title").text("View");
+    //}
+
+    function ViewMode(e) {
+        debugger;
+        window_open1();
+    }
+
+    function ViewModeone(e)
+    {
+        debugger;
+        window_open();
+    }
+
+    function window_open1() {
+        debugger;
+        var grid = $("#Griddatload").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var gid = (model.tran_gid);
+        var table_name = "";
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        var report_condition = " and " + "tran_gid = '" + gid + "' "
+
+        $.ajax({
+            type: "POST",
+            data: '{attrbid: "' + gid + '",reportcondition:  "' + report_condition + '",recon_gid:"' + recon_gid + '" }',
+            // url: "/Report/ReportKnockOFFGrid_ReadVIEW",
+            url: '@Url.Action("ManualMatchoffdependGridview", "ManualMatchOff")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                $("#dialog").kendoWindow();
+                var dialog = $("#dialog").data("kendoWindow");
+                dialog.open().element.closest(".k-window").css({
+                    top: 121,
+                    left: 300, height: 400, width: 900
+                });
+                dialog.title("KnockOff Details");
+                dialog.bind("open", window_open1);
+                debugger
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+
+                    var propType = typeof data[0][key];
+                    if (key != "") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            type: propType,
+                            width: 200,
+                            //attributes: { style: "text-align: right;" }
+                        });
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 350,
+                    navigatable: true,
+                    groupable: true,
+                    editable: false,
+                    sortable: true,
+                    Scrollable: true,
+                    filterable: true,
+                    pagable: false,
+                    resizable: true,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    rows: viewModel
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+                kendo.bind($("#grid"), viewModel);
+
+                var grid = $("#grid").data("kendoGrid");
+
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function window_open() {
+        debugger;
+        var grid = $("#Gridsecondload").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var gid = (model.tran_gid);
+        var table_name = "";
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        var report_condition = " and " + "tran_gid = '" + gid + "' "
+
+        $.ajax({
+            type: "POST",
+            data: '{attrbid: "' + gid + '",reportcondition:  "' + report_condition + '",recon_gid:"' + recon_gid + '" }',
+            // url: "/Report/ReportKnockOFFGrid_ReadVIEW",
+            url: '@Url.Action("ManualMatchoffdependGridview", "ManualMatchOff")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                $("#dialog").kendoWindow();
+                var dialog = $("#dialog").data("kendoWindow");
+                dialog.open().element.closest(".k-window").css({
+                    top: 121,
+                    left: 300, height: 400, width: 900
+                });
+                dialog.title("KnockOff Details");
+                dialog.bind("open", window_open);
+                debugger
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+
+                    var propType = typeof data[0][key];
+                    if (key != "") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            type: propType,
+                            width: 200,
+                            //attributes: { style: "text-align: right;" }
+                        });
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 350,
+                    navigatable: true,
+                    groupable: true,
+                    editable: false,
+                    sortable: true,
+                    Scrollable: true,
+                    filterable: true,
+                    pagable: false,
+                    resizable: true,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    rows: viewModel
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+                kendo.bind($("#grid"), viewModel);
+
+                var grid = $("#grid").data("kendoGrid");
+
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    //function ViewModeone(e) {
+    //    debugger;
+
+    //    var grid = $("#Gridsecondload").data("kendoGrid");
+    //    var model = grid.dataItem($(event.target).closest("tr"));
+    //    var gid = (model.tran_gid);
+    //    var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+    //    var report_condition=  " and " + "tran_gid = '"  + gid  + "' "
+        
+    //    viewflag = "secondgridview";
+    //    $('#wndContent').load('/ManualMatchOff/ManualMatchoffdepend_pop/', { attrbid: gid, recon_gid: recon_gid, reportcondition: report_condition }, function (response, status, xhr) {
+    //        debugger;
+    //        if (status == "error") {
+    //            try {
+    //                var msge = $.parseJSON(response);
+    //                // get the server error
+    //            } catch (e) {
+    //                alert("Error parsing server response");
+    //            }
+    //        } else {
+    //            //this.blur();
+    //            $("#wndWindow").data("kendoWindow").title("view");
+    //            $("#wndWindow").data("kendoWindow").open().center();
+                
+    //        }
+    //    });
+
+
+    //    //$("#window").show().kendoWindow({
+    //    //        width: "500px",
+    //    //        height: "200px",
+    //    //        modal: true,
+    //    //        title: "view"
+    //    //    });
+        
+
+       
+    //}
+
+    function ApplyruleListdel() {
+
+    }
+
+    function Deletejs() {
+
+        debugger;
+        var grid = $("#Gridsecondload").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var gid = (model.tran_gid);
+
+
+
+       // onchangeEvent();
+        $('#Gridsecondload').data("kendoGrid").dataSource.remove(model);
+
+        grid = $("#Gridsecondload").data("kendoGrid");
+        arrStrings = "0";
+        for (var i = 0; i < grid._data.length; i++) {
+            var item = grid._data[i];
+            arrStrings += "," + item.tran_gid;
+        }
+        onChange();
+
+
+
+    }
+
+    function advanceFilter() {
+        objDialog.load('../ManualMatchOff/AdhocEditpartialview');
+        objDialog.dialog({ title: 'Advance Filter' });
+        objDialog.dialog("open");
+    }
+
+    function cleartext() {
+        debugger;
+        $("#Griddatload").data("kendoGrid").dataSource.read();
+        // $("#btn_clearall").val('');
+        var zer = 0;
+        document.getElementById('knockoffidone').value = '';
+       
+        var grid = $("#Gridsecondload").data("kendoGrid");
+        debugger;
+        grid.dataSource.data([]);
+        $("#Debitvalue").text("=" + zer);
+        $("#creditvalue").text("=" + zer);
+        $("#Differencevalue").text("=" + zer);
+       
+        
+        
+        //$("#Gridsecondload").data("kendoGrid").dataSource.read();
+        $('#btn_match').attr('disabled', false);
+
+    }
+    
+
+    function Matchselected() {
+        debugger;
+        //var excptamount = 0;
+        //var Recon_gid = 0;
+        //Recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        var reason = $("#knockoffidone").val();
+        var grid = $("#Gridsecondload").data("kendoGrid");
+       
+        //var data = grid._data.length;
+        //var gid = Attribid;
+        var tran = [];
+      
+
+        for (var i = 0; i < grid._data.length; i++) {
+            var res = grid._data[i].tran_gid;
+           var  excptamount = grid._data[i].excp_amount;
+            var dk = res + '$' + excptamount;
+            
+            tranidframe.push(dk);
+        }
+
+        matchres = tranidframe.join("#");
+
+
+
+        $.ajax({
+            type: "POST",
+            data: '{recon_gid: ' + Recon_gid + ',ko_amount:  ' + excptamount + ',tranid_frame:"' + matchres + '",knockoffreason:"' + reason + '"}',
+            //  url: "/ManualMatchOff/ManualMatchselected",
+            url: '@Url.Action("ManualMatchselected", "ManualMatchOff")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                result = Data1[1];
+                count = Data1[2];
+                call();
+                if (Data1[1] != "0") {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: Data1[0],
+                        type: 'green',
+                        animationSpeed: 700,
+                    });
+                } else {
+                    $.alert({
+                        icon: 'fa fa-warning',
+                        title: 'Impact',
+                        content: Data1[0],
+                        type: 'red',
+                        animationSpeed: 700,
+                    });
+                }
+
+
+            },
+
+            error: function (result) {
+                alert("Error" + result);
+                console.log(result);
+                $.alert({
+                    icon: 'fa fa-success',
+                    title: 'Impact',
+                    content: result,
+                    type: 'red',
+                    animationSpeed: 700,
+                });
+            }
+        });
+    }
+
+
+
+   
+
+
+    function call() {
+
+        $(".accordion_body1").slideDown(300)
+        $(".plusminus").text('-');
+
+        if ($('.accordion_body').is(':visible')) {
+            $(".accordion_body").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($('.accordion_body2').is(':visible')) {
+            $(".accordion_body2").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        
+
+        $("#Griddatload").data("kendoGrid").dataSource.read();
+
+
+
+    }
+    
+
+    function additionalinfo() {
+        debugger;
+        var r = Table_Name;
+        $("#total").val(count);
+        var Actpageno = parseInt(parseInt(count) / parseInt(pagesize));
+        $('#totalpage').val(Actpageno);
+        return {
+            outresult: result,
+            _count: count,
+            _pageno: pageno,
+            _pagesize: pagesize,
+            table_name: Table_Name,
+            condition: orgindata,
+            radio_checked: radiochecked,
+            recon_id: Rec_id
+        }
+
+    }
+
+    $("#collapse_div").click(function () {
+        debugger;
+        if ($('#Partialone').css('display') == 'none') {
+            $('#Partialone').show();
+            $('#collapse_img2').css('display', 'block');
+            $('#collapse_img').css('display', 'none');
+        } else {
+            $('#Partialone').css('display', 'none');
+            $('#collapse_img2').css('display', 'none');
+            $('#collapse_img').css('display', 'block');
+        }
+    });
+    function CloseQcdpopup(e) {
+        debugger;
+
+        if (viewflag == "Firstgridview") {
+            $("#Griddatload").data("kendoGrid").dataSource.read();
+        }
+        else {
+            $('#wndWindow').data("kendoWindow").close();
+            //$("#Gridsecondload").data("kendoGrid").dataSource.read();
+        }
+    }
+    /*Accordion Like DMS*/
+    $(".accordion_head").click(function () {
+        debugger;
+        if ($('.accordion_body').is(':visible')) {
+            $(".accordion_body").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($(this).next(".accordion_body").is(':visible')) {
+            $(this).next(".accordion_body").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+
+        if ($('.accordion_body1').is(':visible')) {
+            $(".accordion_body1").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($(this).next(".accordion_body1").is(':visible')) {
+            $(this).next(".accordion_body1").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body1").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+
+        if ($('.accordion_body2').is(':visible')) {
+            $(".accordion_body2").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($(this).next(".accordion_body2").is(':visible')) {
+            $(this).next(".accordion_body2").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body2").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+        $("#Gridsecondload").data("kendoGrid").dataSource.read();
+    });
+    $(document).ready(function () {
+        debugger;
+        var res = "14";
+        $("#report_gid").data("kendoDropDownList").value(res);
+
+        $('#report_gid').data("kendoDropDownList").enable(false);
+
+        if ($('.accordion_body1').is(':visible')) {
+            $(".accordion_body1").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($('.accordion_body2').is(':visible')) {
+            $(".accordion_body2").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($(this).next(".accordion_body").is(':visible')) {
+            $(this).next(".accordion_body").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+        if ($(this).next(".accordion_body1").is(':visible')) {
+            $(this).next(".accordion_body1").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body1").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+        if ($(this).next(".accordion_body2").is(':visible')) {
+            $(this).next(".accordion_body2").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body2").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+    });
+    /*Accordion Like DMS End*/
+    function onDataBound(e) {
+        debugger;
+        var kendodropdown = this;
+        var ddl = e.sender;
+        var items = ddl.items();
+
+        var curr = $("#ReconName_id").data("kendoDropDownList");
+        var currentRecords = curr.dataSource._data;
+        for (var i = 0; i < currentRecords.length; i++) {
+
+            if (currentRecords[i].recon_tallied == "Yes") {
+
+            }
+
+            else {
+                this.list.find(">ul>li[data-index='" + i + "']").addClass("Recon_tallied_no");
+
+            }
+        }
+    }
+    function onselect(e) {
+        debugger;
+        var dataItem = this.dataItem(e.item.index());
+        var intd = dataItem.value;
+        var intdfd = dataItem.isDeleted;
+        if (intdfd == true) {
+            e.preventDefault();
+        }
+    }
+</script>

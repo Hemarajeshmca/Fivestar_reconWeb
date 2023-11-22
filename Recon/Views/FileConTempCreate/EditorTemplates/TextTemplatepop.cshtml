@@ -1,0 +1,100 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@*@model Recon_Model.AcMaster_model;*@
+@model Recon_Model.FileConTemp_model
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 86%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+    .k-window > div.k-popup-edit-form {
+    padding: 1em 0;
+    overflow: hidden;
+}
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-2">
+            @Html.Label("Sl No", new { style = "" })
+            @Html.TextBoxFor(model => model.FileTemplatefield_gid, new { disabled = "true", style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; " })
+        </div>
+        <div class="col-sm-2">
+            @Html.Label("DB Alias Name", new { style = "" })
+            @(Html.Kendo().DropDownList()
+                 .Name("field_name")
+                 .DataTextField("field_alias_name")
+                 .DataValueField("field_name")
+                .HtmlAttributes(new { style = "height:25px;width:180px;font-weight: normal;" })
+            .DataSource(source => { source.Read(read => { read.Action("DbAliasDropTemp", "FileConTempCreate"); }).ServerFiltering(true); }))
+            <input type="hidden" id="Header_id" name="Header_id" value="" data-bind="value:Header_id">
+        </div>
+        <div class="col-sm-2">
+            @Html.Label("Field Mapping Type", new { style = "font-size: 14px;font-weight: 600 !important;" })
+            @(Html.Kendo().DropDownList()
+                                        .Name("fieldmappingtype")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Events(e => e.Change("mappingtypeText"))
+                        .BindTo(new List<SelectListItem>()
+                        {
+                            new SelectListItem()
+                            {
+                                Text = "Exact",
+                                Value = "E"
+                            },
+                            new SelectListItem()
+                            {
+                                Text = "Formula",
+                                Value = "F"
+                            },new SelectListItem()
+                            {
+                                Text = "Blank on Formula",
+                                Value = "B"
+                            }
+                        })
+                               .Value("E")
+            )
+        </div>
+        <div class="col-sm-2" id="TextConfig">
+            @Html.Label("", new { style = "" })<br />
+            <button type="button" id="configbtnText" onclick="configbtnText()" class="btn btn-primary">&nbsp;Config</button>
+        </div>
+        <div class="col-sm-2" id="startno">
+            @Html.Label("Start Position", new { style = "" })
+            @Html.TextBoxFor(model => model.Txt_Start_Position, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%" })
+        </div>
+        <div class="col-sm-2" id="endno">
+            @Html.Label("End Position", new { style = "" })
+            @Html.TextBoxFor(model => model.Txt_End_Position, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%" })
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-sm-2">
+                @Html.Label("Status", new { style = " " })<br />
+                @Html.RadioButtonFor(model => model.Field_Active_Status, "Y", new { @checked = true }) Active
+                @Html.RadioButtonFor(model => model.Field_Active_Status, "N") InActive
+            </div>
+        </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#startno").hide();
+        $("#endno").hide();
+        $("#TextConfig").hide();
+    });
+</script>
+
+
+

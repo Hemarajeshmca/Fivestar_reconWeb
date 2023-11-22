@@ -1,0 +1,424 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+   
+         .Recon_tallied_no {
+        /*opacity:0.5;*/
+        pointer-events:none;
+      
+        color:red;
+  
+
+        }
+       .Recon_tallied_yes
+        {
+        
+        }
+              .k-popup.k-list-container {
+    width:210px !important;
+    }
+               .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+        /*.k-state-active {
+            display: none;
+        }*/
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 40%;
+            font-weight: normal;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+            color: #fff !important;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+        .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">File Posting - Line Based</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label for="Actype" class="title">Recon Type</label>  <br />
+                                <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="W" checked> Within Account
+                                <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="B"> Between Account
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group" id="within">
+                                    <label for="filetype" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                       .HtmlAttributes(new { style = "width:100%" })
+                                                       .Events(e =>
+                                                          {
+                                                              e.DataBound("onDataBound");
+                                                              e.Select("onselect");
+                                                          })
+                                                        @*.DataSource(source => { source.Read(read => { read.Action("Recon_type_desc", "ApplyRule"); }).ServerFiltering(true); }))*@
+                                                 .DataSource(source => { source.Read(read => { read.Action("getuserrecon_tallied", "Progress").Data("getrecontype"); }).ServerFiltering(true); }))
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' style="width:100%" id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="period_to" class="title">Date To</label>
+                                <input class="cusDate" data-role='datepicker' style="width:100%" id="period_to" name="period_to" />
+                            </div>
+                            <div class="col-sm-2" style="margin-top:25px;" >
+                                <button type="button" id="run" class="btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;Show</button>&nbsp;
+                                <button type="button" id="exportExcel" onclick="exportExcel()"  class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                        </div>
+
+                        <div id="Process" style="margin-top:-1px;margin-left:-24px;">
+                            <div class="form-group">
+                                @using (Html.BeginForm("Manualmatch", "Manualmatch", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div style="padding-left:20px;padding-right:60px;width:101%;">
+                                        @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("processGrid")
+                                        .HtmlAttributes(new { style = "width:105%; height:400px;line-height:2em;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                                        .Columns(columns =>
+                                            {
+                                                columns.Command(command =>
+                                                {
+                                                   command.Custom("Edit").Text("<span class='fa fa-bars' style='color:#357ab8;font-size: 12px;'>Map Support File").Click("editDetails");
+                                                }).Title("Action").Width(90);
+                                                columns.Bound(m => m.SlNo).Title("Sl.No").Width(60).Hidden();
+                                                columns.Bound(m => m.tran_gid).Title("tran").Width(100).Hidden();
+                                                columns.Bound(m => m.AccountNo).Title("A/c No").Width(100);
+                                                columns.Bound(m => m.TranDate).Title("Tran Date").Width(90);
+                                                columns.Bound(m => m.ValueDate).Title("Value Date").Width(90).Hidden();
+                                                columns.Bound(m => m.Description).Title("Trans Desc").Width(90);
+                                                columns.Bound(m => m.Accountmode).Title("A/c Mode").Width(80);
+                                                columns.Bound(m => m.Exceptionamountcon).Title("Exception Amount").Width(150);
+                                                columns.Bound(m => m.amountcon).Title("Amount").Width(100);
+                                                //columns.Command(command => command.Custom("Add To Match Off").Click("editDetails")).Width(120);
+                                            })
+                                    .Editable(editable =>
+                                        { editable.Mode(GridEditMode.PopUp).TemplateName(""); })
+                                    .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                       )
+                                        //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                                        .Excel(excel => excel
+                                                     .AllPages(true)
+                                                     .FileName("File Posting - Line Based.xlsx"))
+
+                                    .Filterable()
+                                    .Sortable()
+                                     .Selectable()
+                                    .Scrollable()
+                                    .Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(5000)
+                                        //.Events(events => events.Error("error_handler"))
+                                    .Model(model =>
+                                        {
+                                            model.Id(p => p.SlNo);
+                                            model.Field(p => p.Select).Editable(false);
+                                        })
+                                   .Create(Create => Create.Action("SaveEmployee", "DedperuleList"))
+                                   .Read(read => read.Action("GridSupFileExcpSumm", "ManualMatchOff").Data("getslno"))
+                                   .Update(update => update.Action("AddMatchOff_Save", "ManualMatchoff_model"))
+                                    ))
+                                    </div>
+                                }                              
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        kendodate_format();
+        var mindate = '@Request.RequestContext.HttpContext.Session["mindate"]';
+        $("#period_from").kendoDatePicker({
+            value: mindate,// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+        $("#ReconName_id").data("kendoDropDownList").dataSource.read();
+        filetype();
+        //$("#Process").hide();
+        $("#exportExcel").hide();
+
+        $("#processGrid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#processGrid").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+    })
+
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+    function getrecontype()
+    {
+        debugger;
+        var fieldtype = "W";
+
+        return{fieldtype:fieldtype}
+
+    }
+    function filetype() {
+
+        var val = $("input[name='Recontype']:checked").val();
+        if (val == "val is not defined") {
+            val = $("#recontypeedit").val();
+        } else if (val == "W") {
+            $("#ReconName_id").val("");
+            var fieldtype = "W";
+            var compsr = "Y";
+            $.ajax({
+                type: "POST",
+                //data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                data: '{fieldtype: "' + fieldtype + '"}',
+                // url: "/ApplyRule/Recon_type_desc",
+                url: '@Url.Action("getuserrecon_tallied", "Progress")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    $("#ReconName_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+
+        } else if (val == "B") {
+            var fieldtype = "B";
+            var compsr = "Y";
+            $.ajax({
+                type: "POST",
+                // data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                data: '{fieldtype: "' + fieldtype + '"}',
+                // url: "/ApplyRule/Recon_type_desc",
+                url: '@Url.Action("getuserrecon_tallied", "Progress")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    $("#ReconName_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+        }
+    }
+
+    function exportExcel() {
+        $("#processGrid").getKendoGrid().saveAsExcel();
+    }
+    function getslno() {
+
+        var ReconName_id;
+            var Recontype = $("input[name='Recontype']:checked").val();
+            if (Recontype == "W") {
+
+                if ($("#ReconName_id").val() == "") {
+                    var ReconName_id = "0";
+                } else {
+                    var ReconName_id = $("#ReconName_id").val();
+                }
+
+
+            } else if (Recontype == "B") {
+                if ($("#ReconName_id").val() == "") {
+                    var ReconName_id = "0";
+                } else {
+                    ReconName_id = $("#ReconName_id").val();
+                }
+            }
+
+        var period_from = $('#period_from').val();
+        var period_to = $("#period_to").val();
+        if (period_from == "") {
+            var formatted_period_from = null;
+        } else {
+            formatted_period_from = getFormated_StringDate(period_from);
+        }
+        if (period_to == "") {
+            var formatted_period_to = null;
+        } else {
+            var formatted_period_to = getFormated_StringDate(period_to);
+        }
+        return { recongid: ReconName_id , periodfrom: formatted_period_from , periodto: formatted_period_to }
+    }
+    $('#run').click(function () {
+        debugger;
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        if (recon_gid == "0" || recon_gid == undefined || recon_gid == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+        $("#Process").show();
+        $("#processGrid").data("kendoGrid").dataSource.read();
+        $("#exportExcel").show();
+    });
+
+    function onRequestEnd(e) {
+        debugger;
+
+    }
+    function editDetails(e) {
+        debugger;
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.tran_gid;
+        $.ajax({
+            type: "POST",
+            data: '{tran_gid:  "' + id + '"}',
+            //url: "/Progress/SupFilemapping_check",
+            url: '@Url.Action("SupFilemapping_check", "Progress")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (response[1] > 0) {
+                    $.dialog({
+                        title: 'Impact',
+                        content: response[0],
+                        type: 'green',
+                    });
+                    setTimeout(function () {
+                    location.href = "@Url.Action("", "Progress/PostSupFilemappingView")?Id=" + id
+                    }, 1000);
+                }
+                else {
+                  
+                    $.dialog({
+                        title: 'Impact',
+                        content: response[0],
+                        type: 'green',
+                    });
+                    preventCloseOnSave = true;
+                }
+            }
+        });
+       
+    }
+    //function onDataBound(e) {
+    //    debugger;
+    //    var ddl = e.sender;
+    //    var items = ddl.items(); 
+    //    for (let item in items) {
+    //        var dataItem = ddl.dataItem($(item));
+    //        $(item).css("Recon_tallied_yes");
+    //    }
+    //}
+    function onselect(e)
+    {
+        debugger;
+        var dataItem = this.dataItem(e.item.index());
+        var intd = dataItem.value;
+        var intdfd = dataItem.isDeleted;
+        if (intdfd == true) {
+            e.preventDefault(); 
+        }
+    }
+    function onDataBound(e) {
+        debugger;
+        var kendodropdown = this;
+        var ddl = e.sender;
+        var items = ddl.items();
+     
+        var curr = $("#ReconName_id").data("kendoDropDownList");
+        var currentRecords = curr.dataSource._data;
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].recon_tallied == "Yes") {
+        
+               
+            }
+
+            else {
+                this.list.find(">ul>li[data-index='" + i + "']").addClass("Recon_tallied_no");
+                this.list.find(">ul>li[data-index='" + i + "']").css("disabled", true);
+              
+        
+             
+                var is_deleteflag = currentRecords[i].isDeleted;
+                //is_deleteflag.set("isDeleted", true);
+
+            }
+        }
+    }
+</script>

@@ -1,0 +1,78 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model  Recon_Model.CategoryViewModel
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 33%;
+        font-weight: normal;
+    }
+
+    .form-horizontal .form-group {
+        margin-right: 25px;
+        margin-left: -15px;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+</style>
+<!--<div>
+    <table style="border:1px;">
+        <tr>
+            <td>@Html.Label("Category", new { style = "width:80px;margin-left: 11%; " })</td>
+            <td>@Html.TextBoxFor(model => model.Category_name, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; " })</td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Status", new { style = "width:80px;margin-left: 11%; " })</td>
+            <td>
+                <input type="radio" id="Status" name="Status" value="Y" checked>  Active
+                @*<input data-val="true" data-val-required="Status Should not be blank" id="Status" name="Status" type="radio" value="Y" data-bind="checked:Status" class="k-valid">  Active*@
+               @* @Html.RadioButtonFor(model => model.Status, "N") InActive*@
+                <input type="radio" id="Status" name="Status" value="N">InActive
+            </td>
+        </tr>
+    </table>
+</div>-->
+@*<div class="container">
+        <div class="row">
+            <div class="col-sm-2">
+                @Html.Label("Category", new { style = "font-size: 14px;font-weight: 600 !important;" })
+                @Html.TextBoxFor(model => model.Category_name, new { style = "" })
+            </div>
+            <div class="col-sm-2">
+                @Html.Label("Status", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+                <input type="radio" id="Status" name="Status" value="Y" checked>  Active
+                <input type="radio" id="Status" name="Status" value="N">InActive
+            </div>
+        </div>
+    </div>*@
+
+<div class="container">
+    <div class="row" style="padding-left:27px;padding-right:10px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Category&nbsp;<span style="font-size: 12px;color: red;"></span></label>
+            <input class="form-control" id="Category_name" name="Category_name" type="text" value="" data-bind="value:Category_name">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Status&nbsp;<span style="font-size: 12px;color: red;"></span></label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Status" name="Status" value="Y" checked>&nbsp;Active &nbsp;
+                <input type="radio" id="Status" name="Status" value="N">&nbsp;InActive&nbsp;
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,512 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script><!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        /*a.k-link {
+            color: #fff !important;
+        }*/
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-link {
+            color: #fff !important;
+        }    </style>
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:5px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Automatic With Preview</h3>
+                        </div>
+                        <div id="Process">
+                            <div class="form-group">
+                                @using (Html.BeginForm("Manualmatch", "Manualmatch", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div style="padding-left:20px;padding-right:20px">
+                                        @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("processGrid")
+                                                .HtmlAttributes(new { style = "width:100%;height:480px;line-height:2em;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                                .Columns(columns =>
+                                                    {
+                                                        columns.Bound(m => m.Select).ClientTemplate("<input type='checkbox' id='checkbox' checked='checked'  #= Select == true ? checked='checked' : '' # />").Width(50);
+                                                        columns.Bound(m => m.SlNo).Title("Sl. No").Width(50);
+                                                        columns.Bound(m => m.AccountNo).Title("Account No").Width(100);
+                                                        columns.Bound(m => m.TranDate).Title("Trans Date").Width(100);
+                                                        columns.Bound(m => m.Description).Title("Description").Width(300);
+                                                        columns.Bound(m => m.filetype).Title("File Type").Width(50);
+                                                        columns.Bound(m => m.Accountmode).Title("Dr/Cr").Width(50);
+                                                        columns.Bound(m => m.Source).Title("Source").Width(100);
+                                                        columns.Bound(m => m.Comparition).Title("Comparision").Width(100);
+                                                        columns.Bound(m => m.grp_field).Title("Group1").Width(100).Hidden();
+                                                        columns.Bound(m => m.group_sno).Title("Group").Width(100).Hidden();
+                                                        columns.Bound(m => m.rule_name).Title("Rule Name").Width(100).Hidden();
+                                                        columns.Command(cmd =>
+                                                        {
+                                                            cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                                        }).Title("Action").Width(50);
+                                                    })
+                                                .Editable(editable =>
+                                                    { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRuleEdit"); })
+                                        //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                                                 .Excel(excel => excel
+                                                     .AllPages(true)
+                                                     .FileName("Manual Match - Rule Based.xlsx"))
+                                                .Sortable()
+                                                .Scrollable()
+                                                .Filterable()
+                                               .Pageable(pageable => pageable
+                                        .Refresh(true))
+                                                .Resizable(resize => resize.Columns(true))
+                                                .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .PageSize(1500)
+                                                    //.Events(events => events.Error("error_handler"))
+                                                .Group(groups =>
+                                                {
+                                                    groups.Add(p => p.group_sno);
+                                                })
+                                                .Model(model =>
+                                                    {
+                                                        model.Id(p => p.SlNo);
+                                                        model.Field(p => p.Select).Editable(false);
+                                                    })
+                                                .Create(Create => Create.Action("SaveEmployee", "DedperuleList"))
+                                                .Read(read => read.Action("ManualmatchSelect_Read", "Manualmatch").Data("getslno1"))
+                                                .Update(update => update.Action("EmployeeGrid_Update", "EmployeeMaster"))
+                                                ))
+                                    </div>
+                                }
+                                <div style="padding-top:10px">
+                                    <button type="button" id="exportExcel" style="float:right;margin-right:60px;margin-top:-7px" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                                    <button type="button" style="float:right;margin-right:10px;margin-top:-7px" id="Match" onclick="validation()" class="btn btn-primary"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;Match Off</button>&nbsp;
+
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dialog">
+                            <button type="button" id="exportExcel1" style="margin-left:18px;margin-top:-7px" onclick="exportExcel1()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            <div id="Maingrid" class="col-md-12" style="margin:auto;height:auto;top:10px;width:100%;"> </div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#period_To").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#btnExport").kendoButton({
+            click: function () {
+                $("#processGrid").data("kendoGrid").saveAsExcel();
+            }
+        })
+        $("#exportExcel1").hide();
+    })
+    function Run() {
+        $("#Rule").show();
+    }
+
+
+    $(".k-pager-refresh").on('click', function (event) {
+        $('#processGrid').data('kendoGrid').refresh();
+    });
+    function getslno1() {
+        debugger;
+        //var user_code = "admin";
+        var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+
+        return { user_code: user_code }
+    }
+    function exportExcel() {
+        $("#processGrid").getKendoGrid().saveAsExcel();
+    }
+    function exportExcel1() {
+        $("#grid").getKendoGrid().saveAsExcel();
+    }
+    function GetRule() {
+        debugger;
+        var getslno = $("#ReconName_id").val();
+        if (getslno == "") {
+            getslno = "0";
+        }
+        return { slno: getslno }
+    }
+    function validation() {
+        var msg = "";
+        var grid = $("#processGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        if (checkedrows.length > 0) {
+
+        }
+        else {
+            msg += "Please Select the Match !!!";
+        }
+        if (msg == "") {
+            match()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function match() {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+                    debugger;
+                    var prv_group_sno = '';
+                    var list_tranrecon_gid = '';
+                    var grid = $("#processGrid").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    var Attribid = [];
+                    var item1 = grid.dataItem(checkedrows);
+                    var groupno = item1.group_sno.length;
+                    var Recongid = item1.recon_gid;
+                    var tranrecon_gid = '';
+                    var tranbrkp_gid = '';
+                    var applyrule_gid = item1.applyrule_gid;
+                    var rule_gid = item1.rule_gid;
+
+                    var gid = '';
+
+                    for (var i = 0; i < checkedrows.length; i++) {
+                        var item = grid.dataItem(checkedrows[i]);
+                        var Examount = item.ko_amount;
+                        var group_sno = item.group_sno;
+                        var file_type = item.filetype
+
+                        if (file_type == "T") {
+                            slno = item.tranrecon_gid;
+                        }
+                        else {
+                            slno = item.tranbrkp_gid;
+                        }
+
+                        if (prv_group_sno != group_sno || i == checkedrows.length - 1) {
+                            prv_group_sno = group_sno;
+
+                            if (gid != '') {
+                                if (list_tranrecon_gid == '') {
+                                    //list_tranrecon_gid = tranrecon_gid;
+                                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + gid;
+                                }
+                                else {
+                                    //list_tranrecon_gid += '^' + tranrecon_gid;
+                                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + gid;
+                                }
+                            }
+
+                            gid = file_type + slno + '$' + Examount;
+
+                            if (i == checkedrows.length - 1) {
+                                if (list_tranrecon_gid == '') {
+                                    //list_tranrecon_gid = tranrecon_gid;
+                                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + gid;
+                                }
+                                else if (prv_group_sno != group_sno) {
+                                    //list_tranrecon_gid += '^' + tranrecon_gid;
+                                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + gid;
+                                }
+                                else {
+                                    list_tranrecon_gid += '#' + gid;
+                                }
+                            }
+                        }
+                        else {
+                            gid += '#' + file_type + slno + '$' + Examount;
+                        }
+                    }
+                    //var gid;
+
+                    //for (var i = 0; i < checkedrows.length; i++) {
+                    //    var item = grid.dataItem(checkedrows[i]);
+                    //    var Examount = item.ko_amount;
+                    //    var group_sno = item.group_sno;
+                    //    var file_type = item.filetype
+
+                    //    if (file_type == "T") {
+                    //        debugger;
+                    //        var slno = item.tranrecon_gid;
+                    //        if (prv_group_sno != group_sno || i == checkedrows.length - 1) {
+                    //            prv_group_sno = group_sno;
+
+                    //            if (tranrecon_gid != '') {
+                    //                if (list_tranrecon_gid == '') {
+                    //                    //list_tranrecon_gid = tranrecon_gid;
+                    //                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + tranrecon_gid;
+                    //                }
+                    //                else {
+                    //                    //list_tranrecon_gid += '^' + tranrecon_gid;
+                    //                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + tranrecon_gid;
+                    //                }
+                    //            }
+
+                    //            tranrecon_gid = file_type + slno + '$' + Examount;
+
+                    //            if (i == checkedrows.length - 1) {
+                    //                if (list_tranrecon_gid == '') {
+                    //                    //list_tranrecon_gid = tranrecon_gid;
+                    //                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + tranrecon_gid;
+                    //                }
+                    //                else if (prv_group_sno != group_sno) {
+                    //                    //list_tranrecon_gid += '^' + tranrecon_gid;
+                    //                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + tranrecon_gid;
+                    //                }
+                    //                else {
+                    //                    list_tranrecon_gid += '#' + tranrecon_gid;
+                    //                }
+                    //            }
+                    //        }
+                    //        else {
+                    //            tranrecon_gid += '#' + file_type + slno + '$' + Examount;
+                    //        }
+                    //    }
+                    //    else {
+                    //        var slno = item.tranbrkp_gid;
+
+                    //        if (prv_group_sno != group_sno || i == checkedrows.length - 1) {
+                    //            prv_group_sno = group_sno;
+
+                    //            if (tranbrkp_gid != '') {
+                    //                if (list_tranrecon_gid == '') {
+                    //                    //list_tranrecon_gid = tranbrkp_gid;
+                    //                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + tranbrkp_gid;
+                    //                }
+                    //                else {
+                    //                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + tranbrkp_gid;
+                    //                }
+                    //            }
+
+                    //            tranbrkp_gid = file_type + slno + '$' + Examount;
+
+                    //            if (i == checkedrows.length - 1) {
+                    //                if (list_tranrecon_gid == '') {
+                    //                    list_tranrecon_gid = applyrule_gid + '&' + rule_gid + '%' + tranbrkp_gid;
+                    //                }
+                    //                else if (prv_group_sno != group_sno) {
+                    //                    list_tranrecon_gid += '^' + applyrule_gid + '&' + rule_gid + '%' + tranbrkp_gid;
+                    //                }
+                    //                else {
+                    //                    list_tranrecon_gid += '#' + tranbrkp_gid;
+                    //                }
+                    //            }
+                    //        }
+                    //        else {
+                    //            tranbrkp_gid += '#' + file_type + slno + '$' + Examount;
+                    //        }
+                    //    }
+                    //}
+                    //prv_group_sno = group_sno;
+                    //var combined = slno + "$" + Examount + "$" + group_sno
+                    var bulk_tranrecon = list_tranrecon_gid;
+
+                    //var user_code = "admin"
+                    var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+
+                    $.ajax({
+                        type: "POST",
+                        data: '{Recongid: "' + Recongid + '",bulk_tranrecon: "' + bulk_tranrecon + '",user_code: "' + user_code + '"}',
+                        url: "/ManualMatch/ManualMatchedSave",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            $.dialog({
+                                title: 'Impact',
+                                content: response[0],
+                                type: 'green',
+
+                            });
+                            setTimeout(function () {
+                                $("#processGrid").data("kendoGrid").dataSource.read();
+                            }, 2000);
+                        },
+
+                    })
+                },
+                cancel: function () {
+                },
+            }
+        });
+    }
+
+    function editDetails(e) {
+        debugger
+        window_open();
+    }
+    function window_open() {
+        debugger
+        var table_name = "recon_rpt_vadhoclist"
+        var grid = $("#processGrid").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var filetype = model.filetype;
+        var tranrecon_gid = model.tranrecon_gid;
+        var tranbrkp_gid = model.tranbrkp_gid;
+        var groupgid = model.group_sno;
+        var user = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+        var user_code = " and mapping_user = \'" + user + "\'";
+        var reportcondition = "and group_sno = " + groupgid + user_code
+        $.ajax({
+            type: "POST",
+            //data: '{filetype: "' + filetype + '",tranrecon_gid:  "' + tranrecon_gid + '",tranbrkp_gid:  "' + tranbrkp_gid + '" }',
+            //url: "/Manualmatch/ManualMatchedSingleView",
+            data: '{table_name: "' + table_name + '",condition:  "' + reportcondition + '" }',
+            url: "/Report/ReportExpenceGrid_Read",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                $("#dialog").kendoWindow();
+                var dialog = $("#dialog").data("kendoWindow");
+                dialog.open().element.closest(".k-window").css({
+                    top: 121,
+                    left: 300, height: 400, width: 900
+                });
+                dialog.title("Manual Match - Rule Based");
+                dialog.bind("open", window_open);
+                debugger
+                $("#exportExcel1").show();
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+                    var propType = typeof data[0][key];
+                    if (key != "") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            type: propType,
+                            width: 200,
+                            //attributes: { style: "text-align: right;" }
+                        });
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 350,
+                    navigatable: true,
+                    groupable: false,
+                    editable: false,
+                    sortable: true,
+                    Scrollable: true,
+                    filterable: false,
+                    pagable: false,
+                    resizable: false,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    rows: viewModel,
+                    excel: {
+                        fileName: "Manual Match.xlsx",
+                        filterable: true,
+                        allPages: false
+                    },
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+                kendo.bind($("#grid"), viewModel);
+
+                var grid = $("#grid").data("kendoGrid");
+                for (var i = 0; i < grid.columns.length; i++) {
+                    if (i != grid.columns.length) {
+                        grid.autoFitColumn(i);  //autofit each column.
+                    }
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+</script>
+@*<style>
+         #Maingrid .k-grid-header { float: left; padding: 0 !important; }
+        #Maingrid .k-grid-content { width: 1000px; height: 300px !important}
+        #Maingrid table {width: auto; white-space: nowrap; }
+        #Maingrid tr { display: inline-block; }
+        #Maingrid thead tr { display: inline; }
+        #Maingrid th, #grid td { display: block; border: 1px solid black; height: 30px; padding:15px;}
+    </style>*@

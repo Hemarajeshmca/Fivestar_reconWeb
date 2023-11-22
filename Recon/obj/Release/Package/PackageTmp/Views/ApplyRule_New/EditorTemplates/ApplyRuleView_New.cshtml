@@ -1,0 +1,109 @@
+﻿
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 95%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+</style>
+<form id="applyrule1" class="form-horizontal" data-role="validator" novalidate="novalidate">
+    <div class="panel panel-default">
+        <div class="panel-body" style="padding-top:6px;padding-bottom:2px">
+
+            <div class="form-group" style="padding-top:30px">
+                <label for="Actype" class="col-sm-2">Recon Type</label>
+                <input type="radio" name="Actype" id="withaccount" value="Wacc" checked> Within Account
+                <input type="radio" name="Actype" id="Betacc" value="Bacc" style="margin-left: 10px"> Between Account
+                <input type="radio" name="Actype" id="supportfile" value="SupportingFile" style="margin-left: 10px"> Supporting File
+            </div>
+
+            <div class="form-group" style="padding-top:30px" id="ano">
+                <label for="filetype" class="col-sm-2">Account No</label>
+                @(Html.Kendo().DropDownList()
+                 .Name("code1")
+            .DataTextField("Name")
+            .DataValueField("Code")
+                    .HtmlAttributes(new { style = "height:25px;width: 158px;font-weight: normal" })
+                    .DataSource(source => { source.Read(read => { read.Action("AccNo1drop", "ReconSetup"); }).ServerFiltering(true); })
+                )
+            </div>
+            <div class="form-group" style="padding-top:30px" id="rname">
+                <label for="filetype" class="col-sm-2">Recon Name</label>
+                @(Html.Kendo().DropDownList()
+                     .Name("code2")
+                .DataTextField("Name")
+                .DataValueField("Code")
+                        .HtmlAttributes(new { style = "height:25px;width: 158px;font-weight: normal" })
+                             .DataSource(source => { source.Read(read => { read.Action("AccMasCatdrop", "AcMaster"); }).ServerFiltering(true); }))
+            </div>
+            <div class="form-group" style="padding-top:30px" id="supfile">
+                <label for="filetype" class="col-sm-2">Support File Name</label>
+                @(Html.Kendo().DropDownList()
+                     .Name("code3")
+                .DataTextField("Name")
+                .DataValueField("Code")
+                        .HtmlAttributes(new { style = "height:25px;width: 158px;font-weight: normal" })
+                             .DataSource(source => { source.Read(read => { read.Action("AccMasCatdrop", "AcMaster"); }).ServerFiltering(true); }))
+            </div>
+            <div class="form-group" style="padding-top:30px">
+                <label for="filetype" class="col-sm-2">Match Off</label>
+                <input type="checkbox" name="vehicle1" value="Bike">System
+                <input type="checkbox" name="vehicle1" value="Bike">Manual
+            </div>
+            <div class="form-group" style="padding-top:30px">
+                <div class="form-group" style="padding-top:30px;padding-right:30px">
+                    <div style="padding-left:20px;padding-right:20px">
+
+                        @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleGrid")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                                //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.slno).Title("Sl No").Width(50);
+                                    columns.Bound(m => m.RuleName).Title("Rule Name").Width(100);
+                                    columns.Command(cmd => { cmd.Edit(); }).Title("Addtional Configuration").Width(50);
+                                    columns.Bound(m => m.Ruleorder).Title("Rule Order").Width(150);
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                })
+                                    .Editable(editable =>
+                                     { editable.Mode(GridEditMode.PopUp).TemplateName("Applyrulepop_New"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                                 .Events(events => events.Error("error_handler"))
+                              .Model(model =>
+                             {
+                                 model.Id(p => p.slno);
+                                 //model.Field(p => p.Select).Editable(false);
+                             })
+                                 // .Create(Create => Create.Action("FileConTempCreateGrid_Save", "ApplyRule"))
+                           .Read(read => read.Action("ApplyRuleGrid_Read", "ApplyRule_New"))
+                             .Update(update => update.Action("EmployeeGrid_Update", "EmployeeMaster"))
+                             ))
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" style="float:right;margin-right:60px" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

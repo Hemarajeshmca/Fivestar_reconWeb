@@ -1,0 +1,101 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model  Recon_Model.user_model
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 50%;
+        font-weight: normal;
+    }
+
+    .form-horizontal .form-group {
+        margin-right: 25px;
+        margin-left: -15px;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+</style>
+<div>
+    <table style="border:1px;">
+        <tr>
+            <td>@Html.Label("User code", new { style = "width:80px;margin-left: 11%;font-size: 14px;font-weight: 600 !important; " })</td>
+            <td>@Html.TextBoxFor(model => model.user_code, new { @readonly = "readonly", style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%;" })</td>
+            <td>@Html.Label("User Name", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:20%;" })</td>
+            <td>@Html.TextBoxFor(model => model.user_name, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%", @readonly = "readonly" })</td>
+            <td><input id="user_gid" name="user_gid" type="hidden"></td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Address", new { style = "width:80px;margin-left: 11%;font-size: 14px;font-weight: 600 !important; " })</td>
+            <td>@Html.TextBoxFor(model => model.user_address, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; ", @readonly = "readonly" })</td>
+            <td>@Html.Label("Contact No", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:20%;" })</td>
+            <td>@Html.TextBoxFor(model => model.user_contact_no, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%", @readonly = "readonly" })</td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("Email Id", new { style = "width:80px;margin-left: 11%;font-size: 14px;font-weight: 600 !important; " })</td>
+            <td>@Html.TextBoxFor(model => model.user_emailid, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; ", @readonly = "readonly" })</td>
+            <td>@Html.Label("City", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:20%;" })</td>
+            <td>@Html.TextBoxFor(model => model.city_name, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%", @readonly = "readonly" })</td>
+        </tr>
+
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("State", new { style = "width:80px;margin-left: 11%;font-size: 14px;font-weight: 600 !important; " })</td>
+            <td>@Html.TextBoxFor(model => model.state_name, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 2%; ", @readonly = "readonly" })</td>
+            <td>@Html.Label("Pincode", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:20%;" })</td>
+            <td>@Html.TextBoxFor(model => model.pin_code, new { style = "height:25px;width:175px;font-weight:normal;margin-left:1%", @readonly = "readonly" })</td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("User Type", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left: 11%; " })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                             .Name("user_type")
+                                             .DataTextField("user_type_desc")
+                                             .DataValueField("user_type")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal", @readonly = "readonly" })
+                                             .DataSource(source => { source.Read(read => { read.Action("usertypedrop", "Admin"); }).ServerFiltering(true); })
+                )
+            </td>
+
+            <td>@Html.Label("User Group", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left: 18%; " })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                             .Name("usergroup_gid")
+                                             .DataTextField("usergroup_code")
+                                             .DataValueField("usergroup_gid")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal", @readonly = "readonly" })
+                                             .DataSource(source => { source.Read(read => { read.Action("usergroupdrop", "Admin"); }).ServerFiltering(true); })
+                )
+            </td>
+        </tr>
+        <tr style="height:20px"></tr>
+        <tr>
+            <td>@Html.Label("User Status", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left: 11%; " })</td>
+            <td>
+                @(Html.Kendo().DropDownList()
+                                             .Name("user_status")
+                                             .DataTextField("active_status_desc")
+                                             .DataValueField("user_status")
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal"})
+                                             .DataSource(source => { source.Read(read => { read.Action("userStatusdrop", "Admin"); }).ServerFiltering(true); })
+                )
+            </td>
+        <tr>
+</table>
+</div>
+
+
+
+
+

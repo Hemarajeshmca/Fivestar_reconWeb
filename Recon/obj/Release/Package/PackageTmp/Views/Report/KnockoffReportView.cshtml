@@ -1,0 +1,214 @@
+﻿@*@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 70%;
+            font-weight: normal;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+    </style>
+    <style>
+        .k-edit-form-container .k-edit-buttons {
+            visibility: hidden !important;
+        }
+    </style>
+</head>*@
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:600px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Knock Off Details</h3>
+                        </div>  
+                        <div style="padding-top:10px">
+                            <a href="../Report/KnockoffReport" type="button" style="float:right;margin-right:60px" id="Match" class="btn btn-primary">Back</a>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12" style="padding-left:30px">
+                                <div class="panel-body" style="padding-right:50px;width:100%;max-height:100%">
+                                    <div class="col-md-12">
+                                        <div id="Maingrid" class="col-md-12" style="margin:auto;height:420px;top:10px;width:100%;"> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+@*</html>*@
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        var baseUrl = (window.location).href; // You can also use document.URL
+        //var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var koopId = 1;
+        var table_name = "recon_trn_vkodtl"
+        var str1 = "and";         
+        var reportcondition;
+        reportcondition = str1 + " "+ "ko_gid = " + "'" + '' + koopId + '' + "'"
+        $.ajax({
+            type: "POST",
+            data: '{table_name: "' + table_name + '",condition:  "' + reportcondition + '" }',
+            url: "/Report/ReportKnockOFFGrid_ReadVIEW",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+
+                    if (key == "Collection Center Name") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            // type: val
+                            //footerTemplate: "Total",
+                            attributes: { style: "text-align: left;" }
+                        });
+                    }
+                    else {
+                        if (key != "Collection Center Name")
+                            columns.push({
+                                field: entryIndex,
+                                title: key,
+                                // type: val
+
+
+                            });
+
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 350,
+                    navigatable: true,
+                    groupable: true,
+                    editable: false,
+                    sortable: true,
+                    scrollable: true,
+                    filterable: true,
+                    pagable: false,
+                    resizable: true,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    excel: {
+                        fileName: "Collected milk.xlsx",
+                        filterable: true,
+                        allPages: false
+                    },
+                    rows: viewModel
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+                //$("#example").remove();
+                //$('#Maingrid').append('<div id="example" style="position:inherit";width: 80%; class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:75%"></table></div>');
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+
+                kendo.bind($("#grid"), viewModel);
+
+                var grid = $("#grid").data("kendoGrid");
+                for (var i = 0; i < grid.columns.length; i++) {
+                    if (i != grid.columns.length) {
+                        grid.autoFitColumn(i);  //autofit each column.
+                    }
+                }
+
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+       
+    });   
+
+</script>
+
+
+

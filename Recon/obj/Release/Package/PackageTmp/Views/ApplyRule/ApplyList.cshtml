@@ -1,0 +1,251 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ApplyRule_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+         .k-button.k-button-icontext.k-grid-add
+        {
+            background:green;
+            color:white;
+        }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+
+   
+
+     
+         .k-webkit {
+            overflow: hidden !important;
+        }
+       
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        } 
+        span.k-icon.k-filter {
+            position: relative !important;
+            top: 7px !important;
+        }  
+        span.k-link {
+            color: #fff !important;   
+        }
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }     
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">  
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Apply Rule</h3>
+                        </div>                      
+                        @using (Html.BeginForm("ApplyList", "ApplyRule", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @*<a class="k-button k-button-icontext k-grid-add" href="../ApplyRule/ApplyRule"><span class="k-icon k-add"></span></a>*@  
+                                <a class="k-button k-button-icontext k-grid-add" style="width:3%" href="../ApplyRule/ApplyRule"><span>+</span></a>                             
+                                @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyList1")
+                                    .HtmlAttributes(new { style = "width:100%;height:430px;line-height:2em;font-weight:normal" })
+                                   // .ToolBar(toolbar => toolbar.Create().Text(""))
+                                    .Columns(columns =>
+                                        {
+                                            columns.Bound(m => m.ReconName).Title("Recon Name").Width(80);
+                                        columns.Bound(m => m.Recontype).Title("Recon Type").Width(50);
+                                        columns.Bound(m => m.supporting_file).Title("Supporting File").Width(50);
+                                       
+                                        //columns.Bound(m => m.Select).Title("Edit").ClientTemplate("<input type='checkbox'  #= Select == true ? checked='checked' : '' # />").Width(10);
+                                        //columns.Template(p => { }).ClientTemplate("<a type='button' href='../ApplyRule/ApplyRule' class='k-button k-button-icontext '><span class='k-icon k-edit'></span>Edit</a>").Width(100).Title("Edit");
+                                        columns.Command(command =>
+                                        {
+                                            command.Custom("Edit").Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                            command.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("viewDetails");
+                                            command.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("ApplyruleListdel");
+                                        }).Title("Action").Width(30);
+                                        })
+                                    .Editable(editable =>
+                                        { editable.Mode(GridEditMode.PopUp).TemplateName("ApplyRuleView"); })
+                                    .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                    .Filterable()
+                                    .Sortable()
+                                    .Scrollable()
+                                    .Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(10)
+                                    //.Events(events => events.Error("error_handler"))
+                                    .Model(model => model.Id(p => p.Accountmode))
+                                   
+                                    .Read(read => read.Action("ApplyRuleGrid_Readlist", "ApplyRule"))
+                                  
+                                    ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("#tabs1").tabs();
+        $("#ApplyList1").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#ApplyList1").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+    });
+    function editDetails(e) {
+        debugger
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.listslno;
+        location.href = "@Url.Action("", "ApplyRule/ApplyRule")?Id=" + id
+    }
+    function viewDetails(e) {
+        debugger;
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.listslno;
+        location.href = "@Url.Action("", "ApplyRule/ApplyRule")?Id=?View=" + id
+    }
+    function onRequestEnd(e) {
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: '',
+                    type: 'green',
+                });
+                setTimeout(function () {
+
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: '',
+                    type: 'green',
+                })
+                setTimeout(function () {
+
+                    window.location.reload(1);
+                }, 2000);
+            }
+        }
+    }
+
+    function ApplyruleListdel() {
+        debugger;
+        var grid = $("#ApplyList1").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var listslno = (model.listslno);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ApplyRulelist_Delete", "ApplyRule")',
+                        data: "{ listslno:'" + listslno + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+</script>
+
+
+

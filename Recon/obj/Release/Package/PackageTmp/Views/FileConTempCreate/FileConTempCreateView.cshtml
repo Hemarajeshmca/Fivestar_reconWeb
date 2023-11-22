@@ -1,0 +1,296 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.FileConTemp_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        span.k-link {
+            color: #fff !important;
+            position: relative;  
+            top:0px;          
+        }
+        a.k-link {
+            position: relative;
+            top: 0px;
+        }
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+         .k-state-active {
+            display: block;
+        }
+           .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">File Conversion Template</h3>
+                        </div>
+                        @using (Html.BeginForm("TemplateList", "TemplateCreate", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div >
+                                <a class="k-button k-button-icontext k-grid-add" href="../FileConTempCreate/FileConTempCreate?mode=Add,Id=0"><span class="k-icon k-add"></span></a>
+                                @(Html.Kendo().Grid<Recon_Model.FileConTemp_model>().Name("FileTemplate")
+                                    .HtmlAttributes(new { style = "width:100%;height:420px;line-height:2em;font-weight:normal" })
+                                //.ToolBar(toolbar => toolbar.Create().Text("Add New "))
+                                    .Columns(columns =>
+                                        {
+                                            columns.Bound(m => m.Template_gid).Title("Template_gid").Width(0).Hidden();
+                                            columns.Bound(m => m.Template_name).Title("Template Name").Width(80);
+                                            columns.Bound(m => m.FileType_desc).Title("File Type").Width(80);
+                                            columns.Bound(m => m.Template_type_desc).Title("Template Type").Width(80);
+                                            columns.Bound(m => m.Active_status).Title("Status").Width(30);
+                                            //columns.Command(command => command.Custom("Edit").Click("editDetails")).Title("Action").Width(120);
+                                            columns.Command(command =>
+                                            {
+                                                command.Custom("Edit").Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                                command.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("viewDetails");
+                                                command.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                            }).Title("Action").Width(30);
+                                        })
+                                    .Editable(editable =>
+                                        { editable.Mode(GridEditMode.PopUp).TemplateName("FileTempDetails"); })
+                                    .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                    .Filterable()
+                                    .Sortable()
+                                    .Scrollable()
+                                    .Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(20)
+                                        //.Events(events => events.Error("error_handler"))
+                                    .Model(model => model.Id(p => p.Template_gid))                                 
+                                    .Read(read => read.Action("FileConTempCreateGrid_Read", "FileConTempCreate"))                                   
+                                    ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Recon',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    function grididdetails() {
+        debugger;
+        var id = 0;
+        var mode = "Add";
+        location.href = "@Url.Action("", "FileConTempCreate/FileConTempCreate")?Id=?Add=" + id, +mode
+    }
+    function editDetails(e) {
+        debugger;
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.id;
+        var mode = "Edit";
+        location.href = "@Url.Action("", "FileConTempCreate/FileConTempCreate")?Id=?Edit=" + id, +mode
+      
+    }
+
+    function viewDetails(e) {
+        debugger;
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.id;        
+        location.href = "@Url.Action("", "FileConTempCreate/FileConTempCreate")?Id=?View=" + id       
+    }
+ 
+
+    $(document).ready(function () {
+        
+        $("#FileTemplate").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#FileTemplate").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+       
+        $("#tabs").tabs();
+        $("#tabstext").tabs();
+        $("#tabscsv").tabs();
+        $("#tabstext").hide();
+        $("#tabscsv").hide();
+        $("#sepator").hide();
+    
+    })
+
+    function onRequestEnd(e) {
+        
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been created successfully!',
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been Edited successfully!',
+                    type: 'green',
+                })
+                setTimeout(function () {
+                    
+                    window.location.reload(1);
+                }, 2000);
+            }
+        }
+    }
+
+    function myDeleteJs() {
+        debugger;
+        var grid = $("#FileTemplate").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var datapass = {};
+        var Template_gid = (model.Template_gid);
+        //var Csv_Columns = (model.Csv_Columns);
+        //var Hflag = (model.Hflag);
+        //var Acflag = (model.Acflag);
+        //var Blflag = (model.Blflag);
+        //var Transaction_Amount_type = (model.Transaction_Amount_type);
+        //var Balance_Amount_Type = (model.Balance_Amount_Type);
+        //var Tran_date_format = (model.Tran_date_format);
+
+      
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("FileConTemp_Delete", "FileConTempCreate")',
+                        data: "{ Template_gid:'" + Template_gid + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    function filetype() {
+        
+        var code1 = $('#code1').data("kendoDropDownList").value();
+        if (code1 == "Csv") {
+            $("#tabs").hide();
+            $("#tabstext").hide();
+            $("#tabscsv").show()
+            $("#sepator").show();
+        } else if (code1 == "Excel") {
+            $("#tabs").show();
+            $("#tabstext").hide();
+            $("#tabscsv").hide()
+            $("#sepator").hide();
+        } else {
+            $("#tabs").hide();
+            $("#tabstext").show();
+            $("#tabscsv").hide()
+            $("#sepator").hide();
+        }
+    }
+</script>

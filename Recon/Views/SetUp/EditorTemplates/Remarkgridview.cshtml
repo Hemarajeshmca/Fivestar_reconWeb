@@ -1,0 +1,150 @@
+﻿
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ManualMatchoff_model
+
+
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 50%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 120%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+</style>
+<style>
+    .error_show {
+        color: red;
+        margin-left: 10px;
+    }
+
+    .k-state-active {
+        display: none;
+    }
+
+    a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+        background: transparent;
+        border-color: transparent;
+        color: #357ab8;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+</style>
+
+
+<style>
+    .k-edit-form-container .k-edit-buttons {
+        visibility: hidden !important;
+    }
+</style>
+
+
+<div>
+    <div class="container" id="pop_match" style="margin-left:13px;">
+        <div class="row" style="margin-right:182px;margin-left:25px;">
+
+            <div class=" col-sm-3" >
+                <label for="Tranid" class="title">Sl NO</label>
+                @Html.TextBoxFor(model => model.SlNo, new { style = "width:100%;", id = "Trangid" ,@class="form-control"})
+                @*<input class="text-box single-line" id="Parent_MasterSyscode" name="Parent_MasterSyscode" type="text" value="" data-bind="value:Parent_MasterSyscode">*@
+
+            </div>
+
+            <div class="col-sm-3" >
+                <label class="title">A/C  NO</label><br />
+                @Html.TextBoxFor(model => model.acc_no, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="mastersyscode" name="reversl_flag" value="">*@
+            </div>
+
+            <div class="col-sm-3">
+                <label class=" title">TranDate</label><br />
+                @Html.TextBoxFor(model => model.TranDate, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_code" name="group_flag" value="" style="margin-left: 10px;" checked>*@
+            </div>
+
+            
+
+            
+            
+
+            </div>
+
+        <div class="row" style="margin-right:182px;margin-left:25px;">
+            <div class="col-sm-3">
+                <label class=" title">A/C Mode</label><br />
+                @Html.TextBoxFor(model => model.Accountmode, new { style = "width:100%;", @class = "form-control" })
+
+            </div>
+            <div class="col-sm-3">
+                <label class=" title">Amount</label><br />
+                @Html.TextBoxFor(model => model.amount, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_Name" name="status2" value="" style="margin-left: 10px;">*@
+            </div>
+
+            <div class="col-sm-3">
+                <label class=" title">ExcptAmount</label><br />
+                @Html.TextBoxFor(model => model.excp_amount, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_Name" name="status2" value="" style="margin-left: 10px;">*@
+            </div>
+
+
+
+        </div>
+        <div class="row" style="margin-right:182px;margin-left:25px;">
+            <div class="col-sm-3">
+                <label class=" title">Particulars</label><br />
+                @Html.TextBoxFor(model => model.Particulars, new { style = "width:100%;", @class = "form-control" })
+
+            </div>
+         </div>
+        <div class="row">
+            <div class="col-sm-3" style="margin-top: 23px;margin-bottom:-51px;margin-right:-36px">
+
+                <div style="margin-bottom:10px;margin-left:500px;">
+                    <button type="button" id="btn_close" onclick="CloseQcdpopup()"  style="margin-left:-307px;margin-top:-107px;" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+                </div>
+            </div>
+           
+
+        </div>
+    </div>
+
+</div>
+

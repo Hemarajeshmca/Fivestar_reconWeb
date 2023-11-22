@@ -1,0 +1,230 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .k-header.k-grid-toolbar.k-grid-top {
+            background: none;
+        }
+
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+        .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+         .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        span.k-icon.k-filter {
+            position: relative !important;
+            top: 6px;
+        }
+        span.k-link {
+        color: #fff !important;
+
+    }
+          a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Dedup Rule</h3>
+
+                        </div>   
+                        @*<div>
+                            <select name="cars" id="cars">
+                                <option value="select">select</option>
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                            <input type="text" id="ded" value="" />
+                            <button id="dedfor" onclick="onchange_add()">Add</button>
+                            <button id="dedf" onclick="onchange_reset()">Reset</button>
+                        </div>*@
+                        <div class="form-group">
+                            @using (Html.BeginForm("DedupeRule", "DedupeRuleView", FormMethod.Post, new { @id = "form1" }))
+                            {
+                                <div>
+                                    <a class="k-button k-button-icontext k-grid-add" href="../DedupeRule/DedupeRule"><span class="k-icon k-add"></span></a> 
+                                    @(Html.Kendo().Grid<Recon_Model.DedupeRule_model>().Name("DedperuleList")
+                                        .HtmlAttributes(new { style = "height:450px;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                        .Columns(columns =>
+                                            {
+                                            columns.Bound(m => m.Deduperule).Title("Dedup Rule").Width(50);
+                                            columns.Bound(m => m.status).Title("Status").Width(100);                                          
+                                            //columns.Template(p => { }).ClientTemplate("<a type='button' href='../DedupeRule/DedupeRule' class='k-button k-button-icontext ' onclick='data()'><span class='k-icon k-edit'></span>Edit</a>").Width(100).Title("Edit");
+                                            columns.Command(command =>
+                                            {
+                                                command.Custom("Edit").Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                                command.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                                command.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                            }).Title("Action").Width(120);
+                                            })
+                                        .Editable(editable =>
+                                            { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRuleEdit"); })
+                                        .Pageable(pageable => pageable
+                                            .Refresh(true)
+                                            .PageSizes(true)
+                                            .ButtonCount(5))
+                                        .Filterable()
+                                        .Sortable()
+                                        .Scrollable()
+                                        .Resizable(resize => resize.Columns(true))
+                                        .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(20)
+                                        .Events(events => events.Error("error_handler"))
+                                        .Model(model =>
+                                            {
+                                            model.Id(p => p.slnolist);
+                                            model.Field(p => p.Deduperule).Editable(false);
+                                            model.Field(p => p.Select).Editable(false);
+                                            })                                        
+                                        .Read(read => read.Action("DedupeGrid_ReadList", "DedupeRule"))
+                                        
+                                        ))
+                                </div>
+                            }
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({               
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    
+   
+    function editDetails(e) {
+        debugger
+        var dataItem = this.dataItem($(e.target).closest("tr"));
+        var id = dataItem.slno;
+        location.href = "@Url.Action("", "DedupeRule/DedupeRule")?Id="+id
+    }
+  
+    function data() {
+        var grid = $("#DedperuleList").data("kendoGrid");
+        var selectedItem = grid.dataItem(grid.select());
+        id = selectedItem.slno;
+        fullname = selectedItem.FullName;
+        if (e.type == "edit") {
+            $.ajax({
+                type: "POST",
+                data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                /// url: "/DedupeRule/DedupeGrid_ListEdit",
+                url: '@Url.Action("DedupeGrid_ListEdit", "DedupeRule")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response2) {
+
+                },
+                error: function (er) {
+
+                }
+            });
+        }
+    }
+    $(document).ready(function () {
+        $("#DedperuleList").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#DedperuleList").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#period_To").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+
+    });
+
+    function onRequestEnd(e) {        
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response,
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    
+                    window.location.reload(1);
+                }, 2000);
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response,
+                    type: 'green',
+                })
+                setTimeout(function () {
+                    
+                    window.location.reload(1);
+                }, 2000);
+            }
+        }
+    }
+   
+</script>
+

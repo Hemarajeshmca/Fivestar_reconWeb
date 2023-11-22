@@ -1,0 +1,787 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+
+    <style>
+        .btn-success {
+            padding: 2px 16px 4px 10px;
+        }
+
+        .k-popup.k-list-container {
+            width: 210px !important;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .balance {
+            color: blue;
+        }
+
+        .total {
+            color: red;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        /*a.k-link {
+            color: #fff !important;
+        }*/
+        /*.k-grid-header th.k-header > .k-link {*/
+        /*color: #fff;
+            font-size: 10px;
+        }*/
+
+        .panel-body {
+            padding: 0px !important;
+        }
+
+        /*.k-grid td {
+            font-size: 17px;
+        }*/
+
+        /*.k-grid-header th.k-header > .k-link {
+            font-size: 14px;
+        }*/
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-webkit {
+            overflow: hidden !important;
+        }
+
+        .k-pager-sizes {
+            display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+        }
+
+        .Recon_tallied_no {
+            pointer-events: none;
+            color: red;
+        }
+
+        .jconfirm.jconfirm-light .jconfirm-box {
+            width: 430px;
+        }
+
+            .jconfirm.jconfirm-light .jconfirm-box .jconfirm-buttons {
+                margin-top: -26px;
+            }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Recon-Between A/cs</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                @*<label for="trandate" class="title">Tran Date</label>*@
+                                @Html.Label("Tran Date", new { style = "font-size: 14px;font-weight: 600 !important; " })
+                                <input class="cusDate1" data-role='datepicker' id="trandate" name="trandate" style="width:90%" />
+
+                            </div>
+                            @*<div class="col-sm-3">
+
+                                    <label for="filetype1" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                            .Name("ReconName_id")
+                                            .HtmlAttributes(new { style = "width:180px" })
+                                            .DataTextField("ReconName")
+                                            .DataValueField("ReconName_id")
+                                           .Template("<input type='checkbox' name='cb'  value='#:data.ReconName#' /> #:data.ReconName#")
+                                            .Events(e => e.Select("onSelect"))
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("getuserrecon_type", "Report");
+                                                    // read.Action("ApplyRecontype_drop", "ApplyRule");
+                                                });
+                                            }))
+
+                                </div>*@
+                            <div class="col-sm-6">
+                                @*<button type="button" id="Runprocess" onclick="validation()" class="btn btn-success" style="margin-top: 25px;margin-left:-18px;"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>&nbsp;*@
+                                <button type="button" style="margin-top:24px;margin-left:5px;" id="selectall" onclick="selectallrules()" value="selectall" class="btn btn-primary">&nbsp;Select All</button>
+                                <button type="button" id="month_brsExcel" onclick="monthbrs()" class="btn btn-primary" style="margin-top: 25px;margin-left:1px;">Month Brs&nbsp;</button>
+                                @*<button type="button" id="Daily_brsExcel" onclick="Foldergrid()" class="btn btn-primary" style="margin-top: 24px;">Folders<i class=" fa fa-file-excel-o" aria-hidden="true" style="margin-left:10%;"></i>&nbsp;</button>*@
+                                    @*<button type="button" style="margin-top:24px;margin-left:5px;" id="selectall" onclick="selectallrules()" value="selectall" class="btn btn-primary">&nbsp;Select Rules</button>
+                                    <button type="button" style="margin-top:24px;margin-left:5px;" onclick="reconpercent()" id="selectall" value="" class="btn btn-primary">&nbsp;Recon percentage</button>
+                                    <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary" style="margin-top: 24px;"><i class=" fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>*@
+                            </div>
+                        </div>
+                        <div class="row" style="padding-bottom:20px;">
+                            <div class="col-sm-12">
+                                <div class="panel-body" style="max-height:100%;margin-top:6px;margin-left:-18px;width:100% !important">
+                                    <div class="col-md-12" id="Process">
+                                        <div class="form-group">
+
+                                            <div>
+                                                @(Html.Kendo().Grid<Recon_Model.Report_model>().Name("ReportBrs")
+                        .HtmlAttributes(new { style = "height:360px;width:104%;font-size:14px;" })
+                                                        //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                        .Columns(columns =>
+                            {
+                                columns.Bound(m => m.Select).HeaderHtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("<input type='checkbox' id='checkbox' name='checkbox' style='margin-left:46%;' onclick = 'Check_Click(this)' #= Select == true ? checked='checked' : '' # />").Width(10);
+                                columns.Bound(m => m.reconname).Title("Recon Name").Width(70);
+                                columns.Bound(m => m.recon_gid).Title("Reconid").Width(10).Hidden();
+                                columns.Bound(m => m.recon_tallied).Title("Recon Tallied").Width(30);
+                                columns.Bound(m => m.glcode).Title("GlCode").Width(30);
+
+                            })
+                      .Editable(editable =>
+                                            { editable.Mode(GridEditMode.PopUp).TemplateName(""); })
+
+                      //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                      .Excel(excel => excel
+                         .AllPages(true)
+                         .FileName("Recon-Between A/cs.xlsx"))
+                                                        //.Sortable()
+                             .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                     .Filterable()
+                                     .Sortable()
+                                     .Events(e => e.DataBound("onDataBound"))
+                                     .Scrollable()
+
+                                     .Resizable(resize => resize.Columns(true))
+                                     .DataSource(dataSource => dataSource
+                                     .Ajax()
+                                     .PageSize(50)
+
+
+
+                     .Model(model =>
+                        {
+                            model.Id(p => p.recon_gid);
+                        })
+
+                    .Read(read => read.Action("ReportreportBrs_Read_new", "Report"))
+                     ))
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                    <div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="row" style="margin-top:-3%;">
+                                <div class="col-sm-3">
+
+                                </div>
+                                <div class="col-sm-3">
+
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" id="Amount_tally" onclick="AmountTally('Y')" value="Y" class="btn btn-primary" style="margin-left:44%" ;>&nbsp;Recon Tallied</button>&nbsp;
+                                    <button type="button" id="Amount_not_tally" onclick="AmountTally('N')" value="N" class="btn btn-primary">Recon NotTallied&nbsp;</button>
+                                </div>
+
+
+                            </div>*@
+                    </div>
+
+                </div>
+
+
+
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+
+    (function ($) {
+        var MultiSelectBox = window.kendo.ui.DropDownList.extend({
+            _select: function (li) { },//Prevents highlighting
+            _blur: function () { },//Prevents auto close
+        });
+
+        window.kendo.ui.plugin(MultiSelectBox);
+    })(jQuery);
+
+    function onSelect(e) {
+        debugger;
+
+        var cbs = document.getElementsByName("cb");
+        var checkboxes = document.getElementsByTagName('input');
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var id = ddl.element.attr("ReconName_id");
+        multiselect();
+        var item = e.item;
+        var index = item.index();
+        if (index == 0) {
+            for (var i = 1; i < cbs.length; i++) {
+                var selectAll = cbs[0].checked;
+                if (cbs[0].checked) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = true;
+                        }
+                    }
+                    multiselect();
+                }
+
+                else {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = false;
+                        }
+                    }
+                    multiselect();
+                }
+            }
+        }
+
+    }
+
+    function multiselect() {
+        debugger;
+        // var dataItem = this.dataItem(e.item);
+        var ddl = $("#ReconName_id").data("kendoDropDownList");
+        var isAllChecked = $('#cb').prop("checked");
+        var cbs = document.getElementsByName("cb");
+        var display;
+
+        var list = [];
+        for (var i = 1; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                list.push(cbs[i].value);
+            }
+
+        }
+
+
+        if (list.length == 0) {
+            display = "-- SelectAll --";
+
+            $("#ReconAttr").html("Recon - All");
+        }
+        else {
+
+            display = list.join(", ");
+            $("#ReconAttr").html("Recon - " + display + "");
+        }
+
+        ddl.text(display);
+
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+
+    $(document).ready(function () {
+        kendodate_format();
+
+        $("#trandate").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        //$("#period_to").kendoDatePicker({
+        //    value: new Date(),// sets max date
+        //    format: "dd-MM-yyyy"
+        //});
+        getslno();
+        $("#exportExcel").hide();
+    });
+    function exportExcel() {
+        $("#ReportBrs").getKendoGrid().saveAsExcel();
+    }
+    function getFormated_StringDate(date) {
+        debugger;
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + " " + d[0];
+        }
+    }
+    function getFormated_StringDate12(date) {
+        debugger;
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            var d1 = new Date();
+            var n = d1.toLocaleTimeString('en-US', { hour12: false });
+            return d[2] + "-" + d[1] + "-" + d[0] + " " + n;
+        }
+    }
+
+ 
+    function monthbrs() {
+        debugger;
+        var Attribid1 = [];
+        var Attribid = [];
+        var arrstring = "";
+        var Tran_Date = getFormated_StringDate($("#trandate").val());
+        var filetime = getFormated_StringDate12($("#trandate").val());
+        var Config_MetricType = $("#ReportBrs").data("kendoGrid");
+        var reconarray = Config_MetricType.dataSource.data();
+        var no_of_recons = "";
+        var cbs = document.getElementsByName("checkbox");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].recon_gid;
+                Attribid1.push(item);
+            }
+
+        }
+
+        for (var i = 0; i < Attribid1.length; i++) {
+            tmp = Attribid1[i];
+
+            if (tmp !== '0') {
+                Attribid.push(tmp);
+            }
+        }
+        arrString = Attribid.join(", ");
+
+        if (arrString == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+
+        window.location.href = '@Url.Action("Monthendreportdownload", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + arrString + '&Filetime=' + filetime + ' ';
+        @*$.ajax({
+            type: "POST",
+            url: '@Url.Action("MonthBRS_Download", "Report")',
+            dataType: "json",
+            data: '{TranDate:"' + Tran_Date + '",Recon_gid:"' + recon_gid + '"}',
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                dataone = Data1;
+
+
+            }
+        });*@
+    }
+    function Dailybrs() {
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+
+        var Tran_Date = getFormated_StringDate($("#trandate").val());
+        var Config_MetricType = $("#ReportBrs").data("kendoGrid");
+        var reconarray = Config_MetricType.dataSource.data();
+        var no_of_recons = "";
+        var cbs = document.getElementsByName("checkbox");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].recon_gid;
+                Attribid.push(item);
+            }
+
+        }
+        arrString = Attribid.join(", ");
+
+        if (arrString == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+
+        window.location.href = '@Url.Action("DailyBRS_Download_1", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + arrString + '';
+    }
+    function validation() {
+        debugger;
+        var msg = "";
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+
+        if ($("#trandate").val() != "") {
+
+        }
+        else {
+            msg += "Select Tran Date";
+        }
+
+        if ($("#ReconName_id").val() != "") {
+
+        }
+        else {
+            msg += " Select Recon Name";
+        }
+
+        if (recon_gid == "0" || recon_gid == undefined || recon_gid == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Runprocess() {
+        debugger;
+        $("#ReportBrs").data("kendoGrid").dataSource.read();
+        $("#exportExcel").show();
+    }
+
+    function getslno() {
+        var trandate = $('#trandate').val();
+        var formatted_trandate = getFormated_StringDate(trandate);
+        var Recon_gid = $("#ReconName_id").val();
+        if (Recon_gid == "") {
+            Recon_gid = 0;
+        }
+        return { trandate: formatted_trandate, Recon_gid: Recon_gid }
+    }
+    function AmountTally(result) {
+        var _recon_gid = $("#ReconName_id").val();
+        var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+        var talliedflag = result;
+        debugger;
+        if (result == "Y") {
+            $.confirm({
+                icon: 'fa fa-warnings',
+                title: 'Recon Tallied',
+                autoClose: 'cancel|10000',
+                //theme: 'dark',
+                animationSpeed: 700,
+                content: 'Are you sure you want to continue?',
+                type: 'blue',
+                buttons: {
+                    confirm: function () {
+                        debugger;
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            url: '@Url.Action("Report_recontallied", "Report")',
+                            data: "{recon_gid:'" + _recon_gid + "',recon_tallied:'" + talliedflag + "',usercode:'" + user_code + "'}",
+                            success: function (response) {
+                                debugger;
+                                if (response[1] > 0) {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'green',
+                                        animationSpeed: 700,
+                                    });
+
+                                }
+                                else {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'blue',
+                                        animationSpeed: 700,
+                                    });
+                                    preventCloseOnSave = true;
+                                }
+                            },
+                        });
+
+
+                    },
+
+
+                    cancel: function () {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Cancelled',
+                            //  theme: 'dark',
+                            content: 'Cancelled.!',
+                            type: 'blue',
+                            // animationSpeed: 700,
+                        });
+
+                    }
+                },
+            });
+        }
+        else {
+            $.confirm({
+                icon: 'fa fa-warnings',
+                title: 'Recon Not Tallied',
+                autoClose: 'cancel|10000',
+                //theme: 'dark',
+                animationSpeed: 700,
+                content: 'Are you sure you want to continue?',
+                type: 'blue',
+                buttons: {
+                    confirm: function () {
+                        debugger;
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            url: '@Url.Action("Report_recontallied", "Report")',
+                            data: "{recon_gid:'" + _recon_gid + "',recon_tallied:'" + talliedflag + "',usercode:'" + user_code + "'}",
+                            success: function (response) {
+                                debugger;
+                                if (response[1] > 0) {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'green',
+                                        animationSpeed: 700,
+                                    });
+
+                                }
+                                else {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'blue',
+                                        animationSpeed: 700,
+                                    });
+                                    preventCloseOnSave = true;
+                                }
+                            },
+                        });
+
+
+                    },
+
+
+                    cancel: function () {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Cancelled',
+                            //  theme: 'dark',
+                            content: 'Cancelled.!',
+                            type: 'blue',
+                            // animationSpeed: 700,
+                        });
+
+                    }
+                },
+            });
+        }
+    }
+    function Check_Click(objRef) {
+        debugger;
+        if (objRef.checked) {
+            objRef.parentElement.parentElement.style.backgroundColor = '#357ab8';
+            objRef.parentElement.parentElement.style.color = 'white';
+            //row.style.backgroundColor = "aqua";
+        }
+
+        else {
+            objRef.parentElement.parentElement.style.backgroundColor = 'white';
+            objRef.parentElement.parentElement.style.color = 'black';
+        }
+
+    }
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].recon_tallied == "Yes") {
+
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_yes");
+            }
+
+            else {
+                // $("#Recontype").data("kendoGrid").setOptions({ editable: false });
+                // this.closeCell();
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_no");
+            }
+        }
+    }
+    function reconpercent() {
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+        var Tran_Date = getFormated_StringDate12($("#trandate").val());
+        var Config_MetricType = $("#ReportBrs").data("kendoGrid");
+        var reconarray = Config_MetricType.dataSource.data();
+        var no_of_recons = "";
+        var cbs = document.getElementsByName("checkbox");
+
+        for (var i = 0; i < cbs.length; i++) {
+            if (cbs[i].checked) {
+                var item = reconarray[i].recon_gid;
+                Attribid.push(item);
+            }
+
+        }
+        arrString = Attribid.join(", ");
+
+        if (arrString == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+
+        window.location.href = '@Url.Action("Reconpercentage", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + arrString + '';
+
+    }
+
+    function selectallrules() {
+        debugger;
+        var selectall = document.getElementById('selectall');
+        var _selectall = selectall.innerText;
+        //var Allrules = $("#Allrules").val();
+
+        $.confirm({
+            icon: 'fa fa-warnings',
+            title: 'Selecting Rule',
+            autoClose: 'cancel|10000',
+            //theme: 'dark',
+            width: 250,
+            animationSpeed: 700,
+            content: '',
+            type: 'blue',
+            buttons: {
+                SelectAll: function () {
+                    debugger;
+                    debugger;
+                    //$("#Allrules").val("true");
+
+                    var cbs = document.getElementById("checkbox");
+                    var grid = $("#ReportBrs").data("kendoGrid");
+                    var checkedrows = grid._data.length;
+                    var overallinput = checkedrows + 1;
+                    var checkboxes = document.getElementsByTagName('input');
+
+                    for (var i = 0; i < overallinput; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = true;
+                            checkboxes[i].parentElement.parentElement.style.backgroundColor = '#357ab8';
+                        }
+                    }
+
+
+                },
+
+                UnselectAll: function () {
+                    debugger;
+                    var cbs = document.getElementById("checkbox");
+                    var grid = $("#ReportBrs").data("kendoGrid");
+                    var checkedrows = grid._data.length;
+                    var overallinput = checkedrows + 1;
+                    var checkboxes = document.getElementsByTagName('input');
+
+
+
+                    for (var i = 0; i < overallinput; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            checkboxes[i].checked = false;
+                            checkboxes[i].parentElement.parentElement.style.backgroundColor = 'white';
+                            checkboxes[i].parentElement.parentElement.style.color = 'black';
+                        }
+                    }
+                },
+
+                Inverse: function () {
+                    debugger;
+                    var cbs = document.getElementById("checkbox");
+                    var grid = $("#ReportBrs").data("kendoGrid");
+                    var checkedrows = grid._data.length;
+                    var overallinput = checkedrows + 1;
+                    var checkboxes = document.getElementsByTagName('input');
+                    for (var i = 0; i < overallinput; i++) {
+                        if (checkboxes[i].type == 'checkbox') {
+                            if (checkboxes[i].checked == true) {
+                                checkboxes[i].checked = false;
+                                checkboxes[i].parentElement.parentElement.style.backgroundColor = 'white';
+                                checkboxes[i].parentElement.parentElement.style.color = 'black';
+                            }
+                            else {
+                                checkboxes[i].checked = true;
+                                checkboxes[i].parentElement.parentElement.style.backgroundColor = '#357ab8';
+                            }
+
+                        }
+                    }
+                },
+
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Rule Cancelled',
+                        //  theme: 'dark',
+                        content: 'Cancelled.!',
+                        type: 'blue',
+                        // animationSpeed: 700,
+                    });
+
+                }
+            },
+        });
+
+    }
+</script>

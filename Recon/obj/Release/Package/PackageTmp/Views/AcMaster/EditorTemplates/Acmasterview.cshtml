@@ -1,0 +1,230 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.AcMaster_model
+
+
+<style>
+
+     .k-window-action
+   {
+    visibility: hidden!important ;
+    
+    margin-left:-220px;
+   
+   }
+   
+    .k-header.k-grid-toolbar.k-grid-top {
+        background: none;
+    }
+
+    .k-button.k-button-icontext.k-grid-add {
+        background: green;
+        color: white;
+    }
+
+    .k-popup.k-list-container {
+        width: 230px !important;
+    }
+
+    .k-pager-sizes {
+        display: inline-flex !important;
+        margin-left: 0% !important;
+        margin-top: -4% !important;
+        width: 24% !important;
+    }
+</style>
+<style>
+    .k-input {
+        background-image: url('textures/highlight.png');
+        /*background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,linear-gradient(to bottom,rgb(51, 122, 183) 0,rgb(51, 122, 183) 100%);
+    background-position: 50% 50%;
+    background-color: #e3e3e3;*/
+        background-color: #e3e3e3 !important;
+    }
+</style>
+<style>
+    .error_show {
+        color: red;
+        margin-left: 10px;
+    }
+
+    .k-state-active {
+        display: none;
+    }
+
+    .k-widget k-grid {
+        width: 60%;
+    }
+
+    span.k-link {
+        color: #fff !important;
+        position: relative;
+        top: 3px;
+        font-size: 12px;
+    }
+
+    a.k-link {
+        font-size: 12px;
+        position: relative;
+        top: 2px;
+    }
+
+    a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+
+    .k-grid td {
+        font-size: 12px;
+    }
+
+    .form-control {
+        height: 32px;
+    }
+</style>
+
+<style>
+    .k-popup.k-list-container {
+        width: 250px !important;
+    }
+
+     .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+</style>
+
+<style>
+   
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 54%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+    div.k-window-content{
+        overflow:inherit;
+    }
+    .k-popup.k-list-container {
+            width: 270px !important;
+        }
+     .k-state-active {
+            display: block;
+        }
+</style>
+<div class="container">
+    <div class="row" style="padding-bottom:5px;padding-left:30px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">A/c No</label>
+            <input class="form-control" id="AccountNo" name="AccountNo" type="text" value="" data-bind="value:AccountNo" style="width:92%;">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">A/c Name&nbsp;</label>
+            <input class="form-control" id="AccountName" name="AccountName" type="text" value="" data-bind="value:AccountName" style=" width:92%;">
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:30px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Category&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                             .Name("Category_name")
+                                             .DataTextField("Category_name")
+                                             .DataValueField("Category_name")
+                                                     .HtmlAttributes(new { style = "height:25px;width: 108%;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasCatdrop", "AcMaster"); }).ServerFiltering(true); })
+                        //.OptionLabel("-----Select------")
+                )
+                @Html.ValidationMessageFor(model => model.Category_name)
+            </div>
+        </div>
+
+        <div class="col-sm-5">
+            <label for="" class="form-label">Responsibility&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                                     .Name("Respon_name")
+                                             .DataTextField("Respon_name")
+                                             .DataValueField("Respon_name")
+                                                             .HtmlAttributes(new { style = "height:25px;width:108%;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasRESdrop", "AcMaster"); }).ServerFiltering(true); })
+                        //.OptionLabel("-----Select------")
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:30px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Dedup Validation&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Dedupvalidateion" name="Dedupvalidateion" value="Y" checked>&nbsp;&nbsp;Required &nbsp;
+                <input type="radio" id="Dedupvalidateion" name="Dedupvalidateion" value="N" style="margin-left: 10px;" checked>&nbsp;&nbsp;Not Required&nbsp;
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Dedup Rule&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                             .Name("Deduperule_id")
+                                             .DataTextField("Dedup_rule")
+                                             .DataValueField("Deduperule_id")
+                                                             .HtmlAttributes(new { style = "height:25px;width:108%;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("AccMasDupdrop", "AcMaster"); }).ServerFiltering(true); })
+                        //.OptionLabel("-----Select------")
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:30px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Recon Type&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="checkbox" name="withinflag" id="withinflag">&nbsp;&nbsp;Within A/c&nbsp;
+                <input type="checkbox" name="Recontype" style="margin-left: 10px;" id="Recontype">&nbsp;&nbsp;Between A/c's&nbsp;
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">A/c Type&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Accounttype" name="Accounttype" value="I" checked>&nbsp;&nbsp;Internal&nbsp;
+                <input type="radio" id="Accounttype" style="margin-left: 10px;" name="Accounttype" value="E">&nbsp;&nbsp;External&nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:30px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Status&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Status" name="Status" value="Y" checked>&nbsp;&nbsp;Active&nbsp;
+                <input type="radio" id="Status" style="margin-left: 10px;" name="Status" value="N">&nbsp;&nbsp;InActive&nbsp;
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    function onDataBound(e) {
+        var defaultItem = e.sender.dataSource.at(10);
+        e.sender.value(defaultItem.ProductID);
+
+    }
+</script>
