@@ -1,0 +1,373 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+  <style>
+
+
+
+  </style>
+
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+          
+       /*.k-pager-wrap k-grid-pager k-widget>k-popup.k-list-container{
+           width:100px !important;
+
+       }*/
+
+
+      .k-popup.k-list-container {
+    width:210px !important;
+    }
+
+               
+
+
+        .k-state-active {
+            display: none;
+        }
+
+          .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+
+       .k-state-active {
+            display: block;
+        }
+
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border" style="margin-left:-9px;">
+                            <h3 class="box-title">Job in progress</h3>
+                            @*<meta http-equiv="refresh" content="5" />*@
+                        </div>
+
+                        <div class="row" style="margin-left:-21px;">
+                            <div class="col-sm-3">
+                                @Html.Label("Process Type", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+
+                                @(Html.Kendo().DropDownList()
+                            .Name("jobtypecode")
+                            .DataTextField("jobtypedesc")
+                            .DataValueField("jobtypecode")
+                                        //.Events(e => e.Change("onfieldchange1").DataBound("dbaliasname1"))
+                                   .HtmlAttributes(new { style = "width:100px", @class = "customclass" })
+                            .DataSource(source => { source.Read(read => { read.Action("DropDownBinding", "FileConTempCreate", new { dropdown = "jobtype", param_1 = "" }); }).ServerFiltering(true); }))
+
+                            </div>
+                            <div class="col-sm-3">
+                                @Html.Label("Initiated From Date", new { style = "font-size: 14px;font-weight: 600 !important; " })
+                                <input class="cusDate1" data-role='datepicker' id="initiate_from" name="initiate_from" data-bind="value:initiate_from" onkeypress="return date_validate(event)" />
+                                <span data-for='valid' class='k-invalid-msg'></span>
+                            </div>
+                            <div class="col-sm-3">
+                                @Html.Label("Initiated To Date", new { style = "font-size: 14px;font-weight: 600 !important; " })<br />
+                                <input class="cusDate1" data-role='datepicker' id="initiate_to" name="initiate_to" data-bind="value:initiate_to" onkeypress="return date_validate(event)" /><span data-for='valid' class='k-invalid-msg'></span>
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" id="btn_search" name="btn_search" class="btn btn-primary" onclick="job_search()" style="margin-top: 25px;">
+                                    &nbsp;Search
+                                </button>
+                            </div>
+                            </div>
+                            
+                        </div>
+                            @using (Html.BeginForm("ProgressView", "Progress", FormMethod.Post, new { @id = "form1" }))
+                            {
+                                <div style="margin-top:-2%;">
+                                    @(Html.Kendo().Grid<Recon_Model.Job_model>().Name("ProgressGrid")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal;height:380px;" })
+                                    //.ToolBar(toolbar => toolbar.Create().Text("Add New Account"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.Job_gid).Title("Job Id").Width(30);
+                                    columns.Bound(m => m.Job_name).Title("Process Name").Width(50);
+                                    columns.Bound(m => m.Job_type_desc).Title("Process Type").Width(40);
+                                    columns.Bound(m => m.Job_start_date).Title("Initiated Date & Time").Width(40);
+                                    //  columns.Bound(m => m.Job_end_date).Title("End Date & Time").Width(100);
+                                    columns.Bound(m => m.Job_initiated_by).Title("Initiated By").Width(40);
+                                    columns.Bound(m => m.Job_status_desc).Title("Status").Width(30);
+                                    columns.Bound(m => m.Job_remark).Title("Remark").Width(150);
+                                    //columns.Command(cmd => { cmd.Edit(); }).Title("Edit").Width(50);
+
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("ProgressGridview"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(15)
+                              .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.Job_gid))
+
+                              .Read(read => read.Action("ReportProcessLog_Read", "Progress").Data("getslno"))
+
+                             ))
+                                </div>
+                            }
+                        </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    window.onload = function () {
+        var btn = document.querySelector("[name='btn_search']");
+        btn.click();
+    }
+
+    //window.addEventListener("load", afterLoaded, false);
+
+    //function afterLoaded() {
+    //    var btn = document.querySelector("[name='btn_search']");
+    //    btn.click();
+    //}
+
+    $(document).ready(function () {
+        
+        kendodate_format();
+      /*  $("#initiate_from").kendoValidator({
+            rules: {
+                date: function (input) {
+                    var d = kendo.parseDate(input.val(), "yyyy-MM-dd");
+                    return d instanceof Date;
+                }
+            }
+        });
+        $("#initiate_to").kendoValidator({
+            rules: {
+                date: function (input) {
+                    var d = kendo.parseDate(input.val(), "yyyy-MM-dd");
+                    return d instanceof Date;
+                }
+            }
+        });*/
+
+        $("#initiate_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#initiate_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+       
+      
+        var grid = $("#ProgressGrid").data("kendoGrid");
+       
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            
+        });
+        debugger;
+        $("#initiate_from").data("kendoDatePicker").value(new Date());
+        $("#initiate_to").data("kendoDatePicker").value(new Date());
+
+        var btn = document.querySelector("[name='btn_search']");
+        //console.log(btn);
+        setInterval(function () {
+            btn.click();
+        }, 3000);
+
+        //Handling of click event
+        btn.onclick = function () {
+            job_search()
+        }
+       
+    })
+
+    function getslno() {
+        var jobtype = $("#jobtypecode").data("kendoDropDownList").value();
+        var from_date = $("#initiate_from").val();
+        var to_date = $("#initiate_to").val();
+        return { Jobtype: jobtype, Fromdate: from_date, Todate: to_date, Job_status : "'I','P'"};
+    }
+   /* function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }*/
+    function job_search() {
+        debugger;
+        var jobtype = $("#jobtypecode").data("kendoDropDownList").value();
+        var from_date = getFormated_StringDate($("#initiate_from").val());
+        var to_date = getFormated_StringDate($("#initiate_to").val());
+
+        if (jobtype == "" || jobtype == "undefined" || jobtype == null) {
+            jobtype = "All";
+        }
+
+        if (jobtype == "" || jobtype == "undefined" || jobtype == null) {
+            $.dialog({
+                title: 'Recon',
+                content: 'Process Type Cannot be Empty!',
+                type: 'yellow',
+            });
+            return false;
+        }
+        else if (from_date == "" || from_date == "undefined" || from_date == null)
+        {
+            $.dialog({
+                title: 'Recon',
+                content: 'Initiated From Date Cannot be Empty!',
+                type: 'yellow',
+            });
+            return false;
+        }
+        else if (to_date == "" || to_date == "undefined" || to_date == null)
+        {
+            $.dialog({
+                title: 'Recon',
+                content: 'Initiated From Date Cannot be Empty!',
+                type: 'yellow',
+            });
+            return false;
+        }
+        else
+        {
+            $("#ProgressGrid").data("kendoGrid").dataSource.read();
+            //$("#ProgressGrid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        }
+    }
+
+    function onRequestEnd(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been created successfully!',
+                    type: 'green',
+                });
+                //setTimeout(function () {
+                    
+                //    window.location.reload(1);
+                //}, 2000);
+
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been Edited successfully!',
+                    type: 'green',
+                })
+                //setTimeout(function () {
+                    
+                //    window.location.reload(1);
+                //}, 2000);
+            }
+        }
+    }
+
+    function myDeleteJs() {
+        debugger;
+        var grid = $("#ProgressGrid").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var EmployeeID = (model.EmployeeID);
+
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            theme: 'dark',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("DeletingEmployee", "EmployeeMaster")',
+                        data: "{ EmployeeID:'" + EmployeeID + "'}",
+                        success: function (data) {
+                            
+                            if (data == 'Success') {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    theme: 'dark',
+                                    content: 'Record deleted.!',
+                                    type: 'green',
+                                    animationSpeed: 700,
+                                });
+                            }
+                            //setTimeout(function () {
+                            //    window.location.reload(1);
+                            //}, 2500);
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        theme: 'dark',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+</script>
+

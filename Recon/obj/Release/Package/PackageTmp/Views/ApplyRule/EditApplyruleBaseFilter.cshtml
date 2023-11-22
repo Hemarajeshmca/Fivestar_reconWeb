@@ -1,0 +1,131 @@
+﻿@model Recon_Model.ApplyRule_model
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 80%;
+        font-weight: normal;
+    }
+
+
+
+    .k-edit-form-container {
+        position: relative;
+        width: 80%;
+    }
+
+
+    .ui-autocomplete {
+        z-index: 2147483647;
+        max-height: 150px;
+        overflow-x: hidden;
+        padding-right: 20px;
+    }
+
+    li.ui-menu-item {
+        font-size: 12px !important;
+        /* font-family: Helvitica, serif; */
+        font-weight: 600;
+    }
+
+        li.ui-menu-item:hover {
+            font-size: 12px !important;
+            /* font-family: Helvitica, serif; */
+            font-weight: 600;
+        }
+</style>
+<div class="container">
+    @Html.HiddenFor(model => model.extraction_filter)
+    @Html.HiddenFor(model => model.slnobase)
+    <input class="text-box single-line" id="slnoadd" name="slnoadd" type="hidden" value="" data-bind="value:slnoadd" readonly>
+    <input type="hidden" id="listslno1" name="listslno" value="">
+    <input type="hidden" id="slno4" name="slno" value="">
+    <input type="hidden" id="applyruledtl_gid1" name="applyruledtl_gid" value="">
+    @* <input id="extraction_filter" name="extraction_filter" type="hidden">*@
+    <input id="comparision_filter" name="comparision_filter" type="hidden">
+    <input id="slnorule" name="comparision_filter" type="hidden">
+    <div class="row" style="margin-left:-34px;">
+
+        <div class="col-sm-2" style="margin-left:-15px;">
+            @*@Html.Label("Sl No", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />*@
+            @Html.HiddenFor(model => model.slnobaseFilter, new { @style = "", @readonly = "readonly" })
+            @Html.HiddenFor(model => model.slnobaseFilter, new { @style = "", @readonly = "readonly" })
+
+           
+        </div>
+        <div class="col-sm-2" style="margin-left:-220px;">
+            <label for="" class="form-label">Filter Apply On</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                    .Name("applyfilter_code")
+                                    .DataTextField("applyfilter_desc")
+                                    .DataValueField("applyfilter_code")
+                        //.Events(e => e.Change("onfieldchange1").DataBound("dbaliasname1"))
+                            .HtmlAttributes(new { style = "" })
+                                    .DataSource(source => { source.Read(read => { read.Action("DropDownBinding", "FileConTempCreate", new { dropdown = "applyfilteron", param_1 = "" }); }).ServerFiltering(true); }))
+
+            </div>
+        </div>
+        <div class="col-sm-2" style="margin-left:5px;">
+            <label for="" class="form-label">Field Name</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                            .Name("field_name")
+                            .DataTextField("field_alias_name")
+                            .DataValueField("field_name")
+                            .Events(e => e.Change("onfieldchange1").DataBound("dbaliasname1"))
+                                            .HtmlAttributes(new { style = "" })
+                            .DataSource(source => { source.Read(read => { read.Action("dedupDbaliasdrop", "DedupeRule"); }).ServerFiltering(true); }))
+
+            </div>
+        </div>
+
+        <div class="col-sm-2" style="margin-top:76px;margin-left:-468px;width:19%;">
+            <label for="" class="form-label">Extraction Criteria</label>
+            <input class="form-control" id="BaseCriteria" name="BaseCriteria" type="text" value="" data-bind="value:BaseCriteria">
+        </div>
+        <div class="col-sm-2" id="extractvisiable" style="margin-left:258px;margin-top:1px;">
+            <label for="" class="form-label">Extraction Filter</label>
+            <div>
+                <form id="extractionfilter" style="width:280px;height:100px;overflow-y:scroll;margin-left:-46px;">
+                    <div id="extractionfilter" class="k-listview">  </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px;">
+        <div class="col-sm-2" style="margin-left:222px;margin-top:-58px;width:19%;">
+            <label for="" class="form-label">Identifier Value</label>
+            <input class="form-control" id="TargetField" name="TargetField" type="text" value="" data-bind="value:TargetField">
+        </div>
+        <div class="col-sm-2" style="margin-left:462px;margin-top:-58px;">
+            <label for="" class="form-label">Identifier Criteria</label>
+            <input class="form-control" id="Identitycriteria" name="Identitycriteria" type="text" value="" data-bind="value:Identitycriteria">
+        </div>
+        <div class="col-sm-2" hidden>
+            @Html.Label("Comparison Criteria", new { style = "font-size: 14px;font-weight: 600 !important;" })  <br />
+
+            @*  @Html.TextBoxFor(model => model.ComparisonCriteria, new { @style = "" })*@
+            @*<input id="ComparisonCriteria" type="text" name="ComparisonCriteria">*@
+            @Html.TextBoxFor(model => model.ComparisonCriteria, new { @style = " " })
+        </div>
+        <div class="col-sm-2" style="margin-left:460px;margin-top:-136px;">
+            <label for="" class="form-label">Status</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="status4" name="statusActive" value="Y" checked> Active
+                <input type="radio" id="status4" name="statusActive" value="N" style="margin-left: 10px;"> InActive
+            </div>
+        </div>
+        <div class="col-sm-2" style="margin-top:10px;margin-left:-15px;">
+            <!--<input type="button" class="btn btn-orange" value="Update" id="btn_submit" onclick="SaveAdditionalRule()" class="btnsubmit" />-->
+            <button type="button" class="btn btn-orange" value="Update" id="btn_submit1" onclick="SaveBaseFilterRule(this)"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Save</button>
+            <!--<input type="button" class="btn btn-orange" value="Close" id="btn_Close" onclick="return CloseAddPopup();" class="btnsubmit" />-->
+
+        </div>
+    </div>
+</div>

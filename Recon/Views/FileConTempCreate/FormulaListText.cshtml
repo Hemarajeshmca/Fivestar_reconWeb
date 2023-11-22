@@ -1,0 +1,456 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model  Recon_Model.Formula_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-orange" style="height:auto">
+                <div>
+                    @(Html.Kendo().Grid<Recon_Model.Formula_model>().Name("formula_gridText")
+                                .HtmlAttributes(new { style = "width:100%;height:500px;line-height:2em;font-weight:normal" })
+                                .ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.filetemplatefield_gid).Title("Sl No").Width(50).Hidden();
+                                    columns.Bound(m => m.source_txt_start).Title("Start Position").Width(100);
+                                    columns.Bound(m => m.source_txt_end).Title("End Position").Width(100);
+                                    columns.Bound(m => m.ExtractionCriteria).Title("Extraction Criteria").Width(100);
+                                    columns.Bound(m => m.formula_order).Title("Formula Order").Width(100);
+                                    columns.Bound(m => m.active_status_desc).Title("Status").Width(100);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeletelook");
+                                    }).Title("Action").Width(50);
+
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("FormulaViewText"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(20)
+                              .Events(events => events.Error("error_handler"))
+                              .Model(model => model.Id(p => p.filetemplatefieldformula_gid))
+                              .Create(Create => Create.Action("LookupMasterSave", "FileConTempCreate"))
+                              .Read(read => read.Action("LookupMasterRead", "FileConTempCreate").Data("getlistText"))
+                              .Update(update => update.Action("LookupMasterUpdate", "FileConTempCreate"))
+                             ))
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Recon',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        $("#formula_gridText").data("kendoGrid").dataSource.read();
+        $("#formula_gridText").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#formula_gridText").data("kendoGrid");
+
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            debugger;
+            Extraction();
+            LookupExtraction();
+            ExtractionCriteria();
+            $("#formula").hide();
+            if (event.model.extraction_filter != 0) {
+                $("#e").prop("checked", true).trigger("change");
+            }
+            if (event.model.lookup_extraction_filter != 0) {
+                $("#e").prop("checked", true).trigger("change");
+            }
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            var val = event.model.lookup_flag;
+            if (val == "Y") {
+                $("#formula").show();
+            } else {
+                $("#formula").hide();
+            }
+            var gid = localStorage.getItem("Fieldgidformula");
+            $("#filetemplatefield_gid").val(gid).trigger("change");
+
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+
+            debugger;
+            if (event.model.isNew() == true) {
+                var gid = localStorage.getItem("Fieldgidformula");
+                $("#filetemplatefield_gid").val(gid).trigger("change");
+            }
+        });
+
+    })
+   
+    var onWindowEditClose = function (e) {
+        debugger;
+        //var preventCloseOnSave = $("#test").val();
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        } else {
+            setTimeout(function () {
+                window.location.reload(1);
+            }, 2000);
+        }
+    };
+    function ClosePopup() {
+        $("#formula_gridText").data("kendoGrid").dataSource.read();
+    }
+    function onRequestEnd(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#formula_gridText").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+
+            }
+        }
+        if (e.type == "update") {
+            debugger;
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#formula_gridText").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+                //$("#test").val(preventCloseOnSave);
+            }
+        }
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+    }
+    function myDeletelook() {
+        var grid = $("#formula_gridText").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var filetemplatefieldformula_gid = (model.filetemplatefieldformula_gid);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("LookupMasterDelete", "FileConTempCreate")',
+                        data: "{ filetemplatefieldformula_gid:'" + filetemplatefieldformula_gid + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    function ExtractionCriteria() {
+        //Extraction
+        debugger;
+        var fieldtype = "TEXT";
+        var compsr = "EXTRACTION";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleExtracioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var selected = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    selected[i] = response[i].ExtractionCriteria;
+                }
+                debugger;
+                //$("#ExtractionCriteria").data("kendoDropDownList").dataSource.data(response);
+
+                $("#ExtractionCriteria").autocomplete({
+                    source: selected,
+                    minLength: 0
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+
+                $("#lookup_extraction_criteria").autocomplete({
+                    source: selected,
+                    minLength: 0
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+            },
+            error: function (er) {
+            }
+
+        });
+
+    }
+    function Extraction() {
+        //Extraction
+        debugger;
+        var fieldtype = "TEXT";
+        var filter_flag;
+        var filter_flag1;
+        if ($("#extraction_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#extraction_filter").val()
+        }
+
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupExtraciondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                if (response.length == 0) {
+                    $("#extractvisiable").hide();
+                } else {
+                    $("#extractvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingExtractionfilter();
+                        }
+                    });
+                }
+            },
+            error: function (er) {
+
+            }
+
+        });
+    }
+    function LookupExtraction() {
+        //Extraction
+        debugger;
+        var fieldtype = "TEXT";
+        var filter_flag;
+        if ($("#lookup_extraction_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#lookup_extraction_filter").val()
+        }
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupExtraciondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                if (response.length == 0) {
+                    $("#extractvisiable").hide();
+                } else {
+                    $("#extractvisiable").show();
+                    var dataSource1 = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilterlookup").kendoListView({
+                        dataSource: dataSource1,
+                        template: kendo.template($("#myTemplate1").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingExtractionfilterlookup();
+                        }
+                    });
+                }
+                //filetype();
+            },
+            error: function (er) {
+
+            }
+
+        });
+
+    }
+    function checkboxEventBindingExtractionfilter() {
+        debugger;
+        $('.1_ID').attr('checked', 'checked')
+    }
+    function checkboxEventBindingExtractionfilterlookup() {
+        $('.1_ID').attr('checked', 'checked')
+    }
+    function formulalookup() {
+        debugger;
+        var val = $("input[name='lookup_flag']:checked").val();
+        if (val == "Y") {
+            $("#formula").show();
+        } else {
+            $("#formula").hide();
+        }
+    }
+    function SaveFormulaText()
+    {
+        debugger;
+        var extractcretia = $("#ExtractionCriteria").val();
+        var Fextraction = $("#extractionfilter").serialize();
+        var extract = Fextraction.split("&")
+        var Attribid = [];
+        var extraction_filter = 0;
+        var item;
+        var filter_flag = 0;
+        for (var i = 0; i < extract.length; i++) {
+            item = extract[i];
+            filter_flag = parseInt(item.replace("extractionfilter=", ""));
+            extraction_filter = extraction_filter | filter_flag;
+        }
+        $("#extraction_filter").val(extraction_filter).trigger("change");
+        $("#ExtractionCriteria").val(extractcretia).trigger("change");
+        var Fcomparision = $("#extractionfilterlookup").serialize();
+        var comparsion = Fcomparision.split("&")
+        var Attribid1 = [];
+        var lookup_extraction_filter = 0;
+        for (var i = 0; i < comparsion.length; i++) {
+            item = comparsion[i];
+            filter_flag = parseInt(item.replace("extractionfilterlookup=", ""));
+            lookup_extraction_filter = lookup_extraction_filter | filter_flag;
+        }
+        $("#lookup_extraction_filter").val(lookup_extraction_filter).trigger("change");
+        var grid1 = $("#formula_gridText").data("kendoGrid");
+        grid1.saveChanges();
+    }
+  
+</script>
+<script type="text/x-kendo-tmpl" id="myTemplate">
+    <div class="item click" data="${filter_flag}">
+        <input type="checkbox" name="extractionfilter" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>
+<script type="text/x-kendo-tmpl" id="myTemplate1">
+    <div class="item click" id="div_comparison" data="${filter_flag}">
+        <input type="checkbox" name="extractionfilterlookup" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>

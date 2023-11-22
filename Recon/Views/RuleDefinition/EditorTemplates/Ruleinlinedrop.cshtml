@@ -1,0 +1,12 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.UI.Fluent
+@using Kendo.Mvc.Extensions
+@using Kendo.Mvc.Resources
+@model Recon_Model.dropdowm_model
+@(Html.Kendo().DropDownList()
+                 .Name("code")
+            .DataTextField("Name")
+            .DataValueField("Code")
+            .HtmlAttributes(new { style = "height:25px;width:178px;font-weight: normal;margin-left:25%" })
+           .DataSource(source => { source.Read(read => { read.Action("GetCmyRecordsdrop", "RuleDefinition"); }).ServerFiltering(true); })) 
+@Html.ValidationMessageFor(model => model.code)

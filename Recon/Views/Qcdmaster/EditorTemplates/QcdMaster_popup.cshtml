@@ -1,0 +1,172 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.QcdMaster
+
+
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+    /*input {
+ display: block;
+ margin-bottom: 1.25em;
+ width: 150px;
+ border: solid black;
+ border-width: 1px 2px 2px 1px;
+}*/ 
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 50%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+</style>
+<style>
+    .k-edit-form-container .k-edit-buttons {
+        visibility: hidden !important;
+    }
+</style>
+@*<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 60%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 120%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+</style>*@
+
+<div>
+    <div class="container" style="margin-left:13px;">
+        <div class="row" >
+
+            <div class=" col-sm-3" >
+            <label for="ParentMasterSyscode" class="title">Parent Code</label>
+                @Html.TextBoxFor(model => model.ParentMasterSyscode, new { style = "width:100%;",id="parentcode",@class = "form-control" })
+            @*<input class="text-box single-line" id="Parent_MasterSyscode" name="Parent_MasterSyscode" type="text" value="" data-bind="value:Parent_MasterSyscode">*@
+
+        </div>
+
+            <div class="col-sm-3">
+                <label class="title">Master Syscode</label><br />
+                @Html.TextBoxFor(model => model.masterSyscode, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="mastersyscode" name="reversl_flag" value="">*@
+            </div>
+
+            <div class="col-sm-3" >
+                <label class=" title">Master Code</label><br />
+                @Html.TextBoxFor(model => model.masterCode, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_code" name="group_flag" value="" style="margin-left: 10px;" checked>*@
+            </div>
+            </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <label class=" title">Master ShortCode</label><br />
+                @Html.TextBoxFor(model => model.masterShortCode, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_ShortCode" name="status2" value="" style="margin-left: 10px;">*@
+            </div>
+
+
+            <div class="col-sm-3" >
+                <label class=" title">Master Name</label><br />
+                @Html.TextBoxFor(model => model.masterName, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_Name" name="status2" value="" style="margin-left: 10px;">*@
+            </div>
+
+            <div class="col-sm-3">
+                <label class=" title">Master MultipleName</label><br />
+                @Html.TextBoxFor(model => model.mastermutiplename, new { style = "width:100%;", @class = "form-control" })
+                @*<input type="text" id="master_Name" name="status2" value="" style="margin-left: 10px;">*@
+            </div>
+
+            <div class="col-sm-3" style="margin-top:6px;margin-left:2px;">
+                <label class=" title">Status</label><br />
+               
+                <input type="radio" id="Status" name="Status" value="Y" checked>&nbsp;&nbsp;Active&nbsp;
+                <input type="radio" id="Status1" style="margin-left: 10px;" name="Status" value="N">&nbsp;&nbsp;InActive&nbsp;
+               
+
+            </div>
+        <div class="row">
+            <div class="col-sm-3">
+
+            </div>
+            <div class="col-sm-3" style="margin-top: 23px;margin-bottom:-51px;margin-right:-36px;margin-left:307px;">
+                <div style="margin-bottom:-29px;margin-left:-117px;">
+                <button type="button" id="btn_saveview" onclick="SaveQcdpopup()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+              </div>
+              <div style="margin-bottom:10px;margin-left:-31px;">
+                <button type="button" id="btn_close" onclick="CloseQcdpopup()" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+                    </div>
+            </div>
+            @*<div class="col-sm-3">
+
+            </div>*@
+        </div>
+    </div>
+
+</div>
+

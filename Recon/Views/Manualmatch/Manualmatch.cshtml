@@ -1,0 +1,495 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        footer.main-footer {
+            height: 40px;
+        }
+
+        .Recon_tallied_no {
+        /*opacity:0.5;*/
+        pointer-events:none;
+        color:red;
+
+        }
+       .Recon_tallied_yes
+        {
+        
+        }
+
+        .img-responsive {
+            margin-top: -5%;
+        }
+
+        .btn-success {
+            padding: 2px 16px 4px 10px;
+        }
+
+        .k-popup.k-list-container {
+            width: 220px !important;
+        }
+
+        .k-pager-sizes {
+            display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+        }
+
+        .k-datepicker {
+            width: 88%;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-webkit {
+            overflow: hidden !important;
+        }
+        .jconfirm.jconfirm-light .jconfirm-box{
+            width:430px;
+        }
+        .jconfirm.jconfirm-light .jconfirm-box .jconfirm-buttons 
+        {
+            margin-top:-26px;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <input type="hidden" id="Allrules" value="false"/>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Rule Based KO-Preview</h3>
+                        </div>
+                        <div class="row" style="margin-left:-15px">
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date To</label><br />
+                                <input class="cusDate" data-role='datepicker' style="width:100%" id="period_to" name="period_to" />
+                            </div>
+
+                            <div class="col-sm-3" style="width:23%;">
+                                <div class="form-group">
+                                    <label for="filetype1" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                                                         .Events(e =>
+                                                                  {
+                                                                      e.DataBound("onDataBound");
+                                                                      e.Select("onselect");
+                                                                  })
+                                                        @*.DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))*@
+                                    .DataSource(source => { source.Read(read => { read.Action("getuserrecon_tallied", "Manualmatch"); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+                            <div class="col-sm-4" style="margin-left:-18px;">
+                                  <button type="button" style="margin-top:24px;" id="rundata" onclick="Run()" class="btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;Show Rules</button>
+                                  <button type="button" style="margin-top:24px;margin-left:5px;" id="selectall" onclick="selectallrules()" value="selectall" class="btn btn-primary">&nbsp;Select Rules</button>
+                                    @*<input type="checkbox" id="selectall" onclick="selectallrules()" class="btn btn-primary">&nbsp;<span id="" style="font-weight:600">SelectAllRules</span>*@
+                                    <button type="button" style="margin-top:-51px;margin-left:240px;" id="ProcessData" onclick="validation('N')" value="N" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Preview</button>
+                                    <button type="button" style="margin-top:-91px;margin-left:338px;" id="knockoffData" onclick="validation('Y')" value="Y" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Knockoff</button>
+                            </div>
+
+                        </div>
+
+                        <div id="Rule">
+                            <div class="form-group">
+                                @using (Html.BeginForm("Manualmatch", "Manualmatch", FormMethod.Post, new { @id = "form1" }))
+                                {
+                                    <div style="">
+                                        @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("RuleGrid")
+                                            .HtmlAttributes(new { style = "width:100%;height:350px;line-height:2em;font-weight:normal" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                            .Columns(columns =>
+                                                {
+                                                    columns.Bound(m => m.sno).Title("Sl.no").Width(50).Hidden();
+                                                    columns.Bound(m => m.rule_name).Title("Rule").Width(50);
+                                                    columns.Bound(m => m.update_date).Title("Last updateDate").Width(20);
+                                                    columns.Bound(m => m.Select).HeaderHtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("<input type='checkbox' id='checkbox' name='checkboxall' style='margin-left:46%;' onclick = 'Check_Click(this)' #= Select == true ? checked='checked' : '' # />").Width(20);
+                                                })
+                                            .Editable(editable =>
+                                                { editable.Mode(GridEditMode.PopUp).TemplateName("DeputeRuleEdit"); })
+                                            .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                            .Filterable()
+                                            .Sortable()
+                                            .Scrollable()
+                                            .Resizable(resize => resize.Columns(true))
+                                            .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(20)
+                                                //.Events(events => events.Error("error_handler"))
+                                            .Model(model =>
+                                                {
+                                                    model.Id(p => p.sno);
+                                                    model.Id(p => p.rule_gid);
+                                                    model.Field(p => p.Select).Editable(false);
+                                                })
+
+                                            .Read(read => read.Action("ManualmatchGrid_Read", "Manualmatch").Data("GetRule"))
+
+                                            ))
+                                    </div>
+                                }
+                                @*<div style="padding-top:10px">
+                                        <button type="button" style="float:right;margin-right:60px;margin-top: -6px;" id="ProcessData" onclick="validation()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Process</button>
+                                    </div>*@
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+
+
+        var koval = "";
+        $("#Rule").hide();
+        $("#Process").hide();
+        kendodate_format();
+        var mindate = '@Request.RequestContext.HttpContext.Session["mindate"]';
+        $("#period_from").kendoDatePicker({
+            value: mindate,// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+
+    })
+
+    function selectallrules()
+    {
+        debugger;
+        var selectall = document.getElementById('selectall');
+        var _selectall = selectall.innerText;
+        var Allrules = $("#Allrules").val();
+
+            $.confirm({
+                icon: 'fa fa-warnings',
+                title: 'Selecting Rule',
+                autoClose: 'cancel|10000',
+                //theme: 'dark',
+                width:200,
+                animationSpeed: 700,
+                content: '',
+                type: 'blue',
+                buttons: {
+                    SelectAll: function () {
+                        debugger;
+                        debugger;
+                         $("#Allrules").val("true");
+                        var cbs = document.getElementById("checkbox");
+                        var grid = $("#RuleGrid").data("kendoGrid");
+                        var checkedrows = grid._data.length;
+                        var overallinput = checkedrows + 4;
+                        var checkboxes = document.getElementsByTagName('input');
+
+                            for (var i = 0; i < overallinput; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    checkboxes[i].checked = true;
+                                    checkboxes[i].parentElement.parentElement.style.backgroundColor = '#357ab8';
+                                }
+                            }
+
+
+                    },
+
+                    UnselectAll: function () {
+                        debugger;
+                        var cbs = document.getElementById("checkbox");
+                        var grid = $("#RuleGrid").data("kendoGrid");
+                        var checkedrows = grid._data.length;
+                        var overallinput = checkedrows + 4;
+                        var checkboxes = document.getElementsByTagName('input');
+
+
+
+                        for (var i = 0; i < overallinput; i++) {
+                            if (checkboxes[i].type == 'checkbox') {
+                                checkboxes[i].checked = false;
+                                checkboxes[i].parentElement.parentElement.style.backgroundColor = 'white';
+                                checkboxes[i].parentElement.parentElement.style.color = 'black';
+                            }
+                        }
+                    },
+
+                    Inverse:function()
+                    {
+                        debugger;
+                        var cbs = document.getElementById("checkbox");
+                        var grid = $("#RuleGrid").data("kendoGrid");
+                        var checkedrows = grid._data.length;
+                        var overallinput = checkedrows + 4;
+                        var checkboxes = document.getElementsByTagName('input');
+                        for (var i = 0; i < overallinput; i++) {
+                            if (checkboxes[i].type == 'checkbox') {
+                                if (checkboxes[i].checked == true)
+                                {
+                                    checkboxes[i].checked = false;
+                                    checkboxes[i].parentElement.parentElement.style.backgroundColor = 'white';
+                                    checkboxes[i].parentElement.parentElement.style.color = 'black';
+                                }
+                                else {
+                                    checkboxes[i].checked = true;
+                                    checkboxes[i].parentElement.parentElement.style.backgroundColor = '#357ab8';
+                                }
+                              
+                            }
+                        }
+                    },
+
+                    cancel: function () {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Rule Cancelled',
+                            //  theme: 'dark',
+                            content: 'Cancelled.!',
+                            type: 'blue',
+                           // animationSpeed: 700,
+                        });
+
+                    }
+                },
+            });
+
+    }
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+    function GetRule() {
+        debugger;
+
+        var getslno = $("#ReconName_id").data("kendoDropDownList").value();
+        if (getslno == "") {
+            getslno = "0";
+        }
+        return { slno: getslno }
+    }
+    function Run() {
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        if (recon_gid == "0" || recon_gid == undefined || recon_gid == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+        $("#Rule").show();
+        $("#RuleGrid").data("kendoGrid").dataSource.read();
+    }
+
+
+    function Check_Click(objRef) {
+        debugger;
+        if (objRef.checked) {
+            objRef.parentElement.parentElement.style.backgroundColor = '#357ab8';
+            objRef.parentElement.parentElement.style.color = 'white';
+            //row.style.backgroundColor = "aqua";
+        }
+
+        else {
+            objRef.parentElement.parentElement.style.backgroundColor = 'white';
+            objRef.parentElement.parentElement.style.color = 'black';
+        }
+
+    }
+
+
+    function validation(result) {
+        var msg = "";
+
+        debugger;
+        var automatchflag = result;
+        var grid = $("#RuleGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+
+        if (checkedrows.length > 0) {
+
+        }
+        else {
+            msg += "Please Select the Rule !!!";
+        }
+
+        if (msg == "") {
+            Process(automatchflag)
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Process(automatch_flag) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+                    debugger;
+                    var grid = $("#RuleGrid").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    var recon_gid_bulk = "";
+                    var recon_gid = $("#ReconName_id").val();
+
+                    for (var i = 0; i < checkedrows.length; i++) {
+                        var item = grid.dataItem(checkedrows[i]);
+                        var rule_gid = item.rule_gid;
+
+                        if (recon_gid_bulk == '') {
+                            recon_gid_bulk += recon_gid + "$" + rule_gid;
+                        }
+                        else {
+                            recon_gid_bulk += "#" + rule_gid;
+                        }
+                    }
+                    // var recongid = ReconName_id + "$" + Attribid
+                    var period_from = $('#period_from').val();
+                    var period_to = $("#period_to").val();
+                    var formatted_period_from = getFormated_StringDate(period_from);
+                    var formatted_period_to = getFormated_StringDate(period_to);
+                    var recontype = "";
+                    var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+                    var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+                    var ip = '@ViewBag.ip';
+                    var automatch = automatch_flag;
+
+                    var obj = { "recontype": recontype, "periodfrom": formatted_period_from, "periodto": formatted_period_to, "automatchoff": automatch, "user_code": user_code, "Rule": recon_gid_bulk, "ip_address": ip }
+
+                    var ManualMatchoff = {};
+
+
+                    $.alert({
+                        title: 'Impact',
+                        content: "Knockoff in progress..." + "<br>" + "<br>" +
+                                 "Please check 'Process in progress' under utility menu",
+                        type: 'green',
+
+                    });
+
+
+                    $.ajax({
+                        type: "POST",
+                        timeout: 3000,
+                        data: JSON.stringify(obj),
+                        async: true,
+                        // data: '{recontype: "' + recontype + '",formatted_period_from: "' + formatted_period_from + '",formatted_period_to: "' + formatted_period_to + '",automatch: "' + automatch + '",user_code: "' + user_code + '",Attribid:"' + recon_gid_bulk + '"}',
+
+                        //  @*url: '@Url.Action("MatchOff_Save", "Manualmatch")',*@
+
+                        url: url + "RuleMatchOff",
+
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function (xhr) {
+                            debugger;
+                            xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+                        },
+                        @*success: function (data) {
+                            debugger;
+                            if (data[1] > 0) {
+                                setTimeout(function () {
+                                    //window.location.href = "../ManualMatch/ManualmatchView";
+                                    window.location.href = '@Url.Action("ManualmatchView", "ManualMatch")';
+
+                                }, 0);
+
+                            }
+                            else {
+                                $.dialog({
+                                    title: 'Impact',
+                                    content: data[0],
+                                    type: 'red',
+                                });
+                                //event.container.data("kendoWindow").one("close", onEditorTemplateClosing);
+                            }
+                        },*@
+
+                    });
+                    hideProgress();
+                },
+                cancel: function () {
+                },
+            }
+        });
+    }
+    function onselect(e) {
+        debugger;
+        var dataItem = this.dataItem(e.item.index());
+        var intd = dataItem.value;
+        var intdfd = dataItem.isDeleted;
+        if (intdfd == true) {
+            e.preventDefault();
+        }
+    }
+    function onDataBound(e) {
+        debugger;
+        var kendodropdown = this;
+        var ddl = e.sender;
+        var items = ddl.items();
+
+        var curr = $("#ReconName_id").data("kendoDropDownList");
+        var currentRecords = curr.dataSource._data;
+        for (var i = 0; i < currentRecords.length; i++) {
+
+            if (currentRecords[i].recon_tallied == "Yes") {
+             
+            }
+
+            else {
+                this.list.find(">ul>li[data-index='" + i + "']").addClass("Recon_tallied_no");
+
+            }
+        }
+    }
+</script>

@@ -1,0 +1,25 @@
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|ipAddressLoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|10.81.234.3LoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|beforePassword EncryptFlexi@123LoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|Password EncryptV3jC7vPWPOdcpxuQ8ohEawKu0mXJfV2T/DkgVCWN6m4=LoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|UserNamesundarLoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|passV3jC7vPWPOdcpxuQ8ohEawKu0mXJfV2T/DkgVCWN6m4=LoginController
+13-09-2023 12:08:23-13-09-2023 12:08:23|0%|0MB|0%|(Thrd ID:5)|ipAddress10.81.234.3LoginController
+13-09-2023 12:08:24-13-09-2023 12:08:24|0%|0MB|0%|(Thrd ID:5)|post_data[{"user_gid":1,"user_name":"SUNDAR","password_expiry_date":"2025-08-22T00:00:00","usergroup_gid":1,"out_result":0,"out_msg":"Invalid password !","user_status":"A"}]LoginController
+13-09-2023 12:08:24-13-09-2023 12:08:24|0%|0MB|0%|(Thrd ID:5)|result1LoginController
+13-09-2023 12:08:24-13-09-2023 12:08:24|0%|0MB|0%|(Thrd ID:5)|System.ArgumentException: Column 'min_tran_date' does not belong to table .
+   at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at Recon.Controllers.LoginController.Login_validation(String UserName, String Password) in d:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon\Controllers\LoginController.cs:line 151Login
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|ipAddressLoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|10.81.234.3LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|beforePassword Encryptvino@123LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|Password Encrypt2IA1bJgP5FE010AxPMy9Wa+IgIngLOr67FZLKL9rO2c=LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|UserNamesundarLoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|pass2IA1bJgP5FE010AxPMy9Wa+IgIngLOr67FZLKL9rO2c=LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|ipAddress10.81.234.3LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|post_data[{"user_gid":1,"user_name":"SUNDAR","password_expiry_date":"2025-08-22T00:00:00","usergroup_gid":1,"out_result":1,"out_msg":"Login success !","user_status":"A","min_tran_date":"19-09-2020","fin_start_date":"01-04-2023"}]LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|result1LoginController
+13-09-2023 12:08:31-13-09-2023 12:08:31|0%|0MB|0%|(Thrd ID:6)|TestsuccessLoginController
+13-09-2023 12:08:35-13-09-2023 12:08:35|0%|0MB|0%|(Thrd ID:12)|1Admin_menu_Controller
+13-09-2023 12:08:35-13-09-2023 12:08:35|0%|0MB|0%|(Thrd ID:12)|Menucount40Admin_menu_Controller

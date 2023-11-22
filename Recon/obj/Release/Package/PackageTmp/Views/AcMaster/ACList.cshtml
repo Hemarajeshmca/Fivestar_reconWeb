@@ -1,0 +1,389 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.AcMaster_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+        .k-pager-sizes {
+            display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+            top: 0px;
+        }
+
+        a.k-link {
+            position: relative;
+            top: 0px;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+    </style>
+
+    <style>
+      
+
+      .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+    </style>
+    <style>
+         .k-button.k-button-icontext.k-grid-add
+        {
+            background:green;
+            color:white;
+        }
+       
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+
+        span.k-link {
+            color: #fff !important;
+            position: relative;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+         .k-grouping-header {
+            color: #ffffff;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+        .k-header.k-grid-toolbar.k-grid-top{
+         background: none;
+        }
+          .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Account Master</h3>
+                        </div>
+                        @using (Html.BeginForm("AcMaster", "ACList", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.AcMaster_model>().Name("AcMaster")
+                                .HtmlAttributes(new { style = "height:450px;font-weight:normal;font-size:15px;" })
+
+                                .ToolBar(toolbar => toolbar.Create().Text(" "))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.AccountNo).Title("A/c No").Width(50);
+                                    columns.Bound(m => m.AccountName).Title("A/c Name").Width(80);
+                                    columns.Bound(m => m.Category_name).Title("Category").Width(100);
+                                    columns.Bound(m => m.Respon_name).Title("Responsibility").Width(80);
+                                    columns.Bound(m => m.Recontype).Title("Recon Type").Width(80).Hidden();
+                                    columns.Bound(m => m.Accounttype).Title("A/c Type").Width(100).Hidden();
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(30);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                    }).Title("Action").Width(30);
+                                    /*
+                                    columns.Command(command =>
+                                    {
+                                        command.Custom("Edit").Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>").Click("");
+                                        command.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("");
+                                        command.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("");
+                                    }).Title("Action").Width(120);
+                                    */
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("acmasterview"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(20)
+                              .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.Account_id))
+                             .Create(Create => Create.Action("AcMasterGrid_Save", "AcMaster"))
+                             .Read(read => read.Action("AcGrid_Read", "AcMaster"))
+                             .Update(update => update.Action("AcGrid_Update", "AcMaster"))
+                             ))
+                            </div>
+                        }
+                        @*<div>
+                @Html.Partial("SearchFiltergrid")
+            </div>*@
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+       
+
+        $("#withinflag").prop("checked", false);
+        $("#Recontype").prop("checked", false);
+        $("#AcMaster").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#AcMaster").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            debugger;
+            if (event.model.Recontype == "Y") {
+                $("#withinflag").prop("checked", false);
+                $("#Recontype").prop("checked", true);
+            }
+            if (event.model.withinflag == "Y") {
+                $("#withinflag").prop("checked", true);
+                $("#Recontype").prop("checked", false);
+            }
+            if (event.model.withinflag == "Y" && event.model.Recontype == "Y") {
+                $("#withinflag").prop("checked", true);
+                $("#Recontype").prop("checked", true);
+            }
+            if (event.model.withinflag == "N" && event.model.Recontype == "N") {
+                $("#withinflag").prop("checked", false);
+                $("#Recontype").prop("checked", false);
+            }
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepop()" style="margin-left:625px;border:none;background-color: #357ab8;cursor:pointer;color:white;">x</button>');
+            var editWindow1 = this.editable.element.data("kendoWindow");
+            editWindow1.unbind("close");
+            editWindow1.bind("close", onWindowEditClose);
+        });
+
+
+
+    })
+    function closepop()
+    {
+        debugger;
+        $("#AcMaster").data("kendoGrid").dataSource.read();
+    }
+    var onWindowEditClose = function (e) {
+        debugger;
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#AcMaster").data("kendoGrid").dataSource.read();
+        }
+    };
+
+    function onRequestEnd(e) {
+        //Check request type
+        debugger;
+        if (e.type == "create") {
+            
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //setTimeout(function () {
+                //    window.location.reload(1);
+                //}, 2000);
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //setTimeout(function () {
+                //    window.location.reload(1);
+                //}, 2000);
+
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+
+    function myDeleteJs() {
+
+        var grid = $("#AcMaster").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var Account_id = (model.Account_id);
+
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',          
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("AcGrid_Delete", "AcMaster")',
+                        data: "{ Account_id:'" + Account_id + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                               setTimeout(function () {
+                                   window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',                      
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+     function ViewMode(e)
+    {
+         var grid = this,
+         selectedRow = $(e.target).closest("tr")[0];        
+         grid.editRow(selectedRow);
+         $(".k-grid-update").hide();
+         $(".k-window-title").text("View").append('<button id="btnMoveMe"  onclick="closepop()" style="margin-left:91%;border:none;background-color: #357ab8;cursor:pointer;color:white;">x</button>');
+        
+    }
+</script>
+

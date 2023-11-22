@@ -1,0 +1,495 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 40%;
+            font-weight: normal;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -5px;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-link {
+            color: #fff !important;
+        }    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Manual - Only Amount</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                                <input id="user" name="user" type="hidden">
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" style="width:100%;" />
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group" id="within">
+                                    <label for="filetype" class="title">Recon Name</label> <br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.Label("Group", new { style = "font-size: 14px;font-weight: 600 !important;" })
+                                @(Html.Kendo().DropDownList()
+                                        .Name("Gropbased")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .BindTo(new List<SelectListItem>()
+                                         {
+                                        new SelectListItem()
+                                         {
+                                            Text = "",
+                                            Value = ""
+                                         },
+                                        new SelectListItem()
+                                         {
+                                            Text = "Single",
+                                            Value = "S"
+                                         },
+                                        new SelectListItem()
+                                         {
+                                            Text = "Multiple",
+                                            Value = "M"
+                                         }
+                                         })
+                                        .Value("1")
+                                )
+                            </div>
+                            <div class="col-sm-2" style="display:none">
+                                <label for="Reconname" class="title">Amount</label>
+                                <input class="text-box single-line" id="amount" name="amount" onkeypress="return isNumberKey(event)" type="text" data-bind="value: amount">
+                            </div>
+                            <div class="col-sm-3" style="margin-top:22px;">
+                                <button type="button" id="run" onclick="Runprocess()" class="btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;Show</button>&nbsp;
+                                <button type="button" id="match" onclick="validation()" class="btn btn-primary"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;Match</button>&nbsp;
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                        </div>
+
+                        <div class="row" id="process">
+                            @using (Html.BeginForm("ManualMatchOff", "amountmatchoff", FormMethod.Post, new { @id = "form1" }))
+                            {
+                                <div style="padding-left:20px;padding-right:20px">
+                                    @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("amountmatch")
+                                .HtmlAttributes(new { style = "height:450px;" })
+                                    //.ToolBar(toolbar => toolbar.Create().Text("Add New"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.Select).ClientTemplate("<input type='checkbox' id='checkbox'  #= Select == true ? checked='checked' : '' # />").Width(30);
+                                    columns.Bound(m => m.AccountNo).Title("A/c No").Width(80);
+                                    columns.Bound(m => m.TranDate).Title("Tran Date").Width(80);
+                                    columns.Bound(m => m.ValueDate).Title("Value Date").Width(100);
+                                    columns.Bound(m => m.Description).Title("Tran Desc").Width(200);
+                                    columns.Bound(m => m.Accountmode).Title("Account Mode").Width(80);
+                                    columns.Bound(m => m.amount).Title("amount").Width(80);
+                                    columns.Bound(m => m.Exceptionamount).Title("Exception amount").Width(100);
+                                    columns.Bound(m => m.group_sno).Title("Group").Width(100).Hidden();
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("editDetails");
+                                    }).Title("Action").Width(50);
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("acmasterview"); })
+                             .Filterable()
+                             .Pageable(pageable => pageable
+                                        .ButtonCount(5))
+                                        .Excel(excel => excel
+                                        .AllPages(true)
+                                        .FileName("Manual Match - Amount Based.xlsx"))
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(5000)
+                             .Group(groups => groups.Add(p => p.group_sno))
+                             .Model(model => model.Id(p => p.SlNo))
+                             .Create(Create => Create.Action("AcMasterGrid_Save", "AcMaster"))
+                             .Read(read => read.Action("ReportExpenceGrid_Read", "ManualMatchOff").Data("getslno"))
+                             .Update(update => update.Action("AcGrid_Update", "AcMaster"))
+                             ))
+                                </div>
+                            }
+                        </div>
+                        <div id="dialog">
+                            <button type="button" id="exportExcel1" style="margin-left:18px;margin-top:-7px" onclick="exportExcel1()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            <div id="Maingrid" class="col-md-12" style="margin:auto;height:auto;top:10px;width:100%;"> </div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#period_To").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#Process").hide();
+
+        $("#exportExcel1").hide();
+        $("#exportExcel").hide();
+        //$("#amountmatch").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        //var grid = $("#processGrid").data("kendoGrid");
+        ////function for changing kendo popup title.
+        //grid.bind("edit", function (event) {
+
+        //    event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        //});
+
+    })
+
+
+    function getslno() {
+        debugger;
+        var period_from = $('#period_from').val();
+        var period_to = $("#period_to").val();
+        var formatted_period_from = getFormated_StringDate(period_from);
+        var formatted_period_to = getFormated_StringDate(period_to);
+        var Recomname = $("#ReconName_id").val();
+        if (Recomname == "") {
+            Recomname = "0"
+        }
+        var amount = $("#amount").val();
+        if (amount == "") {
+            amount = "0";
+        }
+        //var user_code = "admin"
+        var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+        var groupfield = $("#Gropbased").val();
+
+        return { period_from: formatted_period_from, period_to: formatted_period_to, Recomname: Recomname, amount: amount, user_code: user_code, groupfield: groupfield }
+
+    }
+    function Runprocess() {
+        debugger;
+        $("#Process").show();
+        $("#exportExcel").show();
+        $("#amountmatch").data("kendoGrid").dataSource.read();
+    }
+    function exportExcel() {
+        $("#amountmatch").getKendoGrid().saveAsExcel();
+    }
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+          && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+    function validation() {
+        var msg = "";
+        var grid = $("#amountmatch").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        if (checkedrows.length > 0) {
+
+        }
+        else {
+            msg += "Please Select the match !!!";
+        }
+        if (msg == "") {
+            match()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function match() {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            content: 'Are you sure to proceed ?',
+            type: 'green',
+            buttons: {
+                confirm: function () {
+                    var prv_group_sno = '';
+                    var list_tranrecon_gid = '';
+                    var grid = $("#amountmatch").data("kendoGrid");
+                    var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+                    var Attribid = [];
+                    var item1 = grid.dataItem(checkedrows);
+                    var groupno = item1.group_sno.length;
+                    var tranrecon_gid = '';
+
+                    for (var i = 0; i < checkedrows.length; i++) {
+                        var item = grid.dataItem(checkedrows[i]);
+                        var Examount = item.Exceptionamount;
+                        var slno = item.tranrecon_gid;
+                        var group_sno = item.group_sno;
+
+                        if (prv_group_sno != group_sno || i == checkedrows.length - 1) {
+
+                            if (list_tranrecon_gid == '') {
+                                list_tranrecon_gid = tranrecon_gid;
+                            }
+                            else {
+                                list_tranrecon_gid += '^' + tranrecon_gid;
+                            }
+
+                            tranrecon_gid = slno + '$' + Examount;
+
+                            if (i == checkedrows.length - 1) {
+                                if (list_tranrecon_gid == '') {
+                                    list_tranrecon_gid = tranrecon_gid;
+                                }
+                                else if (prv_group_sno != group_sno) {
+                                    list_tranrecon_gid += '^' + tranrecon_gid;
+                                }
+                                else {
+                                    list_tranrecon_gid += '#' + tranrecon_gid;
+                                }
+                            }
+                        }
+                        else {
+                            tranrecon_gid += '#' + slno + '$' + Examount;
+                        }
+
+                        prv_group_sno = group_sno;
+                        //var combined = slno + "$" + Examount + "$" + group_sno
+
+                        //Attribid.push(combined);
+                    }
+
+                    var bulk_tranrecon = list_tranrecon_gid;
+                    var Recongid = $("#ReconName_id").val();
+                    if (Recongid == "") {
+                        Recongid = "0"
+                    }
+                    //var user_code = "admin"
+                    var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+                    $.ajax({
+                        type: "POST",
+                        data: '{Recongid: "' + Recongid + '",bulk_tranrecon: "' + bulk_tranrecon + '",user_code: "' + user_code + '"}',
+                        url: "/ManualMatchOff/AmountMatchedSave",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            $.dialog({
+                                title: 'Impact',
+                                content: response,
+                                type: 'green',
+
+                            });
+                            setTimeout(function () {
+                                $("#amountmatch").data("kendoGrid").dataSource.read();
+                            }, 2000);
+                        },
+                        error: function (er) {
+                        }
+                    });
+                },
+                cancel: function () {
+                },
+            }
+        });
+    }
+    function exportExcel1() {
+        $("#grid").getKendoGrid().saveAsExcel();
+    }
+    function editDetails(e) {
+        debugger
+        window_open();
+    }
+    function window_open() {
+        debugger
+        var table_name = "recon_rpt_vadhoclist"
+        var grid = $("#amountmatch").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var filetype = model.filetype;
+        var tranrecon_gid = model.tranrecon_gid;
+        var tranbrkp_gid = model.tranbrkp_gid;
+        var groupgid = model.group_sno;
+        var user = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+        var user_code = " and mapping_user = \'" + user + "\'";
+        var reportcondition = "and group_sno = " + groupgid + user_code
+        $.ajax({
+            type: "POST",
+            //data: '{filetype: "' + filetype + '",tranrecon_gid:  "' + tranrecon_gid + '",tranbrkp_gid:  "' + tranbrkp_gid + '" }',
+            //url: "/Manualmatch/ManualMatchedSingleView",
+            data: '{table_name: "' + table_name + '",condition:  "' + reportcondition + '" }',
+            url: "/Report/ReportExpenceGrid_Read",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                $("#dialog").kendoWindow();
+                var dialog = $("#dialog").data("kendoWindow");
+                dialog.open().element.closest(".k-window").css({
+                    top: 121,
+                    left: 300, height: 400, width: 900
+                });
+                dialog.title("Manual Match - Rule Based");
+                dialog.bind("open", window_open);
+                debugger
+                $("#exportExcel1").show();
+                var columns = [];
+                var chkval = JSON.parse(Data1);
+                var arr = [];
+                $.each(chkval, function (i, e) {
+                    debugger;
+                    $.each(e, function (key, val) {
+                        arr.push(val);
+                    });
+
+                });
+                if (arr == "No Records Found!" || arr == "Error in Data!") {
+                    alert("No Records found..!");
+                    return false;
+                }
+
+
+                var data = JSON.parse(Data1);
+                // var data2 = JSON.parse(result.Data2);
+                var i = 0;
+
+                var entryIndex = "entries[" + i + "]";
+                for (var key in data[0]) {
+
+                    if (key == "Collection Center Name") {
+                        columns.push({
+                            field: entryIndex,
+                            title: key,
+                            // type: val
+                            //footerTemplate: "Total",
+                            attributes: { style: "text-align: left;" }
+                        });
+                    }
+                    else {
+                        if (key != "Collection Center Name")
+                            columns.push({
+                                field: entryIndex,
+                                title: key,
+                                // type: val
+
+
+                            });
+
+                    }
+                    i = i + 1;
+                    entryIndex = "entries[" + i + "]";
+                }
+
+                var rows = [];
+                var data1 = JSON.parse(Data1);
+
+                $.each(data1, function (i, e) {
+                    var entryArray = [];
+                    $.each(e, function (key, val) {
+
+                        entryArray.push(val);
+                    });
+                    rows.push(kendo.observable({
+                        entries: entryArray
+                    }));
+
+                });
+
+                var viewModel = kendo.observable({
+                    gridRows: rows
+                });
+
+                var configuration = {
+                    //dataBound: onDataBound,
+                    height: 350,
+                    navigatable: true,
+                    groupable: false,
+                    editable: false,
+                    sortable: true,
+                    Scrollable: true,
+                    filterable: false,
+                    pagable: false,
+                    resizable: false,
+                    persistSelection: true,
+                    selectable: "false",
+                    columns: columns,
+                    rows: viewModel,
+                    excel: {
+                        fileName: "Manual Match.xlsx",
+                        filterable: true,
+                        allPages: false
+                    },
+                };
+                $("#example").remove();
+                $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+                var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+                kendo.bind($("#grid"), viewModel);
+
+                var grid = $("#grid").data("kendoGrid");
+                for (var i = 0; i < grid.columns.length; i++) {
+                    if (i != grid.columns.length) {
+                        grid.autoFitColumn(i);  //autofit each column.
+                    }
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+</script>

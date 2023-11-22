@@ -1,0 +1,170 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model  Recon_Model.user_model
+<style>
+     div.k-window {
+         display: inline-block;
+         position: absolute;
+         z-index: 10001;
+         border-style: solid;
+         border-width: 1px;
+         padding-top: 1em;
+         width: 50%;
+         font-weight: normal;
+     }
+
+     .form-horizontal .form-group {
+         margin-right: 25px;
+         margin-left: -15px;
+     }
+
+     .k-edit-form-container {
+         position: relative;
+         width: 100%;
+     }
+
+     .k-state-default {
+         margin-top: 10px;
+     }
+
+     .k-window-action {
+         visibility: hidden !important;
+         margin-left: -220px;
+     }
+     /*.usergroup_kendostyle .k-autocomplete.k-state-default, .k-picker-wrap.k-state-default, .k-numeric-wrap.k-state-default, .k-dropdown-wrap.k-state-default{
+        margin-left: 12px !important;
+     width: 85% !important;
+    }*/
+</style>
+@*<div class="container">
+        <div class="row" >
+            <div class="col-sm-2">
+               @Html.Label("User code", new { style = "font-size: 14px;font-weight: 600 !important; " })
+              </div>
+            <div class="col-sm-2">
+              @Html.TextBoxFor(model => model.user_code, new { style = "height:25px;font-weight:normal; ", @class = "form-control" })
+            </div>
+            <div class="col-sm-2">
+            <div class="col-sm-2">
+                    @Html.Label("User Name", new { style = "font-size: 14px;font-weight: 600 !important;" })
+                </div>
+            <div class="col-sm-2">
+                @Html.TextBoxFor(model => model.user_name, new { style = "height:25px;font-weight:normal;", @class = "form-control" })
+            </div>
+
+        </div>
+    </div>*@
+<div id="spinner">
+    <img src="~/Content/images/spinner.gif" /> <br /><span>Please Wait...</span>
+</div>
+<div class="container" id="overlay">
+    <div>
+        <table style="border:1px;margin-left:-12px;">
+            <tr>
+                <td>@Html.Label("User code", new { style = "width:80px;margin-left: 18%;margin-top:2%;font-size: 14px;font-weight: 600 !important; " })</td>
+                <td>@Html.TextBoxFor(model => model.user_code, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 1%; ", @class = "form-control" })</td>
+                <td>@Html.Label("User Name", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:26%;" })</td>
+                <td>@Html.TextBoxFor(model => model.user_name, new { style = "height:25px;width:175px;font-weight:normal;margin-left:-1%", @class = "form-control" })</td>
+            </tr>
+            <tr style="height:20px;margin-left:2px;"></tr>
+            <tr>
+                <td>@Html.Label("User Type", new { style = "font-size: 14px;font-weight: 600 !important; width:89px;margin-left: 11%;margin-top:2px; " })</td>
+
+                <td>
+                    @(Html.Kendo().DropDownList()
+                                             .Name("user_type")
+                                             .DataTextField("user_type_desc")
+                                             .DataValueField("user_type")
+                                             .HtmlAttributes(new { @class = "usertype_kendostyle", style = "height:25px;width: 197px;font-weight: normal;margin-left:0px;" })
+                                             .DataSource(source => { source.Read(read => { read.Action("usertypedrop", "Admin"); }).ServerFiltering(true); })
+                    )
+                </td>
+
+                <td>@Html.Label("User Group", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left: 26%;margin-top:12px;" })</td>
+                <td>
+                    @(Html.Kendo().DropDownList()
+                                             .Name("usergroup_gid")
+                                             .DataTextField("usergroup_code")
+                                             .DataValueField("usergroup_gid")
+                                             .HtmlAttributes(new { @class = "usergroup_kendostyle", style = "height:25px;width: 198px;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("usergroupdrop", "Admin"); }).ServerFiltering(true); })
+                    )
+                </td>
+
+            </tr>
+
+            <tr style="height:20px"></tr>
+            <tr>
+                <td>@Html.Label("Address", new { style = "width:80px;margin-left: 18%;margin-top:3%;font-size: 14px;font-weight: 600 !important; " })</td>
+                <td>@Html.TextBoxFor(model => model.user_address, new { style = "height:25px;width: 175px;font-weight:normal;margin-left: 1%;margin-top:10px; ", @class = "form-control" })</td>
+                <td>@Html.Label("Contact No", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:26%;" })</td>
+                <td>@Html.TextBoxFor(model => model.user_contact_no, new { style = "height:25px;width:175px;font-weight:normal;margin-left:-1%", maxlength = "10", @class = "form-control" })</td>
+            </tr>
+            <tr style="height:20px"></tr>
+            <tr>
+                <td>@Html.Label("Email Id", new { style = "width:80px;margin-left: 18%;margin-top:3%;font-size: 14px;font-weight: 600 !important; " })</td>
+                <td>@Html.TextBoxFor(model => model.user_emailid, new { style = "height:25px;width: 175px;font-weight:normal;margin-left:1%;margin-top:10px; ", @class = "form-control" })</td>
+                <td>@Html.Label("City", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:28%;" })</td>
+                <td>@Html.TextBoxFor(model => model.city_name, new { style = "height:25px;width:175px;font-weight:normal;margin-left:-1%", @class = "form-control" })</td>
+            </tr>
+
+            <tr style="height:20px"></tr>
+            <tr>
+                <td>@Html.Label("State", new { style = "width:80px;margin-left: 18%;font-size: 14px;font-weight: 600 !important;margin-top:11% " })</td>
+                <td>@Html.TextBoxFor(model => model.state_name, new { style = "height:25px;width: 175px;font-weight:normal;margin-left:1%;margin-top:10px; ", @class = "form-control" })</td>
+                <td>@Html.Label("Pincode", new { style = "font-size: 14px;font-weight: 600 !important; width:142px;margin-left:26%;" })</td>
+                <td>@Html.TextBoxFor(model => model.pin_code, new { style = "height:25px;width:175px;font-weight:normal;margin-left:-1%", @class = "form-control" })</td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div class="row" style="margin-top:4%;">
+
+        <div class="col-sm-2" style="margin-top:2%;margin-left:-3%;">
+            @Html.Label("Recon", new { style = "font-size: 14px;font-weight: 600 !important; width:80px;margin-left:21%;margin-top:2px; " })
+        </div>
+        <div class="col-sm-7" style="margin-left:13%;width:83%;margin-top:-6%;">
+
+            @(Html.Kendo().DropDownList()
+                                        .Name("ReconName_id")
+                                        .HtmlAttributes(new { style = "width:280px" })
+                                        .DataTextField("ReconName")
+                                        .DataValueField("ReconName_id")
+                                       .Template("<input type='checkbox' id='#:data.ReconName_id#' name='dropdowncheck' value='#:data.ReconName#' /> #:data.ReconName#")
+                                        .Events(e => e.Select("onSelect"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("ApplyRecontype_drop", "ApplyRule");
+                                                /// read.Action("getuserrecon", "Admin");
+                                            });
+                                        }))
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        debugger;
+
+
+        $('#spinner').fadeIn();
+        var delay = 1000;
+        setTimeout(function () {
+            $('#spinner').fadeOut("slow");
+            $("#overlay").fadeIn("fadeIn");
+        },
+            delay
+        );
+
+    });
+
+</script>
+
+
+
+
+

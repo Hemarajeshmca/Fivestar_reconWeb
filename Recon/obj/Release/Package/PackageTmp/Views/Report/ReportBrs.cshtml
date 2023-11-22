@@ -1,0 +1,467 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+
+    <style>
+        .btn-success {
+            padding: 2px 16px 4px 10px;
+        }
+
+              .k-popup.k-list-container {
+    width:210px !important;
+    }
+ 
+  
+
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .balance {
+            color: blue;
+        }
+
+        .total {
+            color: red;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        /*a.k-link {
+            color: #fff !important;
+        }*/
+        .k-grid-header th.k-header > .k-link{
+             color:#fff;
+             font-size:10px;
+            
+         }
+        .panel-body {
+            padding: 0px !important;
+        }
+        .k-grid td {
+            font-size:17px;
+        }
+        .k-grid-header th.k-header > .k-link {
+             font-size:14px;
+        }
+          .k-state-active {
+            display: block;
+        }
+        .k-webkit {
+            overflow: hidden !important;
+        }
+       
+
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Recon-Between A/cs</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                @*<label for="trandate" class="title">Tran Date</label>*@
+                                @Html.Label("Tran Date", new { style = "font-size: 14px;font-weight: 600 !important; " })
+                                <input class="cusDate1" data-role='datepicker' id="trandate" name="trandate" style="width:90%" />
+                          
+                           </div>
+                            <div class="col-sm-3">
+                                @*<label for="filetype" class="title">Recon Name</label>*@
+                                @Html.Label("Recon Name", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+                                @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                     .HtmlAttributes(new { style = "width: 90%;font-weight: normal" })
+                                                    @*.DataSource(source => { source.Read(read => { read.Action("Recon_type_desc", "ApplyRule", new { fieldtype = "B", process = "Y" }); }).ServerFiltering(true); }))*@
+                                .DataSource(source => { source.Read(read => { read.Action("getuserrecon_type", "Report", new { fieldtype = "B" }); }).ServerFiltering(true); }))
+
+                            </div>
+
+                            <div class="col-sm-6">
+                                <button type="button" id="Runprocess" onclick="validation()" class="btn btn-success" style="margin-top: 25px;margin-left:-18px;"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>&nbsp;
+                                <button type="button" id="Amount_tally" onclick="AmountTally('Y')" value="Y" class="btn btn-primary" style="margin-top: 25px;margin-left:1px">&nbsp;Recon Tallied</button>&nbsp;
+                                <button type="button" id="Amount_not_tally" onclick="AmountTally('N')" value="N" class="btn btn-primary" style="margin-top: 24px;">Recon NotTallied&nbsp;</button>
+                                @*<button type="button" id="month_brsExcel" onclick="monthbrs()" class="btn btn-primary" style="margin-top: 25px;margin-left:1px;">Month Brs&nbsp;</button>
+                                <button type="button" id="Daily_brsExcel" onclick="Dailybrs()" class="btn btn-primary" style="margin-top: 24px;">Daily Brs<i class=" fa fa-file-excel-o" aria-hidden="true" style="margin-left:10%;"></i>&nbsp;</button>*@
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary" style="margin-top: 24px;"><i class=" fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                            </div>
+                            <div class="row" style="padding-bottom:20px;">
+                                <div class="col-sm-12">
+                <div class="panel-body" style="max-height:100%;margin-top:6px;margin-left:-18px;width:100% !important">
+                    <div class="col-md-12" id="Process">
+                        <div class="form-group">
+
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.Report_model>().Name("ReportBrs")
+                        .HtmlAttributes(new { style = "height:360px;width:104%;font-size:14px;" })
+                                        //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                        .Columns(columns =>
+                            {
+                                columns.Bound(m => m.brs_gid).Title("Brs gid").Width(50).Hidden();
+                                columns.Bound(m => m.particular).Title("Particular").Width(90).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;" });
+                                columns.Bound(m => m.amount).Title("Amount").Width(30).HtmlAttributes(new { style = "text-align:right;font-size:14px;font-weight:bold;" }); ;
+                                columns.Bound(m => m.accmode).Title("Account Mode").Width(30).HtmlAttributes(new { style = "font-size:14px;font-weight:bold;" }); ;
+                                columns.Bound(m => m.bal_amount).Title("Balance Amount").Width(30).HtmlAttributes(new { style = "text-align:right;font-size:14px;font-weight:bold;" }); ;
+                            })
+                      .Editable(editable =>
+                                            { editable.Mode(GridEditMode.PopUp).TemplateName("knockoffpop"); })
+
+                      //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                      .Excel(excel => excel
+                         .AllPages(true)
+                         .FileName("Recon-Between A/cs.xlsx"))
+                                        //.Sortable()
+                     .Selectable()
+                     .Scrollable()
+                     .Events(e => e.DataBound("onDataBound"))
+                     .DataSource(dataSource => dataSource
+                     .Ajax()
+                     .PageSize(20)
+                     .Model(model =>
+                        {
+                            model.Id(p => p.brs_gid);
+                        })
+                    .Read(read => read.Action("ReportreportBrs_Read", "Report").Data("getslno"))
+                     ))
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+                                </div>
+                        @*<div class="row" style="margin-top:-3%;">
+                            <div class="col-sm-3">
+
+                            </div>
+                            <div class="col-sm-3">
+
+                            </div>
+                            @*<div class="col-sm-6">
+                                <button type="button" id="Amount_tally" onclick="AmountTally('Y')" value="Y" class="btn btn-primary" style="margin-left:44%";>&nbsp;Recon Tallied</button>&nbsp;
+                                <button type="button" id="Amount_not_tally" onclick="AmountTally('N')" value="N" class="btn btn-primary">Recon NotTallied&nbsp;</button>
+                            </div>
+                          
+                           
+                        </div>*@
+                            </div>
+
+                    </div>
+              
+
+            
+                </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+
+
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+   
+
+    $(document).ready(function () {
+        kendodate_format();
+   
+        $("#trandate").kendoDatePicker({
+            value:new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        //$("#period_to").kendoDatePicker({
+        //    value: new Date(),// sets max date
+        //    format: "dd-MM-yyyy"
+        //});
+        getslno();
+        $("#exportExcel").hide();
+    });
+    function exportExcel() {
+        //$("#ReportBrs").getKendoGrid().saveAsExcel();
+        debugger;
+        var Tran_Date = getFormated_StringDate($("#trandate").val());
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        var recon_name= $("#ReconName_id").data("kendoDropDownList").text();
+
+
+        window.location.href = '@Url.Action("kendogrid_download", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + recon_gid + '&recon_name='+recon_name +'';
+    }
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+    function monthbrs() {
+        debugger;
+        var Attribid = [];
+        var arrstring = "";
+        var Tran_Date = getFormated_StringDate($("#trandate").val());
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+       
+
+        window.location.href = '@Url.Action("MonthBRS_Download", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + recon_gid+'';
+        @*$.ajax({
+            type: "POST",
+            url: '@Url.Action("MonthBRS_Download", "Report")',
+            dataType: "json",
+            data: '{TranDate:"' + Tran_Date + '",Recon_gid:"' + recon_gid + '"}',
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+                debugger;
+                dataone = Data1;
+
+               
+            }
+        });*@
+    }
+    function Dailybrs()
+    {
+        debugger;
+        var Tran_Date = getFormated_StringDate($("#trandate").val());
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+
+        window.location.href = '@Url.Action("DailyBRS_Download", "Report")?TranDate=' + Tran_Date + '&Recon_gid=' + recon_gid + '';
+    }
+    function validation() {
+        debugger;
+        var msg = "";
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
+        if ($("#trandate").val() != "") {
+
+        }
+        else {
+            msg += "Select Tran Date";
+        }
+
+        if ($("#ReconName_id").val() != "") {
+
+        }
+        else {
+            msg += " Select Recon Name";
+        }
+
+        if (recon_gid == "0" || recon_gid == undefined || recon_gid == "") {
+            $.alert({
+                title: 'Impact',
+                content: "Recon name should not be Empty",
+                type: 'blue',
+
+
+            });
+            return;
+        }
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Runprocess() {
+        debugger;
+        $("#ReportBrs").data("kendoGrid").dataSource.read();
+        $("#exportExcel").show();
+    }
+
+    function getslno() {
+        var trandate = $('#trandate').val();
+        var formatted_trandate = getFormated_StringDate(trandate);
+        var Recon_gid = $("#ReconName_id").val();
+        if (Recon_gid == "") {
+            Recon_gid = 0;
+        }
+        return { trandate: formatted_trandate, Recon_gid: Recon_gid }
+    }
+    function AmountTally(result)
+    {
+        var _recon_gid = $("#ReconName_id").val();
+        var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+        var talliedflag = result;
+        debugger;
+        if (result == "Y") {
+            $.confirm({
+                icon: 'fa fa-warnings',
+                title: 'Recon Tallied',
+                autoClose: 'cancel|10000',
+                //theme: 'dark',
+                animationSpeed: 700,
+                content: 'Are you sure you want to continue?',
+                type: 'blue',
+                buttons: {
+                    confirm: function () {
+                        debugger;
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            url: '@Url.Action("Report_recontallied", "Report")',
+                            data: "{recon_gid:'" + _recon_gid + "',recon_tallied:'" + talliedflag + "',usercode:'" + user_code + "'}",
+                            success: function (response) {
+                                debugger;
+                                if (response[1] > 0) {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'green',
+                                        animationSpeed: 700,
+                                    });
+
+                                }
+                                else {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'blue',
+                                        animationSpeed: 700,
+                                    });
+                                    preventCloseOnSave = true;
+                                }
+                            },
+                        });
+
+
+                    },
+
+
+                    cancel: function () {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Cancelled',
+                            //  theme: 'dark',
+                            content: 'Cancelled.!',
+                            type: 'blue',
+                            // animationSpeed: 700,
+                        });
+
+                    }
+                },
+            });
+        }
+        else {
+            $.confirm({
+                icon: 'fa fa-warnings',
+                title: 'Recon Not Tallied',
+                autoClose: 'cancel|10000',
+                //theme: 'dark',
+                animationSpeed: 700,
+                content: 'Are you sure you want to continue?',
+                type: 'blue',
+                buttons: {
+                    confirm: function () {
+                        debugger;
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            url: '@Url.Action("Report_recontallied", "Report")',
+                            data: "{recon_gid:'" + _recon_gid + "',recon_tallied:'" + talliedflag + "',usercode:'" + user_code + "'}",
+                            success: function (response) {
+                                debugger;
+                                if (response[1] > 0) {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'green',
+                                        animationSpeed: 700,
+                                    });
+
+                                }
+                                else {
+                                    $.alert({
+                                        icon: 'fa fa-success',
+                                        title: 'Impact',
+                                        content: response[0],
+                                        type: 'blue',
+                                        animationSpeed: 700,
+                                    });
+                                    preventCloseOnSave = true;
+                                }
+                            },
+                        });
+
+
+                    },
+
+
+                    cancel: function () {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Cancelled',
+                            //  theme: 'dark',
+                            content: 'Cancelled.!',
+                            type: 'blue',
+                            // animationSpeed: 700,
+                        });
+
+                    }
+                },
+            });
+        }
+    }
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].particular) {
+                grid.tbody.find("tr[data-uid='" + currentRecords[0].uid + "']").addClass("balance");
+                grid.tbody.find("tr[data-uid='" + currentRecords[2].uid + "']").addClass("total");
+                grid.tbody.find("tr[data-uid='" + currentRecords[6].uid + "']").addClass("total");
+                grid.tbody.find("tr[data-uid='" + currentRecords[12].uid + "']").addClass("total");
+                grid.tbody.find("tr[data-uid='" + currentRecords[8].uid + "']").addClass("total");
+                grid.tbody.find("tr[data-uid='" + currentRecords[14].uid + "']").addClass("balance");
+                grid.tbody.find("tr[data-uid='" + currentRecords[15].uid + "']").addClass("total");
+            }
+        }
+    }
+</script>

@@ -1,0 +1,100 @@
+﻿@{
+    var p1 = "";
+    List<Recon_Model.user_model.menu> menuList = new List<Recon_Model.user_model.menu>();
+    //menuList = DMS.Service.UserGroups_Service.GetMenu();
+    var userid = System.Web.HttpContext.Current.Session["usergroup_code"].ToString();
+    Recon.Controllers.AdminController objadmin = new Recon.Controllers.AdminController();
+    menuList = objadmin.DynamicMenu(userid);
+    int i = menuList.Count;
+    
+    //if(i==0)
+    //{
+    //     p1 = "on";
+    //}
+  
+    
+}
+@*<input type="hidden" id="no_menu" value=@p1>*@
+<ul class="sidebar-menu" data-widget="tree" style="">
+   
+    @foreach (var mp in menuList.Where(p => p.parent_menu_gid == 0))
+    {
+        @*<li class="active treeview">*@
+        if (mp.menu_name != "Exception Theming")
+        {
+            <li class="treeview">
+                @if (menuList.Count(p => p.parent_menu_gid == mp.menu_gid) > 0)
+                {
+                    if (mp.rights_flag == true)
+                    {
+                        <a href="@mp.menu_url">@mp.menu_name<i class="fa fa-angle-left fa-pull-left"></i></a>
+
+                        <ul class="treeview-menu" style="display:none;">
+                            @RenderMenuItem(menuList, mp)
+                        </ul>
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+
+                    <a href="@mp.menu_url">@mp.menu_name</a>
+
+                }
+            </li>
+        }
+        if (mp.menu_name == "Exception Theming" && mp.rights_flag == true)
+        {
+            
+            <li class="dropdown">
+                <a href="@mp.menu_url">@mp.menu_name</a>
+            </li>
+        }
+
+    }
+</ul>
+@helper RenderMenuItem(List<Recon_Model.user_model.menu> menuList, Recon_Model.user_model.menu mi)
+{
+    foreach (var cp in menuList.Where(p => p.parent_menu_gid == mi.menu_gid))
+    {
+        <li class="dropdown">
+            @if (menuList.Count(p => p.parent_menu_gid == cp.menu_gid) > 0)
+            {
+                <a href="@cp.menu_url" class="dropdown-toggle collapsible2" data-toggle="collapse">@cp.menu_name<i class="fa fa-angle-left fa-pull-left"></i></a>
+                <ul class="treeview-menu" style="display:none;">
+                    @RenderMenuItem(menuList, cp)
+                </ul>
+            }
+            else
+            {
+                if (cp.rights_flag == true)
+                {
+                    <a style="max-height:32px;position:relative;" href="@cp.menu_url">@cp.menu_name</a>
+                }
+                else
+                {
+
+                }
+            }
+
+        </li>
+    }
+
+}
+
+@*<script>
+
+    debugger;
+  
+    var res = $("#no_menu").val();
+    if(res=="on")
+    {
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+      
+    }
+</script>*@

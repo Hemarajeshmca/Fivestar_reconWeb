@@ -1,0 +1,256 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel-body" style="padding-top:6px;padding-bottom:2px">
+                        <div class="box box-orange" style="height:auto;padding:10px;">
+                            <div class="box-header text-center with-border">
+                                <h3 class="box-title">File Import</h3>
+                            </div>
+                            <div class="row" style="padding-top:10px;margin-left:5px;">
+                                <div class="col-sm-4" hidden>
+                                    <div class="form-group">
+                                        <label for="Actype" class="title">File Type</label><br />
+                                        <input type="radio" name="AccType" onchange="filetype()" value="T" id="AccType" checked> Trans. File
+                                        <input type="radio" name="AccType" onchange="filetype()" value="B" id="AccType" style="margin-left: 10px"> Balance File
+                                        <input type="radio" name="AccType" onchange="filetype()" value="S" id="AccType" style="margin-left: 10px"> Supporting File
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group" style="padding-top:5px" id="Reconfile" hidden>
+                                        <label for="filetype" class="title">Recon Name</label>
+                                        @(Html.Kendo().DropDownList()
+                                                    .Name("recon_gid")
+                                                    .DataTextField("recon_name")
+                                                    .DataValueField("recon_gid")
+                                                //.Events(e => e.Change("reconname_change"))
+                                    .HtmlAttributes(new { style = "height:25px;width: 267px;font-weight: normal" })
+                                            .DataSource(source => { source.Read(read => { read.Action("ReconnTypeList", "FileImport"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group" style="padding-top:5px" id="supfile" hidden>
+                                        <label for="filetype" class="title">Support File Type</label>
+                                        @(Html.Kendo().DropDownList()
+                                                    .Name("tranbrkptype_gid")
+                                                     .DataTextField("tranbrkptype_name")
+                                                     .DataValueField("tranbrkptype_gid")
+                                    .HtmlAttributes(new { style = "height:25px;width: 267px;font-weight: normal" })
+                                            .DataSource(source => { source.Read(read => { read.Action("GetSupportingFile", "FileImport"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="noofcolumns" class="title">No of Coloumns</label><br />
+                                        <input type="number" name="noofcolumns" value="0" id="noofcolumns"> 
+                                    </div>
+                                    </div>
+                            </div>
+                            <div class="row" style="padding-top:10px;margin-left:5px;">
+                                <div class="col-sm-4">
+                                    <form id="theuploadformempff">
+                                        <div class="form-group">
+                                            <label for="Filename" class="title">File Name</label>
+                                            <input type="file" class="form-control input-lg browse btn btn-primary input-lg" name="File_Import" id="File_Import" style="width: 90%;height: 30px;">
+                                            <label class="col-md-6 control-label" id="FileName"></label>
+                                            @*<input class="text-box single-line col-sm-3" id="Filename" name="Filename" type="text" value="">
+                                                <input type="file" name="file" id="farmerfile" src="~/images/noimage.png" class="control-label" accept="image/x-png, image/gif, image/jpeg" style="margin-left:482px" />*@
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-primary" style="margin-top:23px;" onclick="FileImport()"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Import</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script>
+
+    $(document).ready(function () {
+
+        //$("#supfile").hide();
+        //$("#Reconfile").hide();
+        filetype();
+    })
+
+    function FileImport() {
+        debugger;
+        var filesize = $('#File_Import').val();
+
+        if (filesize == "" || filesize == null) {
+            $.alert({
+                title: 'Impact',
+                content: 'Choose corresponding file.!',
+                type: 'blue',
+            });
+            return false;
+        }
+
+        var Filsize = $('#File_Import')[0].files[0].size;
+        //if (Filsize > 5242880) {
+        //    $.alert({
+        //        title: 'Impact',
+        //        content: 'File size should be below in 5 MB.!',
+        //        type: 'blue',
+        //    });
+        //    return false;
+        //}
+
+        var fileData = new FormData();
+        var fileUpload = $("#File_Import").get(0);
+        var AccType = $("input[name='AccType']:checked").val();
+        var files = fileUpload.files;
+
+        var ReconId = $("#recon_gid").data("kendoDropDownList").value();
+        var SupportId = $("#tranbrkptype_gid").data("kendoDropDownList").value();
+
+        if (AccType == "S") {
+            if (ReconId == "0" || ReconId == null) {
+                $.alert({
+                    title: 'Impact',
+                    content: 'Please Select Recon name.!',
+                    type: 'blue',
+                });
+                return false;
+            }
+            if (SupportId == "0" || SupportId == null) {
+                $.alert({
+                    title: 'Impact',
+                    content: 'Please Select supporting file.!',
+                    type: 'blue',
+                });
+                return false;
+            }
+        }
+        var noofcolumn = $("#noofcolumns").val();
+        // Looping over all files and add it to FormData object
+        for (var i = 0; i < files.length; i++) {
+            fileData.append(files[i].name, files[i]);
+        }
+        fileData.append('AccType', AccType);
+        fileData.append('ReconId', ReconId);
+        fileData.append('SupportId', SupportId);
+        fileData.append('Noofcolumn', noofcolumn);
+        $.ajax({
+            url: '@Url.Action("Upload_FileImportTest", "FileImport")',
+            type: "POST",
+            contentType: false,
+            processData: false,
+
+            data: fileData,
+            success: function (result) {
+                debugger;
+                if (result == 'failed') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Upload failed.!',
+                        type: 'blue',
+                    });
+                    // return false;
+                }
+                else if (result == 'invalid file') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invaild file.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+
+                else if (result == 'mandatory fields empty') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Mandatory fields are empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (result == 'failed') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Upload failed.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (result == 'invalid header name') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invalid header name.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else
+                    $.alert({
+                        title: 'Impact',
+                        content: result,
+                        type: 'blue',
+                    });
+                return false;
+
+            },
+            //error: function (error) {
+            //    $.alert({
+            //        title: 'Impact',
+            //        content: 'Error.!',
+            //        type: 'red',
+            //    });
+            //}
+        });
+
+    }
+    function filetype() {
+        debugger;
+        //var val = document.getElementById("supportfile").value
+        var AccType = $("input[name='AccType']:checked").val();
+        if (AccType == "S") {
+            //$("#Reconfile").show();
+            //$("#supfile").show();
+            var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+            tranbrkptype_gid.enable(true);
+            var recon_gid = $("#recon_gid").data("kendoDropDownList");
+            recon_gid.enable(true);
+
+        }
+        else {
+            var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+            tranbrkptype_gid.enable(false);
+            var recon_gid = $("#recon_gid").data("kendoDropDownList");
+            recon_gid.enable(false);
+        }
+
+    }
+
+</script>

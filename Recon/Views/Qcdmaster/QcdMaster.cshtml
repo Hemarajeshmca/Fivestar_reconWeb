@@ -1,0 +1,535 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+@model Recon_Model.QcdMaster
+@{
+    var data = ViewBag.Message;
+}
+  
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+
+    <style>
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+        label {
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 5px;
+        }
+             .k-popup.k-list-container {
+         width:220px !important;
+     }
+              .k-pager-sizes {
+            display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 60%;
+            font-weight: normal;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 120%;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-window > div.k-popup-edit-form {
+            padding: 1em 0;
+            overflow: hidden;
+        }
+
+        a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+          a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+            color: #357ab8;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+         .k-state-active {
+            display: block;
+        }
+          .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Qcd Master</h3>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-3" style="margin-left:4px;">
+                                @Html.Label("QCD Master Code", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+
+                                @(Html.Kendo().DropDownList()
+                                    .Name("Qcdmaster")
+                                        //.DataTextField("ParentMasterSyscode")
+                                     .DataTextField("masterName")
+                                             .DataValueField("masterSyscode")
+                                    .HtmlAttributes(new { style = "width:300px;" }).Events(e => e.Change("griddependload"))
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("QcdMasterRead", "QcdMaster");
+                                        });
+                                    }))
+                            </div>
+
+                            <div class="col-sm-3" style="margin-left:-9px;">
+                                <label for="Filename" class="title">File Name</label>
+                                <input type="file" class="form-control input-lg browse btn btn-primary input-lg" name="File_Import" id="File_Import" style="width:100%;height: 30px;" multiple="true">
+                                <label class="col-md-6 control-label" id="FileName"></label>
+                            </div>
+
+
+                            <div class="col-sm-3" style="margin-top:25px;margin-left:-11px;">
+                                <button type="button" class="btn btn-primary" onclick="Fileupload()">&nbsp;Import</button>
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class=" fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            @*Grid load*@
+                            <div class="col-sm-12" style="margin-top:20px;">
+                               
+                                    <div>
+                                        @(Html.Kendo().Grid<Recon_Model.QcdMaster>().Name("Qcdmaster_gridload")
+                                .HtmlAttributes(new { style = "height:380px;font-weight:normal" })
+                                .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.masterGid).Title("SI.No").Width(30).Hidden();
+                                    columns.Bound(m => m.ParentMasterSyscode).Title("Parent Code").Width(80);
+                                    columns.Bound(m => m.masterSyscode).Title("Master Syscode").Width(100);
+                                    columns.Bound(m => m.masterCode).Title("Master Code").Width(80);
+                                    columns.Bound(m => m.masterShortCode).Title("Master Short Code").Width(80);
+                                    columns.Bound(m => m.masterName).Title("Master Name").Width(80);
+                                    columns.Bound(m => m.mastermutiplename).Title("Master MutipleName").Width(80);
+                                    columns.Bound(m => m.active_status).Title("Status").Width(80);
+                                   
+                                    columns.Command(cmd =>
+                                    {
+                                       cmd.Edit().Text("<span class='fa fa-pencil' style='font-size: 12px;'>");
+                                       cmd.Custom("Delete").Text("<span class='fa fa-trash' style='font-size: 12px;'>").Click("myDeleteJs");
+                                    }).Title("Action").Width(40);
+                                    
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("QcdMaster_popup"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                              .Excel(excel => excel
+                                                 .AllPages(true)
+                                                 .FileName("Branch code"))
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                             // .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p =>p.masterGid))
+                                            .Create(Create => Create.Action("Qcdmaster_Save", "Qcdmaster", new { _action = "Insert" }).Data("parent_code"))
+                                            .Read(read => read.Action("QcdMasterGridRead", "Qcdmaster").Data("getid"))
+                                            .Update(update => update.Action("Qcdmaster_Save", "Qcdmaster", new { _action = "update" }).Data("parent_code"))
+                             ))
+                                    </div>
+                                
+                            </div>
+
+
+                          
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+    var action = "";
+    $(document).ready(function () {
+        debugger;
+        
+        //var data = ViewBag.Message;
+        //debugger;
+     
+       
+                
+        $("#Qcdmaster_gridload").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd2);
+        
+        
+        var grid = $("#Qcdmaster_gridload").data("kendoGrid");
+        grid.bind("edit", function (event) {
+            debugger;
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+            //var editWindow = this.editable.element.data("kendoWindow");
+            //editWindow.unbind("close");
+            //editWindow.bind("close", onWindowEditClose);
+            debugger;
+            if (event.model.isNew() != true) {
+                action = "Update";
+                //$("#btn_saveview").hide();
+               
+                 
+           }
+                else {
+                $("#parentcode").val($("#Qcdmaster").data("kendoDropDownList").text());
+               // action = "Insert";
+                    //$("#btn_saveview").show();
+                }
+            
+        });
+        //$("#Qcdmaster_gridload").data("kendoGrid").dataSource.read();
+    });
+    
+    function ViewMode() {
+        debugger;
+    }
+    function exportExcel() {
+        debugger;
+        $("#Qcdmaster_gridload").getKendoGrid().saveAsExcel();
+    }
+    function getid() {
+        debugger;
+        var master_code = $("#Qcdmaster").data("kendoDropDownList").value();
+
+        return { mastercode: master_code }
+    }
+    function Fileupload() {
+        debugger;
+        var fileData = new FormData();
+        var fileUpload = $("#File_Import").get(0);
+        var files = fileUpload.files;
+
+        for (var i = 0; i < files.length; i++) {
+            fileData.append(files[i].name, files[i]);
+        }
+       
+        if (files.length == 0)
+        {
+            $.alert({
+                title: 'Impact',
+                content: 'please Choose a File!',
+                type: 'red',
+            });
+            return false;
+        }
+
+        $.ajax({
+            url: '@Url.Action("Fileupload", "Qcdmaster")',
+            type: "POST",
+            contentType: false,
+            processData: false,
+
+            data: fileData,
+            success: function (result) {
+                debugger;
+                var validation = result[0].split(",");
+                //if (result == 'failed') {
+                //    $.alert({
+                //        title: 'Impact',
+                //        content: 'Upload failed.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+                if (validation[0] == 'invalid file' || validation[1] == 'invalid file' || validation[2] == 'invalid file' || validation[3] == 'invalid file' || validation[4] == 'invalid file' || validation[3] == 'invalid file' || validation[4] == 'invalid file' || validation[5] == 'invalid file' || validation[6] == 'invalid file') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invaild file.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+
+                else if (validation[0] == 'Invalid parent master syscode' || validation[1] == 'Invalid parent master syscode' ||validation[2] == 'Invalid parent master syscode' ||validation[3] == 'Invalid parent master syscode' ||validation[4] == 'Invalid parent master syscode' ||validation[5] == 'Invalid parent master syscode' ||validation[6] == 'Invalid parent master syscode' ) {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invalid parent master syscode',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (validation[0] == 'Blank Master Syscode'||validation[1] == 'Blank Master Syscode'||validation[2] == 'Blank Master Syscode'||validation[3] == 'Blank Master Syscode'||validation[4] == 'Blank Master Syscode'||validation[5] == 'Blank Master Syscode'||validation[6] == 'Blank Master Syscode') {
+                   $.alert({
+                       title: 'Impact',
+                       content: 'Blank Master Syscode',
+                       type: 'blue',
+                   });
+                   return false;
+               }
+
+                else if (validation[0] == 'Blank Master short Code'||validation[1] == 'Blank Master short Code'||validation[2] == 'Blank Master short Code'||validation[3] == 'Blank Master short Code'||validation[4] == 'Blank Master short Code'||validation[5] == 'Blank Master short Code'||validation[6] == 'Blank Master short Code') {
+                   $.alert({
+                       title: 'Impact',
+                       content: 'Blank Master short Code',
+                       type: 'blue',
+                   });
+                   return false;
+               }
+                else if (validation[0] == 'Blank Master Name'||validation[1] == 'Blank Master Name'||validation[2] == 'Blank Master Name'||validation[3] == 'Blank Master Name'||validation[4] == 'Blank Master Name'||validation[5] == 'Blank Master Name'||validation[6] == 'Blank Master Name') {
+                   $.alert({
+                       title: 'Impact',
+                       content: 'Blank Master Name',
+                       type: 'blue',
+                   });
+                   return false;
+               }
+                else if (validation[0] == 'Blank MasterMultiplte Name' || validation[1] == 'Blank MasterMultiplte Name' || validation[2] == 'Blank MasterMultiplte Name' || validation[3] == 'Blank MasterMultiplte Name' || validation[4] == 'Blank MasterMultiplte Name' || validation[5] == 'Blank MasterMultiplte Name' || validation[6] == 'Blank MasterMultiplte Name') {
+                   $.alert({
+                       title: 'Impact',
+                       content: 'Blank MasterMultiplte Name',
+                       type: 'blue',
+                   });
+                   return false;
+               }
+
+                else if (validation[0] == 'Invalid active status'||validation[1] == 'Invalid active status'||validation[2] == 'Invalid active status'||validation[3] == 'Invalid active status'||validation[4] == 'Invalid active status'||validation[5] == 'Invalid active status'||validation[6] == 'Invalid active status') {
+                   $.alert({
+                       title: 'Impact',
+                       content: 'Invalid active status',
+                       type: 'blue',
+                   });
+                   return false;
+               }
+                else
+                    $.alert({
+                        title: 'Impact',
+                        content:'File Imported Successfully',
+                        type: 'blue',
+                    });
+                
+                return false;
+
+
+            },
+            error: function (error) {
+                $.alert({
+                    title: 'Impact',
+                    content: 'Error.!',
+                    type: 'red',
+                });
+            }
+        });
+          
+    }
+    function onRequestEnd2(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //$("#applyruledtl_gid").val(applyruledtlid);
+                $("#Qcdmaster_gridload").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSavebase = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //$("#applyruledtl_gid").val(applyruledtlid);
+                $("#Qcdmaster_gridload").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSavebase = true;
+            }
+        }
+    }
+
+    //function updateQcdpopup() {
+    //    debugger;
+    //}
+
+    function griddependload() {
+        debugger;
+        $("#Qcdmaster_gridload").data("kendoGrid").dataSource.read();
+    }
+
+    function myDeleteJs() {
+        var grid = $("#Qcdmaster_gridload").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        debugger;
+        var action = "Delete";
+        
+         var Qcdmastergrid = {};
+         Qcdmastergrid.masterGid = (model.masterGid);
+         Qcdmastergrid.masterSyscode = (model.masterSyscode);
+         Qcdmastergrid.masterCode = (model.masterCode);
+         Qcdmastergrid.masterShortCode = (model.masterShortCode);
+         Qcdmastergrid.masterName = (model.masterName);
+         Qcdmastergrid.ParentMasterSyscode = (model.ParentMasterSyscode);
+         Qcdmastergrid.action = "Delete";
+
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("SetQcdmaster_delete", "QcdMaster")',
+                        
+                       data: JSON.stringify(Qcdmastergrid),
+                     
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: "Records deleted successfully",
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+
+
+    function SaveQcdpopup() {
+        debugger;
+     
+        var res = $("#Qcdmaster_gridload").data("kendoGrid");
+        res.saveChanges();
+
+    }
+       
+
+    function parent_code()
+    {
+        debugger;
+        var parentcode = $("#Qcdmaster").data("kendoDropDownList").value();
+
+        return { parent_code: parentcode }
+    }
+
+
+    
+
+    function CloseQcdpopup() {
+        debugger;
+      $("#Qcdmaster_gridload").data("kendoGrid").dataSource.read();
+    }
+
+</script>
+
+
+
+
+
+

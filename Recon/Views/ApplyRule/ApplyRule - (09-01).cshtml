@@ -1,0 +1,2453 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ApplyRule_model
+@{
+  
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!Doctype html>
+<html>
+<head>
+    <style>
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+
+         .k-popup.k-list-container {
+    width:300px !important;
+    }
+           /*.k-grid-pager{
+            height:30px !important;
+        }
+
+     
+     
+        .k-state-default{
+            margin-top:-24px;
+        }*/
+
+    </style>
+   
+    <title></title>
+    <style>
+        /*.k-dropdown-wrap,k-state-disabled{
+            /*background-image: none,linear-gradient(to bottom,rgb(51, 122, 183) 0,rgb(51, 122, 183) 100%);
+            background-position: 50% 50%;*
+            background-image: none,linear-gradient(to bottom,0 0,0 100%);
+            background-position: 50% 50%;
+            background-color: #e3e3e3;
+        }
+        .k-widget,.k-dropdown,.k-header{
+            background-color: #e3e3e3;
+        }
+        .k-dropdown-wrap{
+            background-image: none,linear-gradient(to bottom,0 0,0 100%);
+            background-position: 50% 50%;
+            background-color: #e3e3e3;
+        }*/
+
+        body {
+          font-family: sans-serif;
+          font-weight: 400;
+          overflow-x: hidden !important;
+            overflow-y: hidden !important;
+        }
+
+                .btn-danger {
+                background-color: #d43f3a;
+                border-color: #d43f3a;
+                padding: 2px 16px 4px 10px;
+            }
+
+    .btn-danger:hover, .btn-danger:active, .btn-danger.hover {
+        background-color: #d43f3a;
+    }
+    </style>
+    <style>
+        .accordion_container {
+            width: 100%;
+        }
+
+        .accordion_head {
+            background-color: #337ab7;
+            color: white;
+            cursor: pointer;
+            font-family: arial;
+            font-size: 14px;
+            margin: 0 0 1px 0;
+            padding: 1px 3px;
+            font-weight: bold;
+        }
+
+        .accordion_footer {
+            background-color: #337ab7;
+            color: white;
+            cursor: pointer;
+            font-family: arial;
+            font-size: 14px;
+            margin: 0 0 1px 0;
+            padding: 1px 3px;
+            font-weight: bold;
+        }
+
+        .accordion_body p {
+            padding: 18px 5px;
+            margin: 0px;
+        }
+
+        .plusminus {
+            float: right;
+        }
+
+        .ioniconplus {
+            width: 15px;
+            background-image: url('../images/minus-circled.png');
+            background-repeat: no-repeat;
+            background-position: -50px -128px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /*.ob-right {
+                text-align: right;
+            }*/
+        .gj-unselectable {
+            margin-left: -10%;
+            overflow-y: auto !important;
+            height: 500px;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .tab-content {
+            font: normal 13px Source Sans Pro, Helvetica Neue, Helvetica,Arial,sans-serif;
+        }
+
+        a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        span.k-icon.k-edit {
+            display: none;
+        }
+
+        /*span.k-icon.k-i-close {
+            display: none;
+        }*/
+
+        .k-header.k-grid-toolbar.k-grid-top{
+         background: none;
+        }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Apply Rule</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                    <label for="Actype" class="form-label">Recon Type</label><br />
+                                    <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="W" checked> Within Account
+                                    <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="B" > Between Account
+                                    <input type="radio" name="Recontype" id="Recontype" onchange="filetype()" value="S" > Supporting File
+                            </div>
+                            <div class="col-sm-4" >
+                                <div class="form-group" id="within">
+                                    <label for="filetype" class="form-label">Recon Name</label>
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("Recon_type_desc", "ApplyRule"); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4" >
+                                <div class="form-group" id="supfile">
+                                    <label for="filetype" class="form-label">Support File</label> <br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("supporting_file_id")
+                                                        .DataTextField("supporting_file")
+                                                        .DataValueField("supporting_file_id")
+                                                                .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("Recon_type_Suport", "ApplyRule"); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4" >
+                                <label for="period_from" class="form-label">Date From</label>
+                                <div>
+                                    <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:100%" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="period_To" class="form-label"> Date To</label>&nbsp;&nbsp;<input class="form-check-input" type="checkbox" value="Y" id="untillactive" style="margin-left:8px" />&nbsp;&nbsp;<span style="font-size:13px;">Until Active</span>
+
+                                    <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" style="width:100%" />
+                                    <input type="hidden" id="fieldtype">
+                                    <input type="hidden" id="slno">
+                                    <input type="hidden" id="listslno">
+                                    <input type="hidden" id="applyruledtl_gid">
+                                    <input type="hidden" id="recongid">
+                                    <input type="hidden" id="rulecondgid">
+                                    <input type="hidden" id="recontypeedit">
+
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="row" style="margin-top:3%">
+                                    <div class="col-sm-6">
+                                        <label for="filetype" >Match Off</label><br />
+                                            <input type="checkbox" name="matchoffSys" id="matchoffSys" value="Y">&nbsp;System&nbsp;
+                                            <input type="checkbox" name="matchoffMan" id="matchoffMan" value="Y" style="margin-left:7px">&nbsp;Preview&nbsp;
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Status</label><br />
+                                            <input type="radio" id="status_yes" name="status1" value="Y" checked> Active
+                                            <input type="radio" id="status_no" name="status1" value="N" style="margin-left: 10px;"> InActive
+                                            <input type="text" id="basesele_gid" value="0" hidden />
+                             </div>
+
+                        </div>
+                        </div>
+                       </div><br />
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-6">
+                                  <div class="row">
+                                      <div class="col-sm-6"></div>
+                                      <div class="col-sm-6"style="margin-left:65%">
+                                          <button type="button" id="btn_save" class="btn btn-primary" ><i class="fa fa-floppy-o"></i>&nbsp;Save</button>
+                                          <button type="button" id="btn_close" class="btn btn-danger"><i class="fa fa-times"></i>&nbsp;Close</button>
+                                      </div>
+                                </div>
+                                </div>
+                            </div>
+                             <div class="row" style="margin-top:1%">
+                                 <div class="col-sm-12">
+                                     @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleGrid")
+                                             //.HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal" })
+                                        .ToolBar(toolbar => toolbar.Create().Text(""))
+                                        .Columns(columns =>
+                                            {
+                                                columns.Bound(m => m.sno).Title("Sl No").Width(50);
+                                                columns.Bound(m => m.slno).Title("Sl No").Width(50).Hidden();
+                                                columns.Bound(m => m.RuleName).Title("Rule Name").Width(100);
+                                                columns.Command(cmd =>
+                                                {
+                                                    cmd.Edit().Text("<span class='fa fa-gear' style='color:#357ab8;font-size: 12px;'> Configure");
+                                                }).Title("Addtional Configuration").Width(100);
+
+                                                columns.Bound(m => m.Ruleorder).Title("Rule Order").Width(100);
+                                                columns.Bound(m => m.status_desc).Title("Status").Width(100);
+                                                columns.Command(cmd =>
+                                                {
+                                                    cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewModedtl");
+                                                    cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("Ruledtldel");
+                                                }).Title("Action").Width(50);
+
+                                            })
+                                        .Editable(editable =>
+                                            { editable.Mode(GridEditMode.PopUp).TemplateName("Applyrulepop"); })
+                                        .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                        .Filterable()
+                                        .Sortable()
+                                        .Scrollable()
+                                             //.Resizable(resize => resize.Columns(true))
+                                        .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(10)
+                                        .Events(events => events.Error("error_handler"))
+                                        .Model(model =>
+                                            {
+                                                model.Id(p => p.sno);
+                                            })
+                                                .Create(Create => Create.Action("ApplyRuleGrid_create", "ApplyRule"))
+                                                .Read(read => read.Action("ApplyRuleGrid_Read", "ApplyRule").Data("getslno"))
+                                                .Update(update => update.Action("ApplyRuleGrid_Update", "ApplyRule"))
+                                        ))
+
+                                     </div>
+                                 </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var addbuttonclick = "";
+    var preventCloseOnSave = false;
+    var preventCloseOnSaveAdd = false;
+    var preventCloseOnSavebase = false;
+    var applyruledtlid = 0;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        debugger;
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+        var viewmode = mode.substring(4, 0);
+        var save = "";
+
+        $("#tabs1").tabs();
+        $("#apply").hide();
+
+        $("#ApplyRuleGrid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#ApplyRuleGrid").data("kendoGrid");
+
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+            if (viewmode == "View") {
+                $(".k-grid-edit").hide();
+                $(".k-grid-Delete").hide();
+            }
+        })
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            debugger;
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+
+            var editWindow = this.editable.element.data("kendoWindow");
+            editWindow.unbind("close");
+            editWindow.bind("close", onWindowEditClose);
+            debugger;
+            var listslno3 = $("#listslno").val();
+            if (listslno3 == "") {
+                $("#listslno3").val(koopId).trigger("change");
+            } else {
+                $("#listslno3").val(listslno3).trigger("change");
+            }
+            if (event.model.isNew() == true) {
+                $("#tabs1").hide();
+            }
+            else {
+                var value = event.model.status;
+                $("input[name=status2][value=" + value + "]").attr('checked', 'checked').trigger("change");
+                //$("#statusrule").val(event.model.status).trigger("change");
+            }
+            if (viewmode == "View") {
+                $("#btn_saveview").prop('disabled', true).trigger("change");
+
+            }
+            $("#ApplyRuleAdd").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd1);
+            var grid_add = $("#ApplyRuleAdd").data("kendoGrid");
+            grid_add.bind("edit", function (event) {
+                event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+                debugger;
+                $("#comparisionvisiable").hide();
+                $("#extractvisiable").show();
+
+                var editWindow1 = this.editable.element.data("kendoWindow");
+                editWindow1.unbind("close");
+                editWindow1.bind("close", onWindowEditClose1);
+                if (event.model.isNew() == true) {
+                    debugger;
+                    var slno = applyruledtlid;
+                    var listno = $("#listslno").val();
+                    //var slno = $("#applyruledtl_gid").val();
+                    $("#slno1").val(slno).trigger("change");
+                    $("#listslno1").val(listno).trigger("change");
+                    $("#applyruledtl_gid1").val(applyruledtlid).trigger("change");
+                }
+            });
+
+
+
+            $("#ApplyRuleBase").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd2);
+            debugger;
+            var grid_add = $("#ApplyRuleBase").data("kendoGrid");
+            //$(".k-window-title").text("Identity Configuration");
+            grid_add.bind('dataBound', function (e) {
+                this.element.find('.k-edit').remove();
+                if (viewmode == "View") {
+                    $(".k-grid-edit").hide();
+                    $(".k-grid-Delete").hide();
+                }
+                if ($(".k-window-title").text() == "View") {
+                    $(".k-grid-edit").hide();
+                    $(".k-grid-Delete").hide();
+                }
+
+            })
+            grid_add.bind("edit", function (event) {
+                event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Identifier Configuration");
+                var editWindow2 = this.editable.element.data("kendoWindow");
+                editWindow2.unbind("close");
+                editWindow2.bind("close", onWindowEditClose2);
+                //$(".k-window-title").text("Identity Configuration");
+                if (event.model.isNew() == true) {
+                    debugger;
+                    var slno = applyruledtlid;
+                    var listno = $("#listslno").val();
+                    $("#slno2").val(slno).trigger("change");
+                    $("#listslno2").val(listno).trigger("change");
+                    accno();
+                }
+                else {
+                    debugger;
+                    accno();
+
+                    debugger;
+                    //$("#account1").data("kendoDropDownList").val(event.model.account1).trigger("change")
+                    // $("#acc_no").data("kendoDropDownList").val(event.model.acc_no).trigger("change")
+                }
+            });
+            //ApplyRuleBaseFilter
+            $("#ApplyRuleBaseFilter").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd1);
+            var grid_add = $("#ApplyRuleBaseFilter").data("kendoGrid");
+            grid_add.bind("edit", function (event) {
+                event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+                debugger;
+                $("#comparisionvisiable").hide();
+                $("#extractvisiable").show();
+
+                var editWindow1 = this.editable.element.data("kendoWindow");
+                editWindow1.unbind("close");
+                editWindow1.bind("close", onWindowEditClose1);
+                if (event.model.isNew() == true) {
+                    debugger;
+                    var slno = applyruledtlid;
+                    var listno = $("#listslno").val();
+                    //var slno = $("#applyruledtl_gid").val();
+                    $("#slno1").val(slno).trigger("change");
+                    $("#listslno1").val(listno).trigger("change");
+                    $("#applyruledtl_gid1").val(applyruledtlid).trigger("change");
+                }
+            });
+
+
+        });
+        $("#tabs1").tabs();
+        $("#Substring").hide();
+       // $("#supporting_file_id").data("kendoDropDownList").enable(false);
+        $("#rname").hide();      
+        //filetype();
+        kendodate_format();
+    });
+    function extractconstcheck() {
+        if ($("#extractconstcheck1").is(":checked")) {
+            $("#ExtractionConstant1").removeAttr("disabled");
+            $("#ExtractionConstant1").focus();
+        } else {
+            $("#ExtractionConstant1").attr("disabled", "disabled");
+        }
+    };
+
+    function comparsionconscheck() {
+        if ($("#comparsionconscheck1").is(":checked")) {
+            $("#ComparisionConstant1").removeAttr("disabled");
+            $("#ComparisionConstant1").focus();
+        } else {
+            $("#ComparisionConstant1").attr("disabled", "disabled");
+        }
+    };
+
+    function EditModeon(e) {
+        debugger;
+        //var fieldtype = $("#fieldtype").val();
+        //var filter_flag;
+        //if ($("#extraction_filter").val() == 0) {
+        //    filter_flag = 0;
+        //} else {
+        //    filter_flag = $("#extraction_filter").val()
+        //}
+        addbuttonclick = "";
+        $('#Partialoneshow').show();
+        var btn = document.getElementById("btn_submit1");
+        btn.value = 'my value'; // will just add a hidden value
+        btn.innerHTML = 'Update';
+        grid = $("#ApplyRuleBaseFilter").data("kendoGrid");
+        // model = grid.dataItem(grid.select());
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var slno = dataItem.id;
+        var Basefieldname = dataItem.BaseCriteria;
+        var identitycriteria = dataItem.Identitycriteria;
+        var identityvalue = dataItem.TargetField;
+        var Filterfield = dataItem.field_alias_name;
+        var filterappliedon = dataItem.filter_appliedon;
+        var status = dataItem.status_desc;
+        var ext = dataItem.ComparisonCriteria;
+
+        $('#slnobaseFilter').val(slno);
+        // $('#applyfilter_code').val(filterappliedon);
+        $("#applyfilter_code").data("kendoDropDownList").value(filterappliedon);
+
+
+
+        $("#field_name").data("kendoDropDownList").text(Filterfield);
+        //  $("#applyfilter_code").data("kendoDropDownList").text(filterappliedon);
+        // var dk = $("#field_name").data("kendoDropDownList").val();
+        // $('#field_name').data('KendoDropDownList').text(Filterfield);
+        $('#BaseCriteria').val(Basefieldname);
+        $('#TargetField').val(identityvalue);
+        $('#Identitycriteria').val(identitycriteria);
+        $('#status4').val(status);
+        onfieldchange1();
+        debugger;
+        $("#extraction_filter").val(ext).trigger("change");
+        //loadextractfilter(ext);
+
+
+        //$.ajax({
+        //    type: "POST",
+        //    data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+        //    url: "/DedupeRule/dedupExtraciondrop",
+        //    dataType: "json",
+        //    contentType: 'application/json; charset=utf-8',
+        //    success: function (response) {
+        //        debugger;
+        //        if (response.length == 0) {
+        //            $("#extractvisiable").show();
+        //            var dataSource = new kendo.data.DataSource({
+        //                data: response,
+        //            });
+        //            //console.log(dataSource);
+        //            $("#extractionfilter").kendoListView({
+        //                dataSource: dataSource,
+        //                template: kendo.template($("#myTemplate").html()),
+        //                headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' readonly class='click' /><span class='checkbox'>All</span></div>",
+        //                dataBound: function (e) {
+        //                    checkboxEventBindingExtractionfilter();
+        //                }
+        //            });
+        //        } else {
+        //            $("#extractvisiable").show();
+        //            var dataSource = new kendo.data.DataSource({
+        //                data: response,
+        //            });
+        //            //console.log(dataSource);
+        //            $("#extractionfilter").kendoListView({
+        //                dataSource: dataSource,
+        //                template: kendo.template($("#myTemplate").html()),
+        //                headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+        //                dataBound: function (e) {
+        //                    checkboxEventBindingExtractionfilter();
+        //                }
+        //            });
+        //        }
+        //        //filetype();
+        //    },
+        //    error: function (er) {
+        //        onRequestEnd();
+        //    }
+
+        //});
+
+
+
+
+    }
+
+
+    function EditMode(e) {
+        // $("#GridEdit").load("EditApplyruleBaseFilter");
+        debugger;
+        var baseno = $("#slnobase").val();
+        grid = $("#ApplyRuleBaseFilter").data("kendoGrid");
+        // model = grid.dataItem(grid.select());
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var slnobaseFilter = dataItem.slnobaseFilter;
+        // var selectedRow = grid.dataItem('tr.k-grid-edit-row');
+        // $("#ExtractionCriteria").val(model.ExtractionCriteria);
+
+        $('#wndContent').load('/ApplyRule/EditApplyruleBaseFilter/', { id: slnobaseFilter, inAction: "SelectBaseFilterId", sbaseno: baseno }, function (response, status, xhr) {
+            if (status == "error") {
+                try {
+                    var msge = $.parseJSON(response);
+                    // get the server error
+                } catch (e) {
+                    alert("Error parsing server response");
+                }
+            } else {
+                //this.blur();
+                $("#wndWindow").data("kendoWindow").title("Edit");
+                $("#wndWindow").data("kendoWindow").open().center();
+                var value = dataItem.status;
+                $("input[name=statusActive][value=" + value + "]").attr('checked', 'checked');
+            }
+        });
+    }
+    function AddMode() {
+        // $("#GridEdit").load("EditApplyruleBaseFilter");
+        debugger;
+        addbuttonclick = "save";
+        $("#Partialoneshow").show();
+        save = "save";
+        //   $("#listslno1").val().trigger("change");
+        var btn = document.getElementById("btn_submit1");
+        btn.value = 'my value'; // will just add a hidden value
+        btn.innerHTML = 'Save';
+        var baseno = $("#slnobase").val();
+
+
+        $('#slnobaseFilter').val("");
+        $('#BaseCriteria').val("");
+        $('#TargetField').val("");
+        $('#Identitycriteria').val("");
+        $('#ComparisonCriteria').val("");
+        $('#extractionfilter').val(0);
+        Extraction();
+
+        //checkboxEventBindingExtractionfilter();
+
+
+        //grid = $("#ApplyRuleBaseFilter").data("kendoGrid");
+        //// model = grid.dataItem(grid.select());
+        //var dataItem = grid.dataItem($(e.currentTarget).closest("tr"));
+
+        //var ApplyRulegrid = {};
+        //ApplyRulegrid.slno = dataItem.id;
+        //ApplyRulegrid.Basefieldname = $("#field_name").data("kendoDropDownList").value();
+        //ApplyRulegrid. identitycriteria = dataItem.Identitycriteria;
+        //ApplyRulegrid. identityvalue = dataItem.TargetField;
+        //ApplyRulegrid. Filterfield = dataItem.field_alias_name;
+        //ApplyRulegrid.filterappliedon = $("#applyfiltercode").data("kendoDropDownList").value();
+        //ApplyRulegrid.status = dataItem.status_desc;
+        //// ApplyRulegrid.filter_appliedon = $("#field_name").data("kendoDropDownList").value();
+
+        //$.ajax({
+        //    type: "POST",
+        //    data: '{id: "' + 0 + '",inAction:  "SelectBaseFilterId",sbaseno:"' + baseno + '"}',
+        //    url: "/ApplyRule/ApplyRuleGrid_UpdateBaseFilter",
+        //    data: '{ApplyRulegrid: ' + JSON.stringify(ApplyRulegrid) + '}',
+        //    dataType: "json",
+        //    contentType: 'application/json; charset=utf-8',
+        //    success: function (Data1) {
+        //        debugger;
+
+        //        if (Data1[1] != "0") {
+        //            $.alert({
+        //                icon: 'fa fa-success',
+        //                title: 'Impact',
+        //                content: Data1[0],
+        //                type: 'green',
+        //                animationSpeed: 700,
+        //            });
+        //        } else {
+        //            $.alert({
+        //                icon: 'fa fa-warning',
+        //                title: 'Impact',
+        //                content: Data1[0],
+        //                type: 'red',
+        //                animationSpeed: 700,
+        //            });
+        //        }
+        //    },
+        //        error: function (result) {
+        //            alert("Error" + result);
+        //            console.log(result);
+        //            $.alert({
+        //                icon: 'fa fa-success',
+        //                title: 'Impact',
+        //                content: result,
+        //                type: 'red',
+        //                animationSpeed: 700,
+        //            });
+        //        }
+
+        //});
+
+    }
+
+    //$('#btn_submit1').val()
+
+    //$('#wndContent').load('/ApplyRule/EditApplyruleBaseFilter/', { id: 0, inAction: "SelectBaseFilterId", sbaseno: baseno }, function (response, status, xhr) {
+    //    debugger;
+    //    if (status == "error") {
+    //        try {
+    //            var msge = $.parseJSON(response);
+    //            // get the server error
+    //        } catch (e) {
+    //            alert("Error parsing server response");
+    //        }
+    //    } else {
+    //        //this.blur();
+    //        $("#wndWindow").data("kendoWindow").title("Add");
+    //        $("#wndWindow").data("kendoWindow").open().center();
+    //    }
+    //});
+
+    function ViewMod(e) {
+        // $("#GridEdit").load("EditApplyruleBaseFilter");
+        debugger;
+        var baseno = $("#slnobase").val();
+        grid = $("#ApplyRuleBaseFilter").data("kendoGrid");
+        // model = grid.dataItem(grid.select());
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var slnobaseFilter = dataItem.slnobaseFilter;
+        // var selectedRow = grid.dataItem('tr.k-grid-edit-row');
+        //  $("#ExtractionCriteria").val(model.ExtractionCriteria);
+
+        $('#wndContent').load('/ApplyRule/EditApplyruleBaseFilter/', { id: slnobaseFilter, inAction: "SelectBaseFilterId", sbaseno: baseno }, function (response, status, xhr) {
+            if (status == "error") {
+                try {
+                    var msge = $.parseJSON(response);
+                    // get the server error
+                } catch (e) {
+                    alert("Error parsing server response");
+                }
+            } else {
+                //this.blur();
+                $("#btn_submit1").prop('disabled', true).trigger("change");
+                $("#wndWindow").data("kendoWindow").title("View");
+                $("#wndWindow").data("kendoWindow").open().center();
+                var value = dataItem.status;
+                $("input[name=statusActive][value=" + value + "]").attr('checked', 'checked');
+            }
+        });
+    }
+    var onWindowEditClose = function (e) {
+        debugger;
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#applyruledtl_gid").val(applyruledtlid);
+            $("#ApplyRuleGrid").data("kendoGrid").dataSource.read();
+        }
+    };
+    function onRequestEnd(e) {
+
+    }
+    var onWindowEditClose1 = function (e) {
+
+        if (preventCloseOnSaveAdd) {
+            e.preventDefault();
+            preventCloseOnSaveAdd = false;
+        }
+        else {
+            $("#applyruledtl_gid").val(applyruledtlid);
+            $("#ApplyRuleAdd").data("kendoGrid").dataSource.read();
+        }
+    };
+    function onRequestEnd1(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#applyruledtl_gid").val(applyruledtlid);
+                $("#ApplyRuleAdd").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSaveAdd = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                $("#applyruledtl_gid").val(applyruledtlid);
+                $("#ApplyRuleAdd").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSaveAdd = true;
+            }
+        }
+    }
+    var onWindowEditClose2 = function (e) {
+        if (preventCloseOnSavebase) {
+            e.preventDefault();
+            preventCloseOnSavebase = false;
+        }
+        else {
+            $("#applyruledtl_gid").val(applyruledtlid);
+            $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+        }
+    };
+    function onRequestEnd2(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //$("#applyruledtl_gid").val(applyruledtlid);
+                $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSavebase = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response[1] > 0) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                //$("#applyruledtl_gid").val(applyruledtlid);
+                $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSavebase = true;
+            }
+        }
+    }
+
+    function getslno() {
+        debugger;
+        var baseUrl = (window.location).href; // You can also use document.URL
+        var koopId = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var urlid = baseUrl.substring(baseUrl.lastIndexOf('=') + 1);
+        var koopId = urlid.replace("#", "");
+        var mode = baseUrl.substring(baseUrl.lastIndexOf('=?') + 2);
+        var viewmode = mode.substring(4, 0);
+        if (viewmode == "View") {
+            //$("#btn_save").hide();
+            $("#btn_save").prop('disabled', true);
+            $(".k-grid-add").hide();
+
+        }
+
+        var list = $("#listslno").val();
+        if (koopId != "" && list == "") {
+            list = koopId
+            if (list.length > 5) {
+                $("#Recontype").attr('checked', true);
+            } else {
+                //$("#Recontype").attr('checked', false);
+            }
+
+        } else {
+            list
+        }
+        //var len = koopId.length;
+        //if (len > 5) {
+        //    list = "0";
+        //} else {
+        //    list
+        //}
+
+        $.ajax({
+            type: 'POST',
+            url: "/ApplyRule/ApplyRuleGrid_ListEdit",
+            data: { id: list },
+            dataType: "json",
+            success: function (data) {
+                debugger;
+                var Recontype = data[0].Recontype;
+                $("#recontypeedit").val(Recontype);
+                $("input[name=Recontype][value=" + Recontype + "]").attr('checked', 'checked');
+                filetype();
+                $("#ReconName_id").data("kendoDropDownList").value(data[0].ReconName_id);
+                $("#supporting_file_id").data("kendoDropDownList").value(data[0].supporting_file_id);
+                //$("input[name=Recontype][value=" + Recontype + "]").attr('checked', 'checked');
+                $("#recongid").val(data[0].ReconName_id);
+                var value1 = data[0].matchoffSys;
+                $("input[name=matchoffSys][value=" + value1 + "]").attr('checked', 'checked');
+                var value2 = data[0].matchoffMan;
+                $("input[name=matchoffMan][value=" + value2 + "]").attr('checked', 'checked');
+                $("#listslno").val(data[0].slno);
+                $("#period_from").val(data[0].period_from);
+                $("#period_to").val(data[0].period_to);
+                var value = data[0].status;
+                $("input[name=status1][value=" + value + "]").attr('checked', 'checked');
+                var value1 = data[0].untillactive;
+                $("input[name=untillactive][value=" + value1 + "]").attr('checked', 'checked');
+                $("#apply").show();
+            },
+        });
+        var getslno = $("#slno").val();
+        return { slno: list }
+    }
+    function getbaseFilterGid() {
+        debugger;
+        grid = $("#ApplyRuleBase").data("kendoGrid");
+        var baseno = $("#slnobase").val();
+        model = grid.dataItem($(event.target).closest("tr"));
+        //  var acc_no = (model.acc_no);
+        // $("#acc_no").data("kendoDropDownList").value(acc_no);
+        // accno(acc_no);
+        if (model == null) {
+            //grid = $("#ApplyRuleBaseFilter").data("kendoGrid");
+            //model = grid.dataItem($(event.target).closest("tr"));
+            $("#basesele_gid").val(baseno);
+            return { baseFilterRulegid: baseno, inAction: "SelectBaseSele" }
+
+        }
+        else {
+            $("#basesele_gid").val(model.slnobase);
+            return { baseFilterRulegid: model.slnobase, inAction: "SelectBaseSele" }
+        }
+    }
+    function getslno1() {
+        debugger;
+        if ($("#applyruledtl_gid").val() == "") {
+            $("#applyruledtl_gid").val(applyruledtlid);
+        }
+        grid = $("#ApplyRuleGrid").data("kendoGrid");
+        model = grid.dataItem($(event.target).closest("tr"));
+        if (model == null) {
+            if (applyruledtlid == 0) {
+                applyruledtlid2 = 0;
+            }
+            else {
+                applyruledtlid
+            }
+            //$("#tabs1").hide();
+        }
+        else {
+            applyruledtlid2 = (model.slno);
+            applyruledtlid = (model.slno)
+            //$("#tabs1").show();
+        }
+
+        var applyruleid = $("#listslno").val();
+
+        if (applyruledtlid2 == 0 || applyruledtlid2 == "") {
+            applyruledtlid2 = $("#applyruledtl_gid").val();
+        }
+
+        if (applyruledtlid2 == "") {
+            applyruledtlid2 = 0;
+
+        }
+
+        return { rulegid: applyruledtlid2, slno: applyruleid }
+
+    }
+
+    function getslno2() {
+        debugger;
+        applyruledtlid = 0;
+        grid = $("#ApplyRuleGrid").data("kendoGrid");
+        model = grid.dataItem($(event.target).closest("tr"));
+        if (model == null) {
+            applyruledtlid1 = 0;
+            applyruleid = 0;
+            //$("#tabs1").hide();
+        }
+        else {
+            applyruledtlid1 = (model.Rulegid);
+            applyruleid = (model.Rulegid);
+            //$("#tabs1").show();
+        }
+
+        if (applyruledtlid1 == 0 || applyruledtlid1 == "") {
+            applyruledtlid1 = $("#rulecondgid").val();
+        }
+
+        //if (applyruleid == 0 || applyruleid == "") {
+        //    applyruleid = $("#rulecondgid").val();
+        //}
+
+        if (applyruledtlid1 == "") {
+            applyruledtlid1 = 0;
+        }
+        return { rulegid: applyruledtlid1, slno: applyruleid }
+
+    }
+
+    $('#btn_close').click(function () {
+        debugger;
+        //location.href = "../ApplyRule/ApplyList";
+        location.href = '@Url.Action("ApplyList", "ApplyRule")';
+
+    });
+    $('#btn_save').click(function () {
+        debugger;
+        var item = $("#listslno").val();
+        if (item == "") {
+            var Recontype = $("input[name='Recontype']:checked").val();
+            if (Recontype == "W") {
+                var ReconName_id = $("#ReconName_id").val();
+                var supporting_file_id = "0";
+            } else if (Recontype == "B") {
+                ReconName_id = $("#ReconName_id").val();
+                var supporting_file_id = "0";
+            } else {
+                var ReconName_id = $("#ReconName_id").val();
+                supporting_file_id = $("#supporting_file_id").val();
+            }
+
+            if ($('#matchoffSys').is(":checked")) {
+                matchoffSys = "Y"
+            }
+            else {
+                matchoffSys = "N"
+            }
+            if ($('#matchoffMan').is(":checked")) {
+                matchoffMan = "Y"
+            }
+            else {
+                matchoffMan = "N"
+            }
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDateone(period_from);
+            var formatted_period_to = getFormated_StringDateone(period_to);
+            if (formatted_period_to == "undefined-undefined-") {
+                formatted_period_to = "";
+            }
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+
+            $.ajax({
+                type: "POST",
+                data: '{Recontype: "' + Recontype + '",recon_id: "' + ReconName_id + '",matchsys: "' + matchoffSys + '",matchman: "' + matchoffMan + '",support_id: "' + supporting_file_id + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",untiflag:"' + untillactive + '",status:"' + status + '" }',
+                url: "/ApplyRule/ApplyRule_save",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        $("#slno").val("");
+                        $("#listslno").val(response[1]);
+                        $("#apply").show();
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                    }
+
+                }
+            });
+        } else {
+            var slno = item;
+            var Recontype = $("input[name='Recontype']:checked").val();
+            if (Recontype == "W") {
+                var ReconName_id = $("#ReconName_id").val();
+                var supporting_file_id = "0";
+            } else if (Recontype == "B") {
+                ReconName_id = $("#ReconName_id").val();
+                var supporting_file_id = "0";
+            } else {
+                var ReconName_id = $("#ReconName_id").val();
+                supporting_file_id = $("#supporting_file_id").val();
+            }
+
+            if ($('#matchoffSys').is(":checked")) {
+                matchoffSys = "Y"
+            }
+            else {
+                matchoffSys = "N"
+            }
+            if ($('#matchoffMan').is(":checked")) {
+                matchoffMan = "Y"
+            }
+            else {
+                matchoffMan = "N"
+            }
+            var period_from = $('#period_from').val();
+            var period_to = $("#period_to").val();
+            var formatted_period_from = getFormated_StringDateone(period_from);
+            var formatted_period_to = getFormated_StringDateone(period_to);
+            if (formatted_period_to == "undefined-undefined-") {
+                formatted_period_to = null;
+            }
+            if ($("input:radio[id='status_yes']").is(":checked")) {
+                status = "Y";
+            }
+            else {
+                status = "N";
+            }
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
+            }
+            else {
+                var untillactive = 'N';
+            }
+
+            $.ajax({
+                type: "POST",
+                data: '{Recontype: "' + Recontype + '",recon_id: "' + ReconName_id + '",matchsys: "' + matchoffSys + '",matchman: "' + matchoffMan + '",support_id: "' + supporting_file_id + '",period_from:"' + formatted_period_from + '",period_to:"' + formatted_period_to + '",untiflag:"' + untillactive + '",slno:"' + slno + '",status:"' + status + '"}',
+                url: "/ApplyRule/ApplyRule_Update",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                    }
+
+                }
+            });
+        };
+    });
+
+    function getFormated_StringDateone(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("/");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+    function SaveApplyRulePop() {
+        debugger;
+        if (applyruledtlid == 0) {
+
+            var ApplyRulegrid = {};
+            ApplyRulegrid.listslno = $("#listslno").val();
+            ApplyRulegrid.Rulegid = $("#Rulegid").data("kendoDropDownList").value();
+            if ($("input:radio[id='reversl_flag_yes']").is(":checked")) {
+                ApplyRulegrid.reversl_flag = "Y";
+            }
+            else {
+                ApplyRulegrid.reversl_flag = "N";
+            }
+            if ($("input:radio[id='group_flag_yes']").is(":checked")) {
+                ApplyRulegrid.group_flag = "Y";
+            }
+            else {
+                ApplyRulegrid.group_flag = "N";
+            }
+
+            if ($("#Ruleorder").val() == "") {
+                ApplyRulegrid.Ruleorder = "1";
+            } else {
+                ApplyRulegrid.Ruleorder = $("#Ruleorder").val();
+            }
+            if ($("input:radio[id='status_yesadd']").is(":checked")) {
+                ApplyRulegrid.status = "Y";
+            }
+            else {
+                ApplyRulegrid.status = "N";
+            }
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                url: '@Url.Action("ApplyRuleGrid_create", "ApplyRule")',
+                data: '{ApplyRulegrid: ' + JSON.stringify(ApplyRulegrid) + '}',
+
+                success: function (data) {
+                    debugger;
+                    if (data[1] > 0) {
+                        $.dialog({
+                            title: 'Imapct',
+                            content: data[0],
+                            type: 'green',
+
+                        });
+                        $("#tabs1").show();
+                        $("#applyruledtl_gid").val(data[1]).trigger("change");
+                        $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+                        $("#applyrulecon").data("kendoGrid").dataSource.read();
+                        applyruledtlid = data[1];
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: data[0],
+                            type: 'green',
+                        });
+                        //event.container.data("kendoWindow").one("close", onEditorTemplateClosing);
+                    }
+                },
+
+            });
+        }
+        else {
+            debugger;
+            var ApplyRulegrid = {};
+            ApplyRulegrid.slno = applyruledtlid;
+            ApplyRulegrid.listslno = $("#listslno").val();
+            ApplyRulegrid.Rulegid = $("#Rulegid").data("kendoDropDownList").value();
+            if ($("input:radio[id='reversl_flag_yes']").is(":checked")) {
+                ApplyRulegrid.reversl_flag = "Y";
+            }
+            else {
+                ApplyRulegrid.reversl_flag = "N";
+            }
+            if ($("input:radio[id='group_flag_yes']").is(":checked")) {
+                ApplyRulegrid.group_flag = "Y";
+            }
+            else {
+                ApplyRulegrid.group_flag = "N";
+            }
+            if ($("#Ruleorder").val() == "") {
+                ApplyRulegrid.Ruleorder = "1";
+            } else {
+                ApplyRulegrid.Ruleorder = $("#Ruleorder").val();
+            }
+
+            if ($("input:radio[id='status_yesadd']").is(":checked")) {
+                ApplyRulegrid.status = "Y";
+            }
+            else {
+                ApplyRulegrid.status = "N";
+            }
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                url: '@Url.Action("ApplyRuleGrid_Update", "ApplyRule")',
+                data: '{ApplyRulegrid: ' + JSON.stringify(ApplyRulegrid) + '}',
+
+                success: function (data) {
+                    debugger;
+                    $.dialog({
+                        title: 'Impact',
+                        content: data,
+                        type: 'green',
+                    });
+                    $("#applyrulecon").data("kendoGrid").dataSource.read();
+                    //$("#applyruledtl_gid").val(data[1]);
+                },
+                error: function (er) {
+                }
+            });
+        }
+    }
+
+    function SaveAdditionalRule() {
+
+        debugger;
+        var slnoadd = $("#slnoadd").val();
+        var sno = $("#sno").val();
+        var applyruledtl_gid = $("#applyruledtl_gid1").val();
+        var Fextraction = $("#extractionfilter").serialize();
+        var extract = Fextraction.split("&")
+        var Attribid = [];
+        var extraction_filter = 0;
+        var item;
+        var filter_flag = 0;
+        var extractcretia = $("#ExtractionCriteria").val();
+        var compcretia = $("#ComparisonCriteria").val();
+        var identcretia = $('#Identitycriteria').val();
+        for (var i = 0; i < extract.length; i++) {
+            item = extract[i];
+            filter_flag = parseInt(item.replace("extractionfilter=", ""));
+            extraction_filter = extraction_filter | filter_flag;
+            /*
+            var GridID = item.replace("extractionfilter=", "");
+            if (extractionfinal == '') {
+                extractionfinal +=  GridID;
+            }
+            else {
+                extractionfinal += "||" + GridID;
+            }*/
+
+        }
+        // var exfin = extractionfinal.toString();
+
+        $("#extraction_filter").val(extraction_filter).trigger("change");
+        $("#ExtractionCriteria").val(extractcretia).trigger("change");
+        $("#ComparisonCriteria").val(compcretia).trigger("change");
+
+        var Fcomparision = $("#comparisionfilter").serialize();
+        var comparsion = Fcomparision.split("&")
+        var Attribid1 = [];
+        var comparsion_filter = 0;
+        for (var i = 0; i < comparsion.length; i++) {
+            item = comparsion[i];
+            filter_flag = parseInt(item.replace("comparisionfilter=", ""));
+            comparsion_filter = comparsion_filter | filter_flag;
+            /*
+            if (comparsionfinal == '') {
+                comparsionfinal += GridID1;
+            }
+            else {
+                comparsionfinal += "||" + GridID1;
+            }
+           */
+        }
+        $("#comparision_filter").val(comparsion_filter).trigger("change");
+        if (slnoadd == "" || sno == 0) {
+
+            var grid = $("#ApplyRuleAdd").data("kendoGrid");
+            grid.saveChanges();
+
+        }
+        else {
+            var Fextraction = $("#extractionfilter").serialize();
+            var extract = Fextraction.split("&")
+            var Attribid = [];
+            var extraction_filter = 0;
+            var item;
+            var filter_flag = 0;
+
+            for (var i = 0; i < extract.length; i++) {
+                item = extract[i];
+                filter_flag = parseInt(item.replace("extractionfilter=", ""));
+                extraction_filter = extraction_filter | filter_flag;
+                /*
+                var GridID = item.replace("extractionfilter=", "");
+                if (extractionfinal == '') {
+                    extractionfinal +=  GridID;
+                }
+                else {
+                    extractionfinal += "||" + GridID;
+                }*/
+
+            }
+            // var exfin = extractionfinal.toString();
+
+            $("#extraction_filter").val(extraction_filter).trigger("change");
+
+            var Fcomparision = $("#comparisionfilter").serialize();
+            var comparsion = Fcomparision.split("&")
+            var Attribid1 = [];
+            var comparsion_filter = 0;
+            for (var i = 0; i < comparsion.length; i++) {
+                item = comparsion[i];
+                filter_flag = parseInt(item.replace("comparisionfilter=", ""));
+                comparsion_filter = comparsion_filter | filter_flag;
+                /*
+                if (comparsionfinal == '') {
+                    comparsionfinal += GridID1;
+                }
+                else {
+                    comparsionfinal += "||" + GridID1;
+                }
+               */
+            }
+            $("#comparision_filter").val(comparsion_filter).trigger("change");
+            var grid = $("#ApplyRuleAdd").data("kendoGrid");
+            grid.saveChanges();
+
+        }
+
+
+    }
+    function CloserulePopup() {
+        debugger;
+        $("#ApplyRuleGrid").data("kendoGrid").dataSource.read();
+        //  $("#Applyrulepop").data("KendoWindow").close();
+
+    }
+    function ClosesupportPopup() {
+        $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+    }
+    function CloseAddPopup() {
+        $("#ApplyRuleAdd").data("kendoGrid").dataSource.read();
+    }
+    function DelMod(e) {
+        var ApplyRulegrid = {};
+        ApplyRulegrid.slnobase = $("#slnobase").val();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var slnobaseFilter = dataItem.slnobaseFilter;
+        ApplyRulegrid.slnobaseFilter = slnobaseFilter;
+        ApplyRulegrid.in_action = "DELETE";
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule")',
+                        data: '{ApplyRulegrid: ' + JSON.stringify(ApplyRulegrid) + '}',
+
+                        success: function (data) {
+                            debugger;
+                            $.dialog({
+                                title: 'Impact',
+                                content: data,
+                                type: 'green',
+                            });
+                            $("#ApplyRuleBaseFilter").data("kendoGrid").dataSource.read();
+                            $("#wndWindow").data("kendoWindow").close();
+                            //$("#applyruledtl_gid").val(data[1]);
+                        },
+                        error: function (er) {
+                        }
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    function loadextractfilter(dat) {
+        debugger;
+
+
+
+
+
+        $("#extraction_filter").val(res).trigger("change");
+    }
+    function SaveBaseFilterRule(Modeldata) {
+
+        debugger;
+        var slnobase = $("#slnobase").val();
+        if (slnobase == "0") {
+            $.alert({
+                title: 'Impact',
+                content: "Header value to be fill first",
+                type: 'green',
+
+            });
+            return;
+        }
+
+        if (save = "save") {
+            var btn = document.getElementById("btn_submit1");
+            btn.value = 'my value'; // will just add a hidden value
+            btn.innerHTML = 'Save';
+        }
+        else {
+            var btn = document.getElementById("btn_submit1");
+            btn.value = 'my value'; // will just add a hidden value
+            btn.innerHTML = 'Update';
+        }
+        var res = $('#btn_Add').val();
+        var slnoadd = $("#slnoadd").val();
+        var sno = $("#sno").val();
+        var applyruledtl_gid = $("#applyruledtl_gid1").val();
+        var Fextraction = $("#extractionfilter").serialize();
+        var extract = Fextraction.split("&")
+        var Attribid = [];
+        var extraction_filter = 0;
+        var item;
+        var filter_flag = 0;
+        var extractcretia = $("#BaseCriteria").val();
+        var compcretia = $("#ComparisonCriteria").val();
+        var Identcretia = $("#Identitycriteria").val();
+        for (var i = 0; i < extract.length; i++) {
+            item = extract[i];
+            filter_flag = parseInt(item.replace("extractionfilter=", ""));
+            extraction_filter = extraction_filter | filter_flag;
+            /*
+            var GridID = item.replace("extractionfilter=", "");
+            if (extractionfinal == '') {
+                extractionfinal +=  GridID;
+            }
+            else {
+                extractionfinal += "||" + GridID;
+            }*/
+
+        }
+        // var exfin = extractionfinal.toString();
+
+        $("#extraction_filter").val(extraction_filter).trigger("change");
+        //$("#BaseCriteria").val(BaseCriteria).trigger("change");
+        $("#BaseCriteria").val(extractcretia).trigger("change");
+        $("#ComparisonCriteria").val(compcretia).trigger("change");
+        $("#Identitycriteria").val(Identcretia).trigger("change");
+
+        var Fcomparision = $("#comparisionfilter").serialize();
+        var comparsion = Fcomparision.split("&")
+        var Attribid1 = [];
+        var comparsion_filter = 0;
+        for (var i = 0; i < comparsion.length; i++) {
+            item = comparsion[i];
+            filter_flag = parseInt(item.replace("comparisionfilter=", ""));
+            comparsion_filter = comparsion_filter | filter_flag;
+            /*
+            if (comparsionfinal == '') {
+                comparsionfinal += GridID1;
+            }
+            else {
+                comparsionfinal += "||" + GridID1;
+            }
+           */
+        }
+        $("#comparision_filter").val(comparsion_filter).trigger("change");
+        {
+            var Fextraction = $("#extractionfilter").serialize();
+            var extract = Fextraction.split("&")
+            var Attribid = [];
+            var extraction_filter = 0;
+            var item;
+            var filter_flag = 0;
+
+            for (var i = 0; i < extract.length; i++) {
+                item = extract[i];
+                filter_flag = parseInt(item.replace("extractionfilter=", ""));
+                extraction_filter = extraction_filter | filter_flag;
+                /*
+                var GridID = item.replace("extractionfilter=", "");
+                if (extractionfinal == '') {
+                    extractionfinal +=  GridID;
+                }
+                else {
+                    extractionfinal += "||" + GridID;
+                }*/
+
+            }
+            // var exfin = extractionfinal.toString();
+
+            $("#extraction_filter").val(extraction_filter).trigger("change");
+
+            var Fcomparision = $("#comparisionfilter").serialize();
+            var comparsion = Fcomparision.split("&")
+            var Attribid1 = [];
+            var comparsion_filter = 0;
+            for (var i = 0; i < comparsion.length; i++) {
+                item = comparsion[i];
+                filter_flag = parseInt(item.replace("comparisionfilter=", ""));
+                comparsion_filter = comparsion_filter | filter_flag;
+                /*
+                if (comparsionfinal == '') {
+                    comparsionfinal += GridID1;
+                }
+                else {
+                    comparsionfinal += "||" + GridID1;
+                }
+               */
+            }
+            $("#comparision_filter").val(comparsion_filter).trigger("change");
+
+            debugger;
+            var ApplyRulegrid = {};
+            ApplyRulegrid.slnobase = $("#slnobase").val();
+            if ($("#slnobaseFilter").val() == "") {
+                ApplyRulegrid.slnobaseFilter = "0";
+            } else {
+                ApplyRulegrid.slnobaseFilter = $("#slnobaseFilter").val();
+            }
+            ApplyRulegrid.listslno = $("#listslno").val();
+            ApplyRulegrid.field_alias_name = $("#field_name").data("kendoDropDownList").text();
+            ApplyRulegrid.field_name = $("#field_name").data("kendoDropDownList").value();
+            ApplyRulegrid.BaseCriteria = extractcretia;
+            debugger;
+            ApplyRulegrid.TargetField = $("#TargetField").val();
+            ApplyRulegrid.ComparisonCriteria = compcretia;
+            ApplyRulegrid.IdentityCriteria = Identcretia;
+            ApplyRulegrid.extraction_filter = extraction_filter;
+            ApplyRulegrid.comparsion_filter = comparsion_filter;
+            // ApplyRulegrid.in_action = "UPDATE";
+            // ApplyRulegrid.comparsion_filter = comparsion_filter;
+            ApplyRulegrid.filter_appliedon = $("#applyfilter_code").data("kendoDropDownList").value();
+            if ($("input:radio[id='status4']").is(":checked")) {
+                ApplyRulegrid.status = "Y";
+            }
+            else {
+                ApplyRulegrid.status = "N";
+            }
+
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                url: '@Url.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule")',
+                data: '{ApplyRulegrid: ' + JSON.stringify(ApplyRulegrid) + '}',
+
+                success: function (data) {
+                    debugger;
+                    $.dialog({
+                        title: 'Impact',
+                        content: data,
+                        type: 'green',
+                    });
+                    $("#ApplyRuleBaseFilter").data("kendoGrid").dataSource.read();
+                    $("#wndWindow").data("kendoWindow").close();
+                    //$("#applyruledtl_gid").val(data[1]);
+                },
+                error: function (er) {
+                }
+            });
+
+        }
+
+
+    }
+    function CloseBaseFilterPopup() {
+        debugger;
+        // $("#Partialoneshow").hide();
+        //$("#ApplyRuleGrid").data("kendoGrid").dataSource.read();
+        $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+
+        $("#wndWindow").data("kendoWindow").close();
+    }
+
+    function SaveSupportingFile() {
+
+        debugger;
+        var slnobase = $("#slnobase").val();
+        var sno = $("#sno").val();
+
+        if ((slnobase == "" || slnobase == "0") || (sno == 0 || sno == undefined)) {
+
+            var grid1 = $("#ApplyRuleBase").data("kendoGrid");
+
+
+            var slnobase = $('#slnobase').val();
+            var listslno = $('#listslno1').val();
+            var slno = $('#slno2').val();
+            var account1 = $("#acc_no").data("kendoDropDownList").value();
+            var Accountmode = $("#Accountmode").data("kendoDropDownList").value();
+            var Order = 1;//status2
+            var status = $('#status2').val();
+
+            var obj = { "slnobase": slnobase, "listslno": listslno, "slno": slno, "account1": account1, "Accountmode": Accountmode, "Order": Order, "status": status }
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(obj),
+                url: '@Url.Action("ApplyRuleGrid_createBase", "ApplyRule")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    if (response[1] != "0") {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                            animationSpeed: 700,
+                        });
+                        $("#slnobase").val(response[1]);
+                        $("#ApplyRuleBaseFilter").data("kendoGrid").dataSource.read;
+                    } else {
+                        $.alert({
+                            icon: 'fa fa-warning',
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'red',
+                            animationSpeed: 700,
+                        });
+                    }
+
+
+                },
+            });
+            //grid1.saveChanges();
+
+
+
+        }
+        else {
+            var slnobase = $('#slnobase').val();
+            var listslno = $('#listslno1').val();
+            var slno = $('#slno2').val();
+            var account1 = $("#acc_no").data("kendoDropDownList").value();
+            var Accountmode = $("#Accountmode").data("kendoDropDownList").value();// $("#ReconName_id").data("kendoDropDownList").text();
+            var Order = 1;//status2
+            var status = $('#status2').val();
+
+            var ApplyRulegrid = { "slnobase": slnobase, "listslno": listslno, "slno": slno, "account1": account1, "Accountmode": Accountmode, "Order": Order, "status": status }
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(ApplyRulegrid),
+                url: '@Url.Action("ApplyRuleGrid_UpdateBase", "ApplyRule")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    if (response[1] != "0") {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                            animationSpeed: 700,
+                        });
+                        $("#slnobase").val(response[1]);
+                        $("#ApplyRuleBaseFilter").data("kendoGrid").dataSource.read;
+                    } else {
+                        $.alert({
+                            icon: 'fa fa-warning',
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'red',
+                            animationSpeed: 700,
+                        });
+                    }
+
+
+                },
+            });
+
+        }
+
+    }
+    function filetype() {
+        debugger;
+        var val = $("input[name='Recontype']:checked").val();
+
+        if (val == "W") {
+            $("#ano").show();
+            $("#rname").hide();
+            //$("#supporting_file_id").data("kendoDropDownList").enable(false);
+            $("#within").show();
+            $("#between").hide();
+            var fieldtype = "W";
+            var compsr = "Y";
+            $.ajax({
+                type: "POST",
+                data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                url: "/ApplyRule/Recon_type_desc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    $("#ReconName_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+
+        } else if (val == "B") {
+            $("#ano").hide();
+            $("#rname").show();
+           // $("#supporting_file_id").data("kendoDropDownList").enable(false);
+            var fieldtype = "B";
+            var compsr = "Y";
+            $.ajax({
+                type: "POST",
+                data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                url: "/ApplyRule/Recon_type_desc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    debugger;
+                    $("#ReconName_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+        } else if (val == "S") {
+            $("#ano").show();
+            $("#rname").hide();           
+            //$("#supporting_file_id").data("kendoDropDownList").enable(true);
+
+            var fieldtype = "S";
+            var compsr = "Y";
+            $.ajax({
+                type: "POST",
+                data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                url: "/ApplyRule/Recon_type_desc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    $("#ReconName_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+            $.ajax({
+                type: "POST",
+                data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+                url: "/ApplyRule/Recon_type_Suport",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    $("#supporting_file_id").data("kendoDropDownList").dataSource.data(response);
+                },
+            });
+        } else {
+            $("#ano").show();
+            $("#rname").hide();
+           // $("#supporting_file_id").data("kendoDropDownList").enable(false);
+        }
+    }
+    function Rule() {
+        var code1 = $('#code2').data("kendoDropDownList").value();
+        if (code1 == "SubString") {
+            $("#Substring").show();
+        }
+        else {
+            $("#Substring").hide();
+        }
+    }
+    function dbaliasname() {
+        onfieldchange();
+    }
+    function targetfieldbound() {
+        onTargetFieldchange();
+    }
+    function onfieldchange() {
+        //field type
+        debugger;
+        var code = $("#field_name").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/DedupeRule/field_type",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                ExtractionCriteria();
+                Extraction();
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function dbaliasname1() {
+        onfieldchange1();
+    }
+
+    function onfieldchange1() {
+        //field type
+        debugger;
+        var code = $("#field_name").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/DedupeRule/field_type",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                ExtractionCriteria1();
+                comparisionCriteria();
+                Extraction();
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+
+    function dropaddition() {
+        debugger;
+        var code = $("#ReconName_id").val();
+        // dro();
+        return {
+            value_drop: code
+        }
+    }
+
+
+    function accountdrop() {
+        //field type
+        debugger;
+        var code;
+        var val = $("input[name='Recontype']:checked").val();
+        if (val == "W") {
+            code = $("#ReconName_id").val();
+        } else if (val == "B") {
+            code = $("#ReconName_id1").val();
+        } else {
+            code = $("#ReconName_id").val();
+        }
+        $("#recongid").val(code);
+
+    }
+    function rulecondrop() {
+        debugger;
+        var rulecondropgid = $("#Rulegid").val();
+        $("#rulecondgid").val(rulecondropgid);
+    }
+    function onTargetFieldchange() {
+        //field type
+        var code = $("#field_name").val();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/DedupeRule/field_type",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#fieldtype").val(response);
+                comparisionCriteria();
+                comparision();
+
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function comparision() {
+        //comparision
+        var fieldtype = $("#fieldtype").val();
+        var filter_flag;
+        if ($("#comparision_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#comparision_filter").val()
+        }
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupconditiondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (response.length == 0) {
+                    $("#comparisionvisiable").hide();
+                } else {
+                    $("#comparisionvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#comparisionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate1").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingcomparisionfilter();
+                        }
+                    });
+                }
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+    }
+    function Extraction() {
+        //Extraction
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var filter_flag;
+        if ($("#extraction_filter").val() == 0) {
+            filter_flag = 0;
+        } else {
+            filter_flag = $("#extraction_filter").val()
+        }
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",filter_flag:"' + filter_flag + '"}',
+            url: "/DedupeRule/dedupExtraciondrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                if (response.length == 0) {
+                    $("#extractvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' readonly class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingExtractionfilter();
+                        }
+                    });
+                }
+                else if (addbuttonclick == "save") {
+                    $("#extractvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' readonly class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            //checkboxEventBindingExtractionfilter();
+                        }
+                    });
+
+                }
+                else {
+                    $("#extractvisiable").show();
+                    var dataSource = new kendo.data.DataSource({
+                        data: response,
+                    });
+                    //console.log(dataSource);
+                    $("#extractionfilter").kendoListView({
+                        dataSource: dataSource,
+                        template: kendo.template($("#myTemplate").html()),
+                        headertemplate: "<div class='item click' id='headerTemp' data='*'>       <input type='checkbox' class='click' /><span class='checkbox'>All</span></div>",
+                        dataBound: function (e) {
+                            checkboxEventBindingExtractionfilter();
+                        }
+                    });
+                }
+                //filetype();
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function accno() {
+        debugger;
+        var code = $("#recongid").val();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: "/ApplyRule/Recon_accno",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                //$("#account1").data("kendoDropDownList").dataSource.data(response);
+                $("#acc_no").data("kendoDropDownList").dataSource.data(response);
+            },
+        });
+    }
+    function checkboxEventBindingExtractionfilter() {
+        debugger;
+        $('.1_ID').attr('checked', 'checked')
+    }
+
+    function checkboxEventBindingcomparisionfilter() {
+        $('.1_ID').attr('checked', 'checked')
+    }
+    function comparisionCriteria() {
+        //comparision
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "COMPARISON";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleconditioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+
+                var comparision = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    comparision[i] = response[i].ComparisonCriteria;
+                }
+
+                $("#Identitycriteria").autocomplete({
+                    source: comparision,
+                    minLength: 0,
+                    maxShowItems: 5
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+
+                $("#ComparisonCriteria").autocomplete({
+                    source: comparision,
+                    minLength: 0,
+                    maxShowItems: 5
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+    }
+    function ExtractionCriteria1() {
+        //Extraction
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "EXTRACTION";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleExtracioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var selected = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    selected[i] = response[i].ExtractionCriteria;
+                }
+                debugger;
+                //$("#ExtractionCriteria").data("kendoDropDownList").dataSource.data(response);
+
+                $("#BaseCriteria").autocomplete({
+                    source: selected,
+                    minLength: 0
+                }).focus(function () {
+                    $("#BaseCriteria").autocomplete('search', $("#BaseCriteria").val())
+                });
+
+
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function ExtractionCriteria() {
+        //Extraction
+        debugger;
+        var fieldtype = $("#fieldtype").val();
+        var compsr = "EXTRACTION";
+        $.ajax({
+            type: "POST",
+            data: '{fieldtype: "' + fieldtype + '",process:"' + compsr + '"}',
+            url: "/RuleDefinition/ruleExtracioncreteriadrop",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var selected = [];
+
+                for (var i = 0; i < response.length; i++) {
+                    selected[i] = response[i].ExtractionCriteria;
+                }
+                debugger;
+                //$("#ExtractionCriteria").data("kendoDropDownList").dataSource.data(response);
+
+                $("#ExtractionCriteria").autocomplete({
+                    source: selected,
+                    minLength: 0
+                }).focus(function () {
+                    $(this).autocomplete('search', $(this).val())
+                });
+
+
+            },
+            error: function (er) {
+                onRequestEnd();
+            }
+
+        });
+
+    }
+    function ViewModedtl(e) {
+        debugger;
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $("#btn_saveview").prop('disabled', true).trigger("change");
+        $(".k-window-title").text("View");
+
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $("#btn_submit").prop('disabled', true).trigger("change");
+        $(".k-window-title").text("View");
+    }
+
+    function Ruledtldel() {
+        var grid = $("#ApplyRuleGrid").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var slno = (model.slno);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ApplyRuledtl_Delete", "ApplyRule")',
+                        data: "{ slno:'" + slno + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    function BaseSelectiondel() {
+        var grid = $("#ApplyRuleBase").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var slnobase = (model.slnobase);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ApplyRuleBaseSel_Delete", "ApplyRule")',
+                        data: "{ slnobase:'" + slnobase + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                $("#ApplyRuleBase").data("kendoGrid").dataSource.read();
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+
+    function AddConDel() {
+        var grid = $("#ApplyRuleAdd").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var slnoadd = (model.slnoadd);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("ApplyRuleAddCon_Delete", "ApplyRule")',
+                        data: "{ slnoadd:'" + slnoadd + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                $("#ApplyRuleAdd").data("kendoGrid").dataSource.read();
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+    
+    //$(document).ready(function () {
+    //    // alert("edittem");
+    //    if ($(this).next(".accordion_body").is(':visible')) {
+    //        $(this).next(".accordion_body").slideUp(300);
+    //        $(this).children(".plusminus").text('+');
+    //    } else {
+    //        $(this).next(".accordion_body").slideDown(300);
+    //        $(this).children(".plusminus").text('-');
+    //    }
+
+    //});
+    ////function Toggleclick() {
+    ////    debugger;
+    //    $(".accordion_head").click(function () {
+    //        debugger;
+    //        if ($('.accordion_body').is(':visible')) {
+    //            $(".accordion_body").slideUp(300);
+    //            $(".plusminus").text('+');
+    //        }
+    //        if ($(this).next(".accordion_body").is(':visible')) {
+    //            $(this).next(".accordion_body").slideUp(300);
+    //            $(this).children(".plusminus").text('+');
+    //        } else {
+    //            $(this).next(".accordion_body").slideDown(300);
+    //            $(this).children(".plusminus").text('-');
+    //        }
+
+    //    })
+
+
+    // }
+</script>
+
+<script type="text/x-kendo-tmpl" id="myTemplate">
+    <div class="item click" data="${filter_flag}">
+        <input type="checkbox" name="extractionfilter" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>
+<script type="text/x-kendo-tmpl" id="myTemplate1">
+    <div class="item click" id="div_comparison" data="${filter_flag}">
+        <input type="checkbox" name="comparisionfilter" value="${filter_flag}" class="click ${selected_status}_ID">#:filter_desc#
+    </div>
+</script>

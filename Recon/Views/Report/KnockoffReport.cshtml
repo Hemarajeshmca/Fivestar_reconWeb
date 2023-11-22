@@ -1,0 +1,414 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+
+<!Doctype html>
+<html>
+<head>
+
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-header, .k-treemap-title, .k-grid-header .k-header > .k-link {
+            color: #ffffff;
+        }
+        /*.k-window-content {
+                    width: 1002px;
+                   }*/
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete, a.k-button.k-button-icontext.k-grid-edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grouping-header {
+            color: #ffffff;
+        }
+
+        a.k-link {
+            font-size: 12px;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Matched Transactions</h3>
+                        </div>
+                        <div class="row" style="margin-left: 10px;margin-bottom: 12px;">
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="period_To" class="title"> Date To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_to" name="period_to" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="filetype" class="title">Recon Name</label><br />
+                                @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "height:25px;width: 275px;font-weight: normal" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-sm-4" style="margin-top:24px;">
+                                <button type="button" value="filter" onclick="OnFilter()" id="btn_submit" class="btn btn-primary">&nbsp;Advance Filter</button>&nbsp;
+                                <button type="button" id="Runprocess" onclick="validation()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>
+                                @*<button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>*@
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12" style="padding-left:0px">
+                                <div class="col-md-12">
+                                    <div id="Maingrid" class="col-md-12" style="margin:auto;height:auto;top:10px;width:100%;"> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dialog">
+                        <div class="row" style="margin-top:5px;margin-left:10px">
+                            <div class="col-sm-2">
+                                <label for="Reconname" class="title">Ko Amount</label><br />
+                                <input class="text-box single-line" id="koamount" name="koamount" style="width:100%" type="text" data-bind="    value: koamount">
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="Reconname" class="title">Ko Id</label><br />
+                                <input class="text-box single-line" id="koid" name="koid" type="text" style="width:100%" data-bind="    value: koid">
+                                <input type="hidden" id="review">
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="Reconname" class="title">Maching Type</label><br />
+                                @(Html.Kendo().DropDownList()
+                                                        .Name("matchingtype")
+                                                        .DataTextField("Text")
+                                                        .DataValueField("Value")
+                                                        .BindTo(new List<SelectListItem>()
+                                                            {
+                                                             new SelectListItem()
+                                                                {
+                                                                Text = " ",
+                                                                Value = " "
+                                                                },
+                                                                new SelectListItem()
+                                                                {
+                                                                    Text = "System",
+                                                                    Value = "N"
+                                                                },
+                                                                new SelectListItem()
+                                                                {
+                                                                    Text = "Manual",
+                                                                    Value = "Y"
+                                                                }
+                                                              })
+                                                              .Value("1")
+                                )
+                            </div>
+                            <div class="col-sm-3" style="align-content:center">
+                                <label></label> <br />
+                                <button type="button" value="Refresh" onclick="validation()" id="btn_submit" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Refresh</button>&nbsp;
+                                <button type="button" value="Clear" onclick="OnClear()" id="btn_sendmail" class="btn btn-primary"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;Clear</button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: "01-01-2000",// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#exportExcel").hide();
+        $("#dialog").hide();
+    });
+   
+    function validation() {
+        var msg = "";
+        if ($("#period_from").val() != "") {
+
+        }
+        else {
+            msg += "Select Period From Date";
+        }
+
+        if ($("#period_to").val() != "") {
+
+        }
+        else {
+            msg += " Select Period To Date";
+        }
+        if ($("#account1_desc").val() != "") {
+
+        }
+        else {
+            msg += " Select Account No";
+        }
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function exportExcel() {
+        $("#grid").getKendoGrid().saveAsExcel();
+    }
+
+    function Runprocess() {
+        debugger;
+        var wnd = $("#dialog").data("kendoWindow");
+        if (wnd) {
+            wnd.close();
+        }
+        //var table_name = "recon_trn_vkodtl"
+        var table_name = "recon_rpt_vkodtl"
+        var period_from = $('#period_from').val();
+        var period_to = $("#period_to").val();
+        var str1 = "and";
+        var str2 = "ko_date>="
+        var str3 = "ko_date<="
+        var formatted_Period_from = " and ko_date >= \'" + getFormated_StringDate(period_from) + "\'";
+        var formatted_Period_To = " and ko_date <= \'" + getFormated_StringDate(period_to) + "\'";
+        var account = $("#koamount").val();
+        var Recon_gid = $("#ReconName_id").val();
+        var koid = $("#koid").val();
+        var machingtype = $("#matchingtype").data("kendoDropDownList").value();
+        var reportcondition = formatted_Period_from + formatted_Period_To;
+        if (account != "") {
+            reportcondition += " and ko_amount = \'" + account + "\'";
+        }
+        if (Recon_gid != 0) {
+            //reportcondition += " and Tran_Recon_Id = \'" + Recon_gid + "\'";
+        }
+        if (koid != "") {
+            reportcondition += " and ko_gid = \'" + koid + "\'";
+        }
+        if (machingtype != "1") {
+            reportcondition += " and manual_matchoff = \'" + machingtype + "\'";
+        }
+
+        var cmb_code = "";
+        $.ajax({
+            type: "POST",
+            data: '{table_name: "' + table_name + '",condition:  "' + reportcondition + '" }',
+            url: "/Report/ReportBalanceGrid_Read",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1)
+            {
+                debugger
+                $.alert({
+                    title: 'Impact',
+                    content: "Transaction report generation initiated in the jobid ",
+                    type: 'green',
+                });
+            },
+            //{
+            //    debugger
+            //    $("#exportExcel").show();
+            //    var columns = [];
+            //    var chkval = JSON.parse(Data1);
+            //    var arr = [];
+            //    $.each(chkval, function (i, e) {
+            //        debugger;
+            //        $.each(e, function (key, val) {
+            //            arr.push(val);
+            //        });
+            //    });
+            //    if (arr == "No Records Found!" || arr == "Error in Data!") {
+            //        alert("No Records found..!");
+            //        return false;
+            //    }
+            //    var data = JSON.parse(Data1);
+            //    // var data2 = JSON.parse(result.Data2);
+            //    var i = 0;
+
+            //    var entryIndex = "entries[" + i + "]";
+            //    for (var key in data[0]) {
+            //        debugger;
+            //        var propType = typeof data[0][key];
+
+            //        if (key == "Ko Id") {
+            //            columns.push({
+            //                field: entryIndex,
+            //                title: key,
+            //                type: propType,
+            //                width: 200,
+
+            //            });
+            //        }else
+            //        if (key != "") {
+            //            columns.push({
+            //                field: entryIndex,
+            //                title: key,
+            //                type: propType,
+            //                width: 200,
+            //                //attributes: { style: "text-align: right;" }
+            //            });
+            //        }
+            //        i = i + 1;
+            //        entryIndex = "entries[" + i + "]";
+
+            //    }
+            //    debugger;
+
+            //    var rows = [];
+            //    var data1 = JSON.parse(Data1);
+
+            //    $.each(data1, function (i, e) {
+            //        var entryArray = [];
+            //        $.each(e, function (key, val) {
+            //            entryArray.push(val);
+            //        });
+            //        rows.push(kendo.observable({
+            //            entries: entryArray
+            //        }));
+
+
+            //    });
+
+            //    var viewModel = kendo.observable({
+            //        gridRows: rows,
+            //        //group: [{ field: "Ko Id", dir: "desc" }],
+            //    });
+
+            //    var configuration = {
+            //        //dataBound: onDataBound,
+            //        height: 450,
+            //        navigatable: true,
+            //        groupable: true,
+            //        editable: false,
+            //        sortable: true,
+            //        scrollable: true,
+            //        filterable: true,
+            //        pagable: true,
+            //        pageSize: 5,
+            //        resizable: true,
+            //        persistSelection: true,
+            //        selectable: "false",
+            //        columns: columns,
+            //        //toolbar: ["excel"],
+            //        excel: {
+            //            fileName: "Matched Transactions.xlsx",
+            //            filterable: true,
+            //            allPages: false
+            //        },
+            //        rows: viewModel,
+            //        group: { field: "Ko Id", dir: "desc" },
+            //    };
+
+            //    $("#example").remove();
+            //    $('#Maingrid').append('<div id="example" style="position:relative" class="k-content"><table id="grid"  data-bind="source: gridRows" style="position:relative;overflow:scroll;width:100%"></table></div>');
+            //    //$("#example").remove();
+            //    //$('#Maingrid').append('<div id="example" style="position:inherit";width: 80%; class="k-content"><table id="grid" data-bind="source: gridRows" style="position:relative;overflow:scroll;width:75%"></table></div>');
+            //    var timeEditGrid = $("#grid").kendoGrid(configuration).data("kendoGrid");
+            //    kendo.bind($("#grid"), viewModel);
+
+            //},
+            error: function (result) {
+                console.log(result);
+            }
+    });
+
+    }
+    function OnFilter() {
+        var msg = "";
+        if ($("#Period_from").val() != "" || $("#Period_from").val() != undefined) {
+
+        }
+        else {
+            msg += "Select Period From Date";
+        }
+
+        if ($("#Period_To").val() != "") {
+
+        }
+        else {
+            msg += " Select Period To Date";
+        }
+        if ($("#ReconName_id").data("kendoDropDownList").value() != "0") {
+
+        }
+        else {
+            msg += "Select Recon Name";
+        }
+        if (msg == "") {
+            window_open();
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+
+    }
+    function window_open() {
+        $("#dialog").kendoWindow();
+        var dialog = $("#dialog").data("kendoWindow");
+        dialog.open().element.closest(".k-window").css({
+            top: 121,
+            left: 300, height: 108, width: 800
+        });
+        dialog.title("Advance Filter");
+        dialog.bind("open", window_open);
+    }
+    function OnClear() {
+        $("#koamount").val("");
+        $("#koid").val("");
+        $("#matchingtype").data("kendoDropDownList").value("");
+    }
+</script>

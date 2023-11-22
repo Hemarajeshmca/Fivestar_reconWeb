@@ -1,0 +1,232 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ApplyRule_model
+
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 80%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+
+    .k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+    }
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+</style>
+<style>
+    .k-edit-form-container .k-edit-buttons {
+        visibility: hidden !important;
+    }
+</style>
+<div class="container">
+    <div class="row" style="margin-bottom:10px;">
+        <div class="col-sm-2">
+            @Html.Label("Sl No", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+            @Html.TextBoxFor(model => model.sno, new { @style = "", @readonly = "readonly" })
+            @Html.HiddenFor(model=>model.slnobase)
+            <input class="text-box single-line" id="slnobase" name="slnobase" type="hidden" value="" data-bind="value:slnobase">
+            <input type="hidden" id="listslno2" name="listslno" value="" data-bind="value:listslno">
+            @*<input type="hidden" id="applyruledtl_gid2" name="applyruledtlid" value="" data-bind="value:slno">*@
+            <input type="hidden" id="slno2" name="slno" value="" data-bind="value:slno">
+            <input type="hidden" id="alias_name" name="Accountmode_alias_name" value="" data-bind="value:Accountmode_alias_name">
+
+        </div>
+        <div class="col-sm-3" id="BetweenAccount">
+            @Html.Label("Account No", new { style = "font-size: 14px;font-weight: 600 !important;" })
+
+            @(Html.Kendo().DropDownList()
+                                     .Name("account1")
+                                    .DataTextField("account2")
+                                    .DataValueField("account1")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                                        
+                                                    .DataSource(source => { source.Read(read => { read.Action("AccNo1drop", "ApplyRule").Data("dropaddition"); }).ServerFiltering(true); }))
+                   </div>
+        <div class="col-sm-2" id="withaccount">
+            @Html.Label("Account Mode", new { style = "font-size: 14px;font-weight: 600 !important;" })
+
+            @(Html.Kendo().DropDownList()
+                                        .Name("Accountmode")
+                                        .DataTextField("Text")
+                                                        .DataValueField("Value")
+                        .BindTo(new List<SelectListItem>()
+                        {
+                             new SelectListItem()
+                            {
+                                Text = "",
+                                Value = ""
+                            },
+                            new SelectListItem()
+                            {
+                                Text = "Debit",
+                                Value = "D"
+                            },
+                            new SelectListItem()
+                            {
+                                Text = "Credit",
+                                Value = "C"
+                            }
+                        })
+                       .Value("1")
+            )
+
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:15px;">
+        <div class="col-sm-2">
+            @Html.Label("Order", new { style = "font-size: 14px;font-weight: 600 !important;" })    <br />
+
+            @Html.TextBoxFor(model => model.Order, new { @style = "" })
+
+        </div>
+        @*<div class="row" style="margin-top:15px;">
+            <div class="col-sm-2">
+                @Html.Label("Comparsion criteria", new { style = "font-size: 14px;font-weight: 600 !important;" })    <br />
+
+                @Html.TextBoxFor(model => model.ComparisonCriteria, new { @style = "" })
+
+            </div>*@
+            <div class="col-sm-2">
+                @Html.Label("Status", new { style = "font-size: 14px;font-weight: 600 !important;" })<br />
+
+                <input type="radio" id="status2" name="status" value="Y" checked> Active
+                <input type="radio" id="status2" name="status" value="N"> InActive
+
+            </div>
+            <div class="col-sm-2" style="margin-top:10px;">
+                <!--<input type="button" class="btn btn-orange btnsubmit fa fa-eraser" value="Update" id="btn_submit" onclick="SaveSupportingFile()" />&nbsp;-->
+                <button type="button" class="btn btn-orange btnsubmit" id="btn_submit" onclick="SaveSupportingFile();"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Update</button>&nbsp;
+                <!--<input type="button" class="btn btn-orange" value="Close" id="btn_Close" onclick="return ClosesupportPopup();" class="btnsubmit" />-->
+                <button type="button" class="btn btn-orange" id="btn_Close" onclick="return ClosesupportPopup();"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+            </div>
+        </div>
+    <div style="padding-top:10px;">
+        <button type="button" class="btn btn-orange"  id="btn_Add" style="height:10px" onclick="AddMode();">+</button>
+        @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleBaseFilter")
+                                .HtmlAttributes(new { style = "width:80%;line-height:2em;font-weight:normal" })
+                                //.ToolBar(toolbar => toolbar.Create().Text("Add"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.slnobaseFilter).Title("Sl No").Width(50);
+                                    columns.Bound(m => m.filter_appliedon_desc).Title("Filter Applied On").Width(50);
+                                    columns.Bound(m => m.field_alias_name).Title("Filter Field").Width(50);
+                                    columns.Bound(m => m.BaseCriteria).Title("Filter Criteria").Width(50);
+                                    columns.Bound(m => m.Identitycriteria).Title("Identity Criteria").Width(50);
+                                    columns.Bound(m => m.TargetField).Title("Identy value").Width(50);
+                                    columns.Bound(m => m.ComparisonCriteria).Title("ident Criteria").Width(50).Hidden();
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(10);
+                                    columns.Bound(m => m.slnobase).Title("SlNo").Width(50).Hidden();
+                                    columns.Command(command =>
+                                    {
+                                       // command.Edit().Text("edit");
+                                        //command.Custom("Add").Text("+").Click("AddMode");
+
+                                        //command.Custom("<span class='fa fa-pencil'; >").Click("EditMode");
+                                        //command.Custom("<span class='fa fa-eye'; >").Click("ViewMod");
+
+                                        command.Custom("E").Text("<span class='fa fa-pencil';>").Click("EditMode");
+                                        command.Custom("V").Text("<span class='fa fa-eye';>").Click("ViewMod");
+                                        command.Custom("D").Text("<span class='fa fa-trash';>").Click("DelMod");
+                                        //command.Custom("<span class='fa fa-eye'; >");
+                                    }).Title("Action").Width(50);
+                                })
+
+                                                                        //.Editable(editable =>
+                                                                        //     { editable.Mode(GridEditMode.PopUp).TemplateName("supportfilepopTest"); })
+                                                         
+                             .Filterable()
+                             .Sortable()
+                             //.Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(5)
+                             .Events(events => events.Error("error_handler"))
+                                     .Model(model =>
+                                     {
+                                         model.Id(p => p.slnobaseFilter);
+                                         model.Field(p => p.Select).Editable(false);
+                                     })
+                                                                            //.Create(Create => Create.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule"))
+                                           .Read(read => read.Action("ApplyRuleGrid_ReadBaseFilterRule", "ApplyRule").Data("getbaseFilterGid"))
+                                                                                //    .Update(update => update.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule"))
+                             ))
+        </div>
+        <hr />
+    @(Html.Kendo().Window()
+    .Name("wndWindow")
+            .Title("Add")
+            .Visible(false)
+            .Draggable(true)
+            .Width(1050)
+            .Height(300)
+            .Modal(true)
+            .Resizable()
+    .Content(@<text>
+        <div id="wndContent">
+
+        </div>
+    </text>)
+    ) 
+
+    </div>
+<script>
+    //$(document).ready(function () {
+    //    alert("edittem");
+
+      
+    //});
+   
+
+    
+   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

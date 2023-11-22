@@ -1,0 +1,710 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.Recontype_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+   
+
+    <style>
+        
+
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+
+
+         /*.k-grid-pager{
+            height:30px !important;
+        }
+
+     
+     
+        .k-state-default{
+            margin-top:-24px;
+        }*/
+    </style>
+    <style>
+        .k-header.k-grid-toolbar.k-grid-top {
+            background: none;
+        }
+
+        .k-button.k-button-icontext.k-grid-add {
+            background: green;
+            color: white;
+        }
+    </style>
+
+    <style>
+
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        span.k-link {
+            color: #fff !important;
+            position: relative;           
+    }
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+       .k-state-active {
+            display: block;
+        }
+         .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Recon Setup</h3>
+                        </div>
+                       @*// <button type="button" class="btn btn-orange" id="btn_Add" style="height:10px" onclick="AddMode();">+</button>*@
+                        @using (Html.BeginForm("ReconSetup", "ReconSetupList", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.Recontype_model>().Name("Recontype")
+                                .HtmlAttributes(new { style = "width:100%;height:450px;line-height:2em;font-weight:normal" })
+                                .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.recon_id).Hidden();
+                                    columns.Bound(m => m.ReconName).Title("Recon Name").Width(80);
+                                    columns.Bound(m => m.Account1).Title("Account 1").Width(100);
+                                    columns.Bound(m => m.Account2).Title("Account 2").Width(100);
+                                    columns.Bound(m => m.MappingType_name).Title("Mapping Type").Width(50);
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(30);
+                                    //columns.Bound(m => m.period_from).Title("Period From").ClientTemplate("#= period_from  ? kendo.toString(kendo.parseDate(period_from, 'dd-MM-yyyy'), 'dd/MM/yyyy') : '' #").Width(80);
+                                    //columns.Bound(m => m.period_to).Title("Period To").ClientTemplate("#= period_to  ? kendo.toString(kendo.parseDate(period_to, 'dd-MM-yyyy'), 'dd/MM/yyyy') : '' #").Width(80);
+                                    columns.Bound(m => m.period_from).Title("Period From").Width(70);
+                                    columns.Bound(m => m.period_to).Title("Period To").Width(70);
+                                    columns.Bound(m => m.untillactive).Title("untilactive").Width(100).Hidden();
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                        cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>").Click("myDeleteJs");
+                                    }).Title("Action").Width(50);
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("Recontypepop"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(20)
+                             .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.recon_id))
+                             .Create(Create => Create.Action("RecontypeGrid_Save", "ReconSetup"))
+                             .Read(read => read.Action("RecontypeGrid_Read", "ReconSetup"))
+                             .Update(update => update.Action("RecontypeGrid_Update", "ReconSetup").Data("Onchange"))
+                             ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    var periodfrom = "";
+    var periodto = "";
+    var reconname;
+    var type;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'DMS',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    function Onchange() {
+        debugger;
+        var val = $("input[name='MappingType_code']:checked").val();
+
+        if (val == "C")
+        {
+            mapping = "C";
+        }
+        else if (val == "P")
+        {
+            mapping = "P";
+        }
+        else {
+            mapping = "M";
+        }
+
+
+        var grid = $("#Recontype").data("kendoGrid");
+        var model = grid._data[0];
+        //var Datefrom = model.period_from;
+        //var Dateto = model.period_to;
+        var periodfrom = $("#period_from").val();
+        var periodto = $("#period_to").val();
+        //var Datefrom = $("#period_from").val();
+        //var Dateto = $("#period_to").val();
+
+        //var Dateto1 = res.replace("/", "-");
+        //var Dateto = Dateto1.replace("/", "-");
+        //var periodto = null;
+        //if (Dateto !="") {
+           
+        //    var periodto = getFormated_StringDateone(Dateto);
+        //}
+        //var periodfrom = getFormated_StringDate(Datefrom);
+
+
+        if ($('#untillactive').is(":checked")) {
+            var untillactive = 'Y';
+        }
+        else {
+            var untillactive = 'N';
+        }
+        //var periodfrom = Datefrom.split("-").reverse().join("-");
+        //var periodto = Dateto.split("-").reverse().join("-");
+        
+       
+
+        //if (periodfrom.contains('/'))
+        //{
+        //    var per=periodfrom.split("/").re
+
+        //}
+       
+        
+        var Deptmodel = {};
+            Deptmodel.ReconName = $("#ReconName").val();
+            Deptmodel.account1_desc = $("#account1_desc").data("kendoDropDownList").value();
+            Deptmodel.account2_desc = $("#account2_desc").data("kendoDropDownList").value();
+            Deptmodel.untillactive = untillactive;
+           //Deptmodel.Recon_type = ;
+            Deptmodel.MappingType_code = mapping;// $("#MappingType_code").val();
+            Deptmodel.Status_code = $("#Status_code").val();
+            Deptmodel.period_from = periodfrom;
+            Deptmodel.period_to = periodto;
+            Deptmodel.recon_id = $("#recon_id").val();
+
+
+        return {
+            Deptmodel: Deptmodel
+            
+
+        }
+
+
+    }
+    //function getFormated_StringDateone(date) {
+    //    debugger;//get DD/MM/YYYY or MM/DD/YYYYY
+    //    if (date != "" || date != undefined) {
+    //        var d = date.split("/");
+    //        debugger;
+    //        return d[2] + "-" + d[0] + "-" + d[1];
+    //    }
+
+    //}
+    //function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+    //    if (date != "" || date != undefined) {
+    //        var d = date.split("/");
+
+    //        return d[2] + "-" + d[1] + "-" + d[0];
+    //    }
+
+    //}
+    //function getFormated_StringDate(date) {
+    //    debugger;//get DD/MM/YYYY or MM/DD/YYYYY
+    //    if (date != "" || date != undefined) {
+    //        var d = date.split("/");
+
+    //        return d[2] + "-" + d[1] + "-" + d[0];
+    //    }
+
+    //}
+
+
+    function AddMode() {
+
+        debugger;
+    addbuttonclick = "save";
+   
+    save = "save";
+    //   $("#listslno1").val().trigger("change");
+    //var btn = document.getElementById("btn_saveview");
+    //btn.value = 'my value'; // will just add a hidden value
+    //btn.innerHTML = 'Save';
+
+    }
+
+    function checkactive() {
+        debugger;
+        if ($("input:checkbox[id='untillactive']").is(":checked") == true) {
+            $("#period_to").val('');
+            $("#period_to").attr('disabled', true);
+         
+           /// $(".untilperiod").attr('disabled', true);
+            
+
+        }
+        else {
+            
+            document.getElementById('period_to').disabled = false;
+            $("#period_to").removeAttr("disabled");
+            $("#period_to").attr('disabled', false)
+        }
+    }
+
+
+    $(document).ready(function () {
+        $("#acc1").hide();       
+        $("#acc2drop").hide();
+        $("#acc2").hide();
+        $("#accname1").hide();
+        filetype();
+      
+        $("#Recontype").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#Recontype").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            debugger;
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepopone()" style="margin-left:511px;border:none;background-color: #357ab8;cursor:pointer;color:white;">x</button>');
+           
+            var editWindow1 = this.editable.element.data("kendoWindow");
+            editWindow1.unbind("close");
+            editWindow1.bind("close", onWindowEditClose);
+            //reconname = event.model.ReconName;
+            periodfrom = event.model.period_from;
+            periodto = event.model.period_to;
+            $("#period_from").val(periodfrom);
+            $("#period_to").val(periodto);
+            filetype();
+        });
+       
+
+        kendodate_format();
+    });
+
+    //function update_btn()
+    //{
+    //    // var btnsave="save"
+    //    debugger;
+    //    if (reconname == "")
+    //    {
+    //   var btn = document.getElementById("btn_saveview");
+    //    btn.value = 'my value'; // will just add a hidden value
+    //    btn.innerHTML = 'Update';
+    //    //var grid = $("#Recontype").data("kendoGrid");
+    //    //var model = grid.dataItem($(event.target).closest("tr"));
+    //    var Deptmodel = {};
+    //    Deptmodel.ReconName = $("#ReconName").val();
+    //    Deptmodel.account1_desc = $("#account1_desc").data("kendoDropDownList").value();
+    //    Deptmodel.account2_desc = $("#account2_desc").data("kendoDropDownList").value();
+    //    Deptmodel.untillactive = $("#untillactive").val();
+    //    Deptmodel.period_from = $("#period_from").val();
+    //    Deptmodel.period_to = $("#period_to").val();
+
+    //    //Deptmodel.Recon_type = ;
+    //    Deptmodel.MappingType_code = $("#MappingType_code").val();
+    //    Deptmodel.Status_code = $("#Status_code").val();
+       
+
+    //    debugger;
+    //    $.ajax({
+    //        type: "POST",
+    //        timeout: 0,
+    //        async: true,
+    //        data: '{Deptmodel: ' + JSON.stringify(Deptmodel) + '}',
+    //        //data: '{table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '",Recon_gid:'+Recon_gid+'}',
+    //        url: "/ReconSetup/RecontypeGrid_Save",
+    //        dataType: "json",
+    //        contentType: 'application/json; charset=utf-8',
+    //        success: function (Data1) {
+    //            debugger;
+
+    //            if (Data1[1] != "0") {
+    //                $.alert({
+    //                    icon: 'fa fa-success',
+    //                    title: 'Impact',
+    //                    content: Data1[0],
+    //                    type: 'green',
+    //                    animationSpeed: 700,
+    //                });
+    //            } else {
+    //                $.alert({
+    //                    icon: 'fa fa-warning',
+    //                    title: 'Impact',
+    //                    content: Data1[0],
+    //                    type: 'red',
+    //                    animationSpeed: 700,
+    //                });
+    //            }
+
+
+    //        },
+
+
+
+    //        error: function (result) {
+    //            alert("Error" + result);
+    //            console.log(result);
+    //            $.alert({
+    //                icon: 'fa fa-success',
+    //                title: 'Impact',
+    //                content: result,
+    //                type: 'red',
+    //                animationSpeed: 700,
+    //            });
+    //        }
+    //    });
+    
+
+    //}
+    //else{
+
+ 
+    //    var btn = document.getElementById("btn_saveview");
+    //    btn.value = 'my value'; // will just add a hidden value
+    //    btn.innerHTML = 'Update';
+    //    //var grid = $("#Recontype").data("kendoGrid");
+    //    //var model = grid.dataItem($(event.target).closest("tr"));
+    //    var Deptmodel = {};
+    //    Deptmodel.ReconName = $("#ReconName").val();
+    //    Deptmodel.account1_desc = $("#account1_desc").data("kendoDropDownList").value();
+    //    Deptmodel.account2_desc = $("#account2_desc").data("kendoDropDownList").value();
+    //    Deptmodel.untillactive = $("#untillactive").val();
+    //    Deptmodel.period_from = $("#period_from").val();
+    //    Deptmodel.period_to = $("#period_to").val();
+
+    //    //Deptmodel.Recon_type = ;
+    //    Deptmodel.MappingType_code = $("#MappingType_code").val();
+    //    Deptmodel.Status_code = $("#Status_code").val();
+       
+
+    //    debugger;
+    //    $.ajax({
+    //        type: "POST",
+    //        timeout: 0,
+    //        async: true,
+    //        data: '{Deptmodel: ' + JSON.stringify(Deptmodel) + '}',
+    //        //data: '{table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '",Recon_gid:'+Recon_gid+'}',
+    //        url: "/ReconSetup/RecontypeGrid_Update",
+    //        dataType: "json",
+    //        contentType: 'application/json; charset=utf-8',
+    //         success: function (Data1) {
+    //             debugger;
+
+    //             if (Data1[1] != "0") {
+    //                 $.alert({
+    //                     icon: 'fa fa-success',
+    //                     title: 'Impact',
+    //                     content: Data1[0],
+    //                     type: 'green',
+    //                     animationSpeed: 700,
+    //                 });
+    //             } else {
+    //                 $.alert({
+    //                     icon: 'fa fa-warning',
+    //                     title: 'Impact',
+    //                     content: Data1[0],
+    //                     type: 'red',
+    //                     animationSpeed: 700,
+    //                 });
+    //             }
+
+
+    //         },
+
+
+
+    //         error: function (result) {
+    //             alert("Error" + result);
+    //             console.log(result);
+    //             $.alert({
+    //                 icon: 'fa fa-success',
+    //                 title: 'Impact',
+    //                 content: result,
+    //                 type: 'red',
+    //                 animationSpeed: 700,
+    //             });
+    //         }
+    //    });
+    
+    //}
+
+    //}
+    var onWindowEditClose = function (e) {
+        debugger;
+        if (preventCloseOnSave) {
+            e.preventDefault();
+            preventCloseOnSave = false;
+        }
+        else {
+            $("#Recontype").data("kendoGrid").dataSource.read();
+        }
+    };
+    function closepopone() {
+        debugger;
+        $("#Recontype").data("kendoGrid").dataSource.read();
+    }
+    function onRequestEnd(e) {
+        //Check request type
+        debugger;
+      
+        //var type = e.type;
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response > 0) {
+                $.alert({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+            else {
+                $.alert({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response > 0) {
+                $.alert({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                    autoClose: 'ok|10000',
+                });
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 10000);
+
+            }
+            else {
+                $.alert({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+    }
+    function accname1(){
+        account_name1();
+    }
+    function accname2() {
+        account_name2();
+    }
+    function account_name1() {
+        //$("#field_name").data("kendoDropDownList").value();
+        var code = $("#account1_desc").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: '@Url.Action("AccName", "ReconSetup")',
+            //url: "/ReconSetup/AccName",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                $("#accname").val(response).trigger("change");
+                $("#acc1").show();
+                $("#accname").show();
+            },
+            error: function (er) {
+            }
+        });
+    }
+    function account_name2() {
+        var code = $("#account2_desc").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{code: "' + code + '"}',
+            url: '@Url.Action("AccName", "ReconSetup")',
+            //url: "/ReconSetup/AccName",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                var fieldtype = response;
+                $("#accname2").val(response).trigger("change");
+                $("#acc2").show();
+                $("#accname1").show();
+               
+            },
+            error: function (er) {
+            }
+        });
+    }
+    function filetype() {
+        debugger;
+        var val = $("input[name='MappingType_code']:checked").val();
+        if (val == "P") {
+            $("#acc2drop").hide();
+
+            $("#acc2").hide();
+            $("#accname1").hide();
+        } else {
+            $("#acc2drop").show();
+            $("#accname1").show();
+        }
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+    }
+    function myDeleteJs() {
+        var grid = $("#Recontype").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var recon_id = (model.recon_id);
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Impact',
+            autoClose: 'cancel|10000',
+            animationSpeed: 700,
+            content: 'Are you sure to delete ?',
+            type: 'red',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        url: '@Url.Action("RecontypeGrid_Delete", "ReconSetup")',
+                        data: "{ recon_id:'" + recon_id + "'}",
+                        success: function (response) {
+                            if (response[1] > 0) {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 2000);
+
+                            }
+                            else {
+                                $.alert({
+                                    icon: 'fa fa-success',
+                                    title: 'Impact',
+                                    content: response[0],
+                                    type: 'blue',
+                                    animationSpeed: 700,
+                                });
+                                preventCloseOnSave = true;
+                            }
+                        },
+                    });
+                },
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: 'Delete cancelled !',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+                },
+            }
+        });
+    }
+
+    function Dateformat() {
+        debugger;
+
+
+    //    $("#period_from").kendoDatePicker({
+    //        value: new Date(),// sets max date
+    //        format: "dd-MM-yyyy"
+    //    });
+    //    $("#period_to").kendoDatePicker({
+    //        value: new Date(),// sets max date
+    //        format: "dd-MM-yyyy"
+    //    });
+    }
+
+    //$(".datein").click(function () {
+    //    debugger;
+    //    $("#period_from").kendoDatePicker({
+    //        value: new Date(),// sets max date
+    //        format: "dd-MM-yyyy"
+    //    });
+    //    $("#period_to").kendoDatePicker({
+    //        value: new Date(),// sets max date
+    //        format: "dd-MM-yyyy"
+    //    });
+    //});
+
+
+    $(document).ready(function () {
+
+        debugger;
+       
+        //kendodate_format();
+        //$("#period_from").kendoDatePicker({
+        //    value: new Date(),// sets max date
+        //    format: "dd-MM-yyyy"
+        //});
+        //$("#period_to").kendoDatePicker({
+        //    value: new Date(),// sets max date
+        //    format: "dd-MM-yyyy"
+        //});
+
+
+    });
+</script>
+

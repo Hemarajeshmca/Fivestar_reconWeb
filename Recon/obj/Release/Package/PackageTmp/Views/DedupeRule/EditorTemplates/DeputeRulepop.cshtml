@@ -1,0 +1,79 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.DedupeRule_model
+
+<style>
+   
+    .form-control {  
+        height: 26px;     
+        width: 89%;       
+    }
+      
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 48%;
+        font-weight: normal;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+    div.k-window-content {
+        overflow: inherit;
+    }
+</style>
+   
+<div class="container">
+    <div class="row" style="padding-bottom:8px;padding-left:37px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Sl No&nbsp;</label>
+            <input class="form-control" id="sno" name="sno" type="text" value="" data-bind="value:sno" readonly>
+            <input id="slnolist" name="slnolist" type="hidden">
+            <input id="slno" name="slno" type="hidden">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">DB Alias Name&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                            .Name("field_name")
+                            .DataTextField("field_alias_name")
+                            .DataValueField("field_name")
+                            .Events(e => e.Change("onfieldchange").DataBound("test1"))
+                                    .HtmlAttributes(new { style = "height:25px;width: 96%;font-weight: normal" })
+                            .DataSource(source => { source.Read(read => { read.Action("dedupDbaliasdrop", "DedupeRule"); }).ServerFiltering(true); }))
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-left:37px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Comparison Criteria&nbsp;</label>
+            <input class="form-control" id="ComparisonCriteria" name="ComparisonCriteria" type="text" value="" data-bind="value:ComparisonCriteria">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Extraction Criteria&nbsp;</label>
+            <input class="form-control" id="ExtractionCriteria" name="ExtractionCriteria" type="text" value="" data-bind="value:ExtractionCriteria">
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:5px;padding-left:37px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Status&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="status" name="status" value="Y" checked>&nbsp;&nbsp;Active&nbsp;
+                <input type="radio" id="status" style="margin-left: 10px;" name="status" value="N">&nbsp;&nbsp;InActive&nbsp;
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        $(document).ready(function () {
+
+        });
+    </script>

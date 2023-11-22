@@ -1,0 +1,605 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ManualMatchoff_model
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        body {
+            font-family: Arial;
+            font-size: 10pt;
+        }
+
+        table {
+            border: 1px solid #ccc;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+            table th {
+                background-color: #B8DBFD;
+            }
+
+            table th, table td {
+                padding: 5px;
+                border: 1px solid #ccc;
+            }
+
+            table, table table td {
+                border: 0px solid #ccc;
+            }
+
+                table th a, table th a:visited {
+                    color: #333;
+                    font-weight: bold;
+                }
+
+        .Pager span {
+            text-align: center;
+            color: #333;
+            display: inline-block;
+            width: 20px;
+            background-color: #B8DBFD;
+            margin-right: 3px;
+            line-height: 150%;
+            border: 1px solid #B8DBFD;
+        }
+
+        .Pager a {
+            text-align: center;
+            display: inline-block;
+            width: 20px;
+            background-color: #ccc;
+            color: #333;
+            border: 1px solid #ccc;
+            margin-right: 3px;
+            line-height: 150%;
+            text-decoration: none;
+        }
+    </style>
+
+    <style>
+        .btnsubmit {
+            color: #fff;
+            border-radius: 5px;
+            padding: 8px 25px;
+            border: 0 none;
+            background-color: #337ab7;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-grouping-header {
+            color: #ffffff;
+        }
+
+        /*.k-header {
+                font-weight: bold;
+            }*/
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+    </style>
+
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 40%;
+            font-weight: normal;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+            color: #fff !important;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grid-filter.k-state-active {
+            background-color: rgb(51, 122, 183);
+        }
+
+        .k-state-active {
+            display: block;
+        }
+
+        .k-link {
+            color: #fff !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Manual - Adhoc</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+
+                            <div class="col-sm-3">
+                                <div class="form-group" id="within">
+                                    <label for="filetype" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "width:100%" })
+                                                                        .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" id="run" class="btn btn-primary" onclick="show_filter()" style="margin-left:58px;margin-top:24px;">&nbsp;Advance Filter</button>&nbsp;
+                            </div>
+
+                            <div class="col-sm-1">
+                                <button type="button" value="Refresh" onclick="OnRefresh()" id="btn_submit" class="btn btn-primary" style="margin-left:200px;margin-top:-52px"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>&nbsp;
+                            </div>
+
+                            <div class="col-sm-1">
+                                <button type="button" value="Refresh" onclick="OnProgress()" id="btn_submit" class="btn btn-primary" style="margin-left:200px;margin-top:-52px"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Process</button>&nbsp;
+                            </div>
+
+                            <div id="Partialone" style="display:none">
+                                @Html.Partial("AdhocEditpartialview")
+                            </div>
+                            @*<div class="col-sm-1" id="gridload" style="width:100%">
+
+                                @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("Griddatload")
+                                .HtmlAttributes(new { style = "height:400px;font-weight:normal" })
+                                        // .ToolBar(toolbar => toolbar.Create().Text(""))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.select).ClientTemplate("<input type='checkbox' id='checkbox'  #= select == true ? checked='checked' : '' # />").Width(50).Title("Select");
+                                    columns.Bound(m => m.TranDate).Title("Tran Date").Width(50);
+                                    columns.Bound(m => m.ValueDate).Title("Value Date").Width(50);
+                                    // columns.Bound(m => m.Accountmode).Title("A/C Mode").Width(50);
+                                    columns.Bound(m => m.acc_no).Title("A/C No").Width(80);
+                                    columns.Bound(m => m.amount).Title("Amount").Width(80);
+                                    columns.Bound(m => m.excp_amount).Title("Exception Amount").Width(100);
+                                    // columns.Bound(m => m.MappedAmount).Title("MappedAmount").Width(80);
+
+                                    //columns.Command(cmd =>
+                                    //{
+                                    //    cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;'>");
+                                    //    cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                    //}).Title("Action").Width(50);
+                                })
+                                        //.Editable(editable =>
+                                        // { editable.Mode(GridEditMode.PopUp).TemplateName(""); })
+                                                 .Pageable(pageable => pageable
+                                                            .Refresh(true)
+                                                            .PageSizes(true)
+                                                            .ButtonCount(5))
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                                 //.Events(events => events.Error("error_handler"))
+                                     .Model(model => model.Id(p => p.report_gid))
+                                           .Read(read => read.Action("ManualmatchoffGridRead", "ManualMatchOff").Data("additionalinfo"))
+
+
+                             ))
+
+                            </div>*@
+                            <table id="tblCustomers" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th><a href="javascript:;">Tran Date</a></th>
+                                    <th><a href="javascript:;">Value Date</a></th>
+                                    <th><a href="javascript:;">A/C No</a></th>
+                                    <th><a href="javascript:;">Amount</a></th>
+                                    <th><a href="javascript:;">Exception Amount</a></th>
+                                </tr>
+                                <tr style="display:none">
+                                    <td>Tran Date</td>
+                                    <td>Value Date</td>
+                                    <td>A/C No</td>
+                                    <td>Amount</td>
+                                    <td>Exception Amount</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <div class="Pager"></div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script src="~/Scripts/ASPSnippets_Pager.min.js"></script>
+<script type="text/javascript">
+    var sortName = "";
+    var sortDirection = "ASC";
+    $(function () {
+        GetCustomers(1);
+    });
+    $("body").on("click", "#tblCustomers th a", function () {
+        sortName = $(this).html();
+        sortDirection = sortDirection == "ASC" ? "DESC" : "ASC";
+        GetCustomers(1);
+    });
+    $("body").on("click", ".Pager .page", function () {
+        GetCustomers(parseInt($(this).attr('page')));
+    });
+    function GetCustomers() {       
+        $.ajax({
+            type: "POST",
+            url: "/ManualMatchOff/ManualmatchoffGridReads",
+            //data: '{outresult: ' + outresult + ', _count: "' + count + '", table_name: "' + table_name + '", condition: "' + condition + '"}',
+            data: '{outresult: ' + result + ', _count: "' + count + '",table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '"}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: OnSuccess,
+            failure: function (response) {
+                alert(response.d);
+            },
+            error: function (response) {
+                alert(response.d);
+            }
+        });
+    };
+    function OnSuccess(response) {
+        debugger;
+        var model = response;
+        var row = $("#tblCustomers tr:last-child").removeAttr("style").clone(true);
+        $("#tblCustomers tr").not($("#tblCustomers tr:first-child")).remove();
+        $.each(model, function () {
+            var customer = this;
+            $("td", row).eq(0).html(customer.TranDate);
+            $("td", row).eq(1).html(customer.ValueDate);
+            $("td", row).eq(2).html(customer.acc_no);
+            $("td", row).eq(3).html(customer.amount);
+            $("td", row).eq(3).html(customer.excp_amount);
+            $("#tblCustomers").append(row);
+            row = $("#tblCustomers tr:last-child").clone(true);
+        });
+        $(".Pager").ASPSnippets_Pager({
+            ActiveCssClass: "current",
+            PagerCssClass: "pager",
+            PageIndex: model.PageIndex,
+            PageSize: model.PageSize,
+            RecordCount: model.RecordCount
+        });
+    };
+</script>
+
+
+
+<script>
+    var orgindata = "";
+    var radiochecked;
+    var Rec_id;
+    var result;
+    var count;
+
+    function OnRefresh() {
+        debugger;
+        var rflag = "";
+
+        parcheck = 0;
+        parchecksec = 0;
+
+        $.confirm({
+            icon: 'fa fa-warnings',
+            title: 'Apply Filter',
+            autoClose: 'cancel|10000',
+            //theme: 'dark',
+            animationSpeed: 700,
+            content: 'Please Confirm to Download the File',
+            type: 'blue',
+            buttons: {
+                confirm: function () {
+                    debugger;
+                    confirm()
+                    debugger;
+                    // rez();
+                    // $("#radgrid").trigger("change");
+
+
+                },
+
+
+
+
+
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Apply filter',
+                        //  theme: 'dark',
+                        content: 'Cancelled.!',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+
+                }
+            },
+        });
+
+
+       // $("#gridload").show();
+
+    }
+
+    function confirm() {
+
+        debugger;
+
+        // textinput();
+
+        var checkflag = "";
+        var reportcondition = "";
+
+
+        var reportgid = 0;
+        var Transaction_Rpt = {};
+        // Transaction_Rpt.Table_Name = "recon_trn_vtranrecon";
+
+
+        var Recon_gid = $("#ReconName_id").data("kendoDropDownList").text();
+        Rec_id = $("#report_gid").data("kendoDropDownList").value();//report_gid
+
+
+        var str1 = "and";
+        var str2 = "tran_date>="
+        var str3 = "tran_date<="
+        radiochecked = false;
+        //reportcondition = Recon_gid;//formatted_Period_from + formatted_Period_To;
+        //if (document.getElementById('radgrid').checked) {
+        //    radiochecked =false;
+        //}
+        //if (document.getElementById('fileid').checked) {
+        //    radiochecked = true;
+        //}
+
+        Transaction_Rpt.Report_condition = reportcondition;
+        dataresponse = "";
+        orgindata = "";
+        getdata(reportcondition);
+
+        orgindata = dataresponse;
+
+
+        if (ran == "emptyvalue") {
+            $.alert({
+                title: 'Impact',
+                content: "please fill the value",
+                type: 'blue',
+
+
+            });
+
+        }
+        else if (orgindata == "" || orgindata == undefined) {
+            $.alert({
+                title: 'Impact',
+                content: "Minimum one filter need to be Add.",
+                type: 'blue',
+
+
+            });
+        }
+        else if (parcheck != parchecksec) {
+            $.alert({
+                title: 'Impact',
+                content: "Open and close paranthesis mismatch",
+                type: 'blue',
+
+
+            });
+        }
+
+
+        else {
+
+            if (radiochecked == true) {
+
+                //  additionalinfo();
+               // $("#Griddat").data("kendoGrid").dataSource.read();
+
+            }
+
+            else {
+                debugger;
+               // $("#Griddatload").data("kendoGrid").dataSource.read();
+
+
+                    $.ajax({
+                        type: "POST",
+                        data: '{table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '"}',
+                        url: "/ManualMatchOff/ManualFirstgridload",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                      success: function (Data1) {
+                        debugger;
+                      result = Data1[1];
+                      count = Data1[2];
+                      //call();
+                      GetCustomers();
+                        if (Data1[1] != "0") {
+                            $.alert({
+                                icon: 'fa fa-success',
+                                title: 'Impact',
+                                content: Data1[0],
+                                type: 'green',
+                                animationSpeed: 700,
+                            });
+                        } else {
+                            $.alert({
+                                icon: 'fa fa-warning',
+                                title: 'Impact',
+                                content: Data1[0],
+                                type: 'red',
+                                animationSpeed: 700,
+                            });
+                        }
+
+
+                    },
+
+                    error: function (result) {
+                        alert("Error" + result);
+                        console.log(result);
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Impact',
+                            content: result,
+                            type: 'red',
+                            animationSpeed: 700,
+                        });
+                    }
+                });
+            }
+
+
+        }
+
+
+    }
+
+    function show_filter() {
+        debugger;
+
+        $('#Partialone').show();
+    }
+
+    function call() {
+        $("#Griddatload").data("kendoGrid").dataSource.read();
+    }
+    function OnProgress() {
+        //if ($("#checkbox").is(":checked")) {
+            debugger;
+            var grid = $("#Griddatload").data("kendoGrid");
+            var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+            var res = checkedrows.length;
+            debugger;
+            var Attribid = [];
+            for (var i = 0; i < checkedrows.length; i++) {
+                var item = grid.dataItem(checkedrows[i]);
+                var slno = item.recon_id;
+                Attribid.push(slno);
+            }
+
+
+            $.ajax({
+
+                type: "POST",
+                data: "{table_name: '"+ Table_Name + "',condition:  '" + orgindata + "',radio_checked:'" + radiochecked + "',recon_id:'" + Rec_id + "'}",
+                // url: "/Report/ReportExpenceGrid_Read",
+                url: "/ManualMatchOff/ManualFirstgridload",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (Data1) {
+                    debugger;
+
+                    if (Data1[1] != "0") {
+                        $.alert({
+                            icon: 'fa fa-success',
+                            title: 'Impact',
+                            content: Data1[0],
+                            type: 'green',
+                            animationSpeed: 700,
+                        });
+                    } else {
+                        $.alert({
+                            icon: 'fa fa-warning',
+                            title: 'Impact',
+                            content: Data1[0],
+                            type: 'red',
+                            animationSpeed: 700,
+                        });
+                    }
+
+
+                },
+
+                error: function (result) {
+                    alert("Error" + result);
+                    console.log(result);
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Impact',
+                        content: result,
+                        type: 'red',
+                        animationSpeed: 700,
+                    });
+                }
+            });
+
+
+
+    }
+
+
+    function additionalinfo() {
+        debugger;
+        var r = Table_Name;
+        //if (r != "") {
+        //    $("#gridradio").show();
+        //}
+
+        return {
+            outresult: result,
+            _count: count,
+            table_name: Table_Name,
+            condition: orgindata,
+           radio_checked: radiochecked,
+           recon_id: Rec_id
+        }
+
+    }
+</script>

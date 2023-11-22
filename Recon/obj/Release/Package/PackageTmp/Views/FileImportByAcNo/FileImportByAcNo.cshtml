@@ -1,0 +1,657 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+              .error_show {
+                  color: red;
+                  margin-left: 10px;
+              }
+
+              .k-state-active {
+                  display: none;
+              }
+              /*.k-header{
+                  background:brown;
+
+              }*/
+
+              /*   .k-dropdown-wrap, .k-state-highlight, .k-tabstrip-items .k-item, .k-panelbar .k-tabstrip-items .k-item, .km-pane-wrapper > .km-pane > .km-view > .km-content {*/
+              .k-input {
+                  background-image: url('textures/highlight.png');
+                  /*background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+          background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+          background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+          background-image: none,linear-gradient(to bottom,rgb(51, 122, 183) 0,rgb(51, 122, 183) 100%);
+          background-position: 50% 50%;
+          background-color: #e3e3e3;*/
+                  background-color: #e3e3e3 !important;
+              }
+              /*.k-list
+        {
+          white-space: nowrap;
+        }*/
+
+              .k-popup.k-list-container {
+                  width: 300px !important;
+              }
+
+              .k-state-active {
+                  display: block;
+              }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel-body" style="padding-top:6px;padding-bottom:2px;margin-left:-23px;width:105%;">
+                        <div class="box box-orange" style="height:auto;padding:10px;">
+                            <div class="box-header text-center with-border">
+                                <h3 class="box-title">File Import</h3>
+                            </div>
+                            <div class="row" style="padding-top:10px;margin-left:-9px;">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="Actype" class="title">File Type</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("AccType")
+                                                .DataTextField("AccType")
+                                        .DataValueField("filetype_val")
+                                        .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal;" })
+                                        .Events(e => e.Change("filetype"))
+                                                        .DataSource(source => { source.Read(read => { read.Action("getfiletype", "FileImportByAcNo").Data("get_filetype"); }).ServerFiltering(true); }).Value("E"))
+
+
+                                        @*<input type="radio" name="AccType" onchange="filetype()" value="T" id="AccType" checked> Trans. File
+                                            <input type="radio" name="AccType" onchange="filetype()" value="B" id="AccType" style="margin-left: 10px"> Balance File
+                                            <input type="radio" name="AccType" onchange="filetype()" value="S" id="AccType" style="margin-left: 10px"> Supporting File*@
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group" id="Reconfile">
+                                        <label for="filetype" class="title">Recon Name</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                                    .Name("recon_gid")
+                                                    .DataTextField("recon_name")
+                                                    .DataValueField("recon_gid")
+                                                    .Events(e => e.Change("reconname_change"))
+                                      .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
+                                    @*.DataSource(source => { source.Read(read => { read.Action("ReconnTypeList", "FileImportByAcNo"); }).ServerFiltering(true); }))*@
+.DataSource(source => { source.Read(read => { read.Action("getuserrecon", "FileImportByAcNo"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group" id="supfile">
+                                        <label for="filetype" class="title">Support File Type</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                                    .Name("tranbrkptype_gid")
+                                                     .DataTextField("tranbrkptype_name")
+                                                     .DataValueField("tranbrkptype_gid")
+                                         .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
+                                            .DataSource(source => { source.Read(read => { read.Action("GetSupportingFile", "FileImportByAcNo"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left:-9px;">
+                                <div class="col-sm-4" hidden>
+                                    <div class="form-group">
+                                        <label for="ACno" class="title">A/c No By</label><br />
+                                        <input type="radio" name="ACno" id="ACno" value="Selection" onclick="accnoby_change1()" checked> Selection
+                                        <input type="radio" name="ACno" id="ACno" value="partoftemp" onclick="accnoby_change()" style="margin-left: 10px"> Part Of Template
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="Template" class="title">Template</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                                .Name("TemplateType_desc")
+                                                .DataTextField("Template_name")
+                                                .DataValueField("TemplateType_desc")
+                                                //.Events(e => e.Change("onChangetemplateid"))
+                                                  .Events(e => e.Change("onChangetemplateid"))
+                                                .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
+                                        .DataSource(source => { source.Read(read => { read.Action("FileTemplate", "FileImportByAcNo"); }).ServerFiltering(true); }))
+                                        @*<input class="text-box single-line col-sm-4" id="Template" name="Template" type="text" value="">*@
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="Template_Type" class="title"> Template Type</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                     .Name("Template_type")
+                                      .DataTextField("Template_type_desc")
+                                     .DataValueField("Template_type")
+                                     .Enable(false)
+                                                // .Events(e => e.Change("filetype"))
+                                             .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
+                                      .DataSource(source => { source.Read(read => { read.Action("TemplateTypedrop", "FileConTempCreate"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="acno" class="title">A/c No</label><br />
+                                        @(Html.Kendo().DropDownList()
+                                            .Name("account1_desc")
+                                                    .DataTextField("account1_desc")
+                                                    .DataValueField("account1_code")
+                                                    .HtmlAttributes(new { style = "width:100%;font-weight: normal", @disabled = true })
+                                            .DataSource(source => { source.Read(read => { read.Action("GetACCNo", "FileImportByAcNo"); }).ServerFiltering(true); }))
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left:-9px;">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="Filename" class="title">File Name</label>
+                                        <input type="file" class="form-control input-lg browse btn btn-primary input-lg" name="File_Import" id="File_Import" style="width:100%;height: 30px;">
+                                        <label class="col-md-6 control-label" id="FileName"></label>
+                                        @*<input class="text-box single-line col-sm-3" id="Filename" name="Filename" type="text" value="">
+                                            <input type="file" name="file" id="farmerfile" src="~/images/noimage.png" class="control-label" accept="image/x-png, image/gif, image/jpeg" style="margin-left:482px" />*@
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-primary" style="margin-top:23px;" onclick="FileImport()"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Import</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var templateid = 0;
+    var csvseprator;
+    var acflag;
+    var csv_columns = 0;
+    var header_flag;
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        debugger;
+
+
+        //$("#supfile").hide();
+        //$("#Reconfile").hide();
+        filetype();
+    })
+
+
+    //function carry() {
+    //    debugger;
+    @*$.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            url: '@Url.Action("FileConTemp_Create", "FileConTempCreate")',
+            dataType: "json",
+            success: function (data) {
+                debugger;
+                var tr = data;
+                var car = $('#account1_desc').data("kendoDropDownList");
+                car.enable(true);
+
+            },
+            error: function (er) {
+            }
+        });
+    })*@
+
+
+    function accnoby_change() {
+        debugger;
+        var accno = $('input[name="ACno"]:checked').val();
+        if (accno = "Part Of Template") {
+            var account1_desc = $("#account1_desc").data("kendoDropDownList");
+            account1_desc.dataSource.data([]);
+            account1_desc.enable(false);
+        }
+    }
+    function accnoby_change1() {
+        debugger;
+        var accno = $('input[name="ACno"]:checked').val();
+        if (accno = "Selection") {
+            var account1_desc = $("#account1_desc").data("kendoDropDownList");
+            account1_desc.enable(true);
+        }
+    }
+
+    function reconname_change() {
+        debugger;
+        var recon_gid = $("#recon_gid").val();
+        $.ajax({
+            type: "POST",
+            data: '{recon_gid: "' + recon_gid + '"}',
+            //url: "/FileImportByAcNo/GetReconAccNo",
+            url: '@Url.Action("GetReconAccNo", "FileImportByAcNo")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                $("#account1_desc").data("kendoDropDownList").dataSource.data(response);
+            },
+            error: function (er) {
+            }
+        });
+    }
+
+    function onRequestEnd(e) {
+
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: '',
+                    type: 'green',
+                });
+                setTimeout(function () {
+
+                    window.location.reload(1);
+                }, 2000);
+
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: '',
+                    type: 'green',
+                })
+                setTimeout(function () {
+
+                    window.location.reload(1);
+                }, 2000);
+            }
+        }
+    }
+    function filetype() {
+        debugger;
+        //var val = document.getElementById("supportfile").value
+        //var AccType = $("input[name='AccType']:checked").val();
+
+        var AccType = $("#AccType").data("kendoDropDownList").value();
+
+        //$("#TemplateType_desc").data("kendoDropDownList").value('');
+
+
+        if (AccType == "S") {
+            //$("#Reconfile").show();
+            //$("#supfile").show();
+
+            var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+            tranbrkptype_gid.enable(true);
+            var recon_gid = $("#recon_gid").data("kendoDropDownList");
+            recon_gid.enable(true);
+
+            var recon_gid = $("#recon_gid").val();
+            $.ajax({
+                type: "POST",
+                data: '{recon_gid: "' + recon_gid + '"}',
+                //url: "/FileImportByAcNo/GetReconAccNo",
+                url: '@Url.Action("GetReconAccNo", "FileImportByAcNo")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    $("#account1_desc").data("kendoDropDownList").dataSource.data(response);
+                },
+                error: function (er) {
+                }
+            });
+
+        }
+
+        else if (AccType == "M" || AccType == "P") {
+            if (AccType == "P") {
+                var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+                tranbrkptype_gid.enable(true);
+            }
+
+            var reconname = $("#recon_gid").data("kendoDropDownList");
+            reconname.enable(true);
+
+            var accno = $("#account1_desc").data("kendoDropDownList");
+            accno.enable(false);
+
+
+            $("#account1_desc").data("kendoDropDownList").value('');
+
+
+            $("#TemplateType_desc").data("kendoDropDownList").value('');
+
+
+            //$.ajax({
+            //    type: "POST",
+            //    data: '{AccType: "' + "M" + '"}',
+            //    url: "/FileImportByAcNo/GetACCNo",
+            //    dataType: "json",
+            //    contentType: 'application/json; charset=utf-8',
+            //    success: function (response) {
+            //        $("#account1_desc").data("kendoDropDownList").dataSource.data(response);
+            //    },
+            //    error: function (er) {
+            //    }
+            //});
+        }
+
+
+
+        else {
+
+            var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+            tranbrkptype_gid.enable(false);
+
+            var recon_gid = $("#recon_gid").data("kendoDropDownList");
+            recon_gid.enable(false);
+            recon_gid.value("Select");
+
+            $.ajax({
+                type: "POST",
+                data: '{AccType: "' + "W" + '"}',
+                // url: "/FileImportByAcNo/GetACCNo",
+                url: '@Url.Action("GetACCNo", "FileImportByAcNo")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    $("#account1_desc").data("kendoDropDownList").dataSource.data(response);
+                },
+                error: function (er) {
+                }
+            });
+
+        }
+
+    }
+
+    function onChangetemplateid(e) {
+        debugger;
+
+        var AccType = $("#AccType").data("kendoDropDownList").value();
+        var dataItem = this.dataItem(e.item);
+        //var templateid = $("#TemplateType_desc").text(dataItem.Template_gid);
+        templateid = dataItem.Template_gid;
+        csvseprator = dataItem.FileSeperator;
+        acflag = dataItem.Acflag;
+        csv_columns = dataItem.Csv_Columns;
+        header_flag = dataItem.Hflag;
+
+        var temptype = dataItem.TemplateType_desc;
+
+        if (temptype.toUpperCase() == "CSV") {
+            $("#Template_type").data("kendoDropDownList").value("C");
+            $("#Template_type").data("kendoDropDownList").enable(false);
+        } else {
+            $("#Template_type").data("kendoDropDownList").value("E");
+            $("#Template_type").data("kendoDropDownList").enable(false);
+        }
+
+
+        if (acflag == "N") {
+            if (AccType == "M" || AccType == "P") {
+                $("#account1_desc").data("kendoDropDownList").enable(false);
+                $("#account1_desc").data("kendoDropDownList").value('');
+            }
+            else {
+                $("#account1_desc").data("kendoDropDownList").enable(true);
+                $("#account1_desc").data("kendoDropDownList").value('');
+            }
+
+        } else if (acflag == "Y") {
+
+
+            $("#account1_desc").data("kendoDropDownList").enable(false);
+            $("#account1_desc").data("kendoDropDownList").value('');
+
+
+        }
+        else {
+
+        }
+
+    }
+    function get_filetype() {
+        debugger;
+        var file_update_flag = 'N';
+
+        return { Fileupdate_flag: file_update_flag };
+
+
+    }
+
+    function FileImport() {
+        debugger;
+        var filesize = $('#File_Import').val();
+        var AccType = $("#AccType").data("kendoDropDownList").value();
+        //  var AccType = $("input[name='AccType']:checked").val();
+        var ACno = $("input[name='ACno']:checked").val();
+        var ACCNo = ""
+        var ReconId = $("#recon_gid").data("kendoDropDownList").value();
+        if (ReconId == "") {
+            ReconId = 0;
+        }
+        var SupportId = $("#tranbrkptype_gid").data("kendoDropDownList").value();
+
+        //if (ACno == "Selection") {
+        //    ACCNo = $("#account1_desc").data("kendoDropDownList").value();
+        //}
+
+        if (acflag == "N") {
+            ACCNo = $("#account1_desc").data("kendoDropDownList").value();
+        }
+
+        if (filesize == "" || filesize == null) {
+            $.alert({
+                title: 'Impact',
+                content: 'Choose corresponding file.!',
+                type: 'blue',
+            });
+            return false;
+        }
+
+        var Filsize = $('#File_Import')[0].files[0].size;
+        //if (Filsize > 5242880) {
+        //    $.alert({
+        //        title: 'Impact',
+        //        content: 'File size should be below in 5 MB.!',
+        //        type: 'blue',
+        //    });
+        //    return false;
+        //}
+
+        var fileData = new FormData();
+        var fileUpload = $("#File_Import").get(0);
+        var TemplateType_desc = $("#TemplateType_desc").data("kendoDropDownList").value();
+
+        var files = fileUpload.files;
+        // Looping over all files and add it to FormData object
+        for (var i = 0; i < files.length; i++) {
+            fileData.append(files[i].name, files[i]);
+        }
+        fileData.append('TemplateType_desc', TemplateType_desc);
+        fileData.append('templateid', templateid);
+        fileData.append('csvseprator', csvseprator);
+        fileData.append('AccType', AccType);
+        fileData.append('ACCNo', ACCNo);
+        fileData.append('ACno_By', ACno);
+        fileData.append('ReconId', ReconId);
+        fileData.append('SupportId', SupportId);
+        fileData.append('acflag', acflag);
+        fileData.append('csv_columns', csv_columns);
+        fileData.append('header_flag', header_flag);
+
+        $.ajax({
+            url: '@Url.Action("Upload_FileImportTest", "FileImportByAcNo")',
+            type: "POST",
+            contentType: false,
+            processData: false,
+
+            data: fileData,
+            success: function (result) {
+                debugger;
+                if (result == 'failed') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Upload failed.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (result == 'invalid file') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invaild file.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+
+                else if (result == 'mandatory fields empty') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Mandatory fields are empty.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (result == 'failed') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Upload failed.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else if (result == 'invalid header name') {
+                    $.alert({
+                        title: 'Impact',
+                        content: 'Invalid header name.!',
+                        type: 'blue',
+                    });
+                    return false;
+                }
+                else
+                    $.alert({
+                        title: 'Impact',
+                        content: result,
+                        type: 'blue',
+                    });
+                //setTimeout(function () {
+
+                //    window.location.reload(1);
+                //}, 2000);
+                return false;
+
+
+                //if (result == 'data missing') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Excel data should not be blank.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+
+
+                //if (result == 'Invalid Insider Pan No') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Invalid Insider Pan No.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+                //if (result == 'Invalid Security Type') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Invalid Security Type.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+                //if (result == 'Invalid Fin Year') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Invalid Fin Year.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+                //if (result == 'Invalid Event Type') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Invalid Event Type.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+                //if (result == 'Duplicate Entry') {
+                //    $.alert({
+                //        title: 'RECON',
+                //        content: 'Duplicate Entry.!',
+                //        type: 'blue',
+                //    });
+                //    return false;
+                //}
+
+                //if (result == 'inserted') {
+
+                //    $.dialog({
+                //        title: 'RECON',
+                //        content: 'Uploaded Successfully.!',
+                //        type: 'green',
+                //    });
+
+                //    //setTimeout(function () {
+
+                //    //    $("#TradingPlan_grid").data("kendoGrid").dataSource.read();
+                //    //    var upload = document.getElementById("Grid");
+                //    //    upload.style.display = "block";
+                //    //}, 2000);
+                //}
+            },
+            error: function (error) {
+                $.alert({
+                    title: 'Impact',
+                    content: 'Error.!',
+                    type: 'red',
+                });
+            }
+        });
+
+    }
+</script>
+
+
+

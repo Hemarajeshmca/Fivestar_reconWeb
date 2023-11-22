@@ -1,0 +1,199 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+            color: #fff !important;
+        }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Error Report</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-2">
+                                <label for="period_from" class="title">Date </label>
+                                <input class="cusDate" data-role='datepicker' id="errorDate" name="errorDate" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="filetype" class="title">File Name</label>
+                                @(Html.Kendo().DropDownList()
+                                       .Name("file_gid")
+                                       .DataTextField("file_name")
+                                       .DataValueField("file_gid")
+                                       .HtmlAttributes(new { style = "height:25px;width: 158px;font-weight: normal" })
+                                       .DataSource(source => { source.Read(read => { read.Action("getreportfile_name", "Report"); }).ServerFiltering(true); }))
+                            </div>
+                            <div class="col-sm-3" style="margin-top:22px;">
+                                <button type="button" id="Runprocess" onclick="validation()" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Run</button>
+                                <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                            </div>
+                            <div class="col-sm-2">
+
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-right: 40px;">
+                            <div class="col-sm-12">
+                                <div class="panel-body" style="width:100%;max-height:100%">
+                                    <div class="col-md-12" id="Process">
+                                        <div class="form-group">
+
+                                            <div>
+                                                @(Html.Kendo().Grid<Recon_Model.Report_model>().Name("filereport")
+                                        .HtmlAttributes(new { style = "width:105%;height:380px;line-height:2em;font-weight:normal" })
+                                                        //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                                        .Columns(columns =>
+                                            {
+                                                columns.Bound(m => m.file_name).Title("File Name").Width(100);
+                                                columns.Bound(m => m.errline_no).Title("Error Line No").Width(50);
+                                                columns.Bound(m => m.errline_desc).Title("Error Description").Width(200);
+                                            })
+                                      .Editable(editable =>
+                                                { editable.Mode(GridEditMode.PopUp).TemplateName("knockoffpop"); })
+                                     .Pageable(pageable => pageable
+                                        .Refresh(true)
+
+                                        .ButtonCount(5))
+                                                        //.Filterable()
+                                    .Sortable()
+                                     .Selectable()
+                                    .Scrollable()
+                                    .Excel(excel => excel
+                                      .FileName("File Error.xlsx")
+                                      )                 //.Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(2000)
+                                        //.Events(events => events.Error("error_handler"))
+                                    .Model(model =>
+                                        {
+                                            model.Id(p => p.errline_gid);
+                                        })
+                                   .Read(read => read.Action("ReportFileerror_Read", "Report").Data("getslno"))
+
+                                    ))
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        kendodate_format();
+        $("#errorDate").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        getslno();
+        errordate();
+        $("#exportExcel").hide();
+    });
+
+    function exportExcel() {
+        $("#filereport").getKendoGrid().saveAsExcel();
+    }
+    function errordate() {
+        var errorDate = $('#errorDate').val();
+        var formatted_period_from = getFormated_StringDate(errorDate);
+        $.ajax({
+            type: "POST",
+            data: '{date: "' + formatted_period_from + '"}',
+            url: "/Report/getreportfile_name",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                $("#file_gid").data("kendoDropDownList").dataSource.data(response);
+            }
+        });
+    }
+    $("#errorDate").change(function () {
+        errordate();
+    });
+    function validation() {
+        var msg = "";
+        if ($("#errorDate").val() != "") {
+
+        }
+        else {
+            msg += "Select Date";
+        }
+        if (msg == "") {
+            Runprocess()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Runprocess() {
+        $("#filereport").data("kendoGrid").dataSource.read();
+        $("#exportExcel").show();
+    }
+
+    function getslno() {
+        var Filetype = $("#file_gid").val();
+        if (Filetype == "") {
+            Filetype = "";
+        }
+        return { file_gid: Filetype }
+    }
+
+</script>

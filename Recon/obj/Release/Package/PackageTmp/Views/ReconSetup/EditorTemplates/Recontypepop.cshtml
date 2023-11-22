@@ -1,0 +1,192 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model  Recon_Model.Recontype_model
+<style>
+    .k-window-action {
+        visibility: hidden !important;
+        margin-left: -220px;
+    }
+
+    .k-popup.k-list-container {
+            width: 230px !important;
+        }
+</style>
+
+<style>
+    .form-control {
+        width: 91%;
+    }
+
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 45%;
+        font-weight: normal;
+    }
+
+    .form-horizontal .form-group {
+        margin-right: 25px;
+        margin-left: -15px;
+    }
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+
+
+    .form-control1 {
+        display: block;
+        height: 20px;
+        width: 85%;
+        padding: 0.6375rem 0.875rem;
+        font-weight: 400;
+        border: 0px solid #d9dee3;
+    }
+
+
+    div.k-window-content {
+        overflow: inherit;
+    }
+
+    input[type=checkbox], input[type=radio] {
+        margin: 0px 0 0;
+    }
+</style>
+<div class="container">
+    <input type="text" id="recon_id" name="recon_id" hidden value="">
+    <div class="row" style="padding-bottom:5px;padding-left:5px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Recon Name&nbsp;</label>
+            <input class="form-control" id="ReconName" name="ReconName" type="text" value="" data-bind="value:ReconName">
+        </div>
+        <div class="col-sm-5">
+            <label for="" class="form-label">Mapping Type&nbsp;</label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="MappingType_code" name="MappingType_code" onchange="filetype()" value="C"> Contra
+                <input type="radio" id="MappingType_code" name="MappingType_code" onchange="filetype()" value="M" style="margin-left: 10px"> Mirror
+                <input type="radio" id="MappingType_code" name="MappingType_code" onchange="filetype()" value="P" style="margin-left: 10px" checked> Proof
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:5px;padding-left:5px;padding-right:5px">
+        <div class="col-sm-5">
+
+            <label for="" class="form-label">Period From&nbsp;</label>
+            <div>
+                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" onclick="Dateformat()" style="width:100%" />
+
+                @*<input class="cusDate1" data-role='datepicker' id="period_from" style="height:25px;width:100%;" name=" period_from" data-bind="value:period_from" onkeypress="return date_validate(event)" />*@
+                @*<input class="cusDate" data-role='datepicker' id="period_from"  value="@Model.period_from"style="height:25px;width:100%;"   />*@
+                @*<input class="form-control" id="period_from" name="period_from" type="text" value="" >*@
+                <span data-for='valid' class='k-invalid-msg'></span>
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <label for="organization" class="form-label">
+                <span>Period To</span>&nbsp;&nbsp;&nbsp;&nbsp;<input class="form-check-input" type="checkbox" value="false" name="untillactive" onclick="checkactive()" id="untillactive" />&nbsp;&nbsp;<span style="font-size:13px;">Until Active</span>
+            </label>
+            <div>
+                @*<input class="cusDate" data-role='datepicker' id="period_to" onclick="Dateformat()" style="height:25px;width: 100%;" disabled /><span data-for='valid' class='k-invalid-msg'></span>*@
+                @*<input class="cusDate" data-role='datepicker' id="period_to" value="@Model.period_to" style="height:25px;width: 100%;" /><span data-for='valid' class='k-invalid-msg'></span>*@
+                <input class="cusDate" data-role='datepicker' id="period_to" onclick="Dateformat()" style="height:25px;width: 100%;" data-bind="value:period_to" onkeypress="return date_validate(event)" /><span data-for='valid' class='k-invalid-msg'></span>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:8px;padding-top:8px;padding-left:5px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Account 1&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                 .Name("account1_desc")
+                                 .DataTextField("account1_desc")
+                                 .DataValueField("account1_desc")
+                                         .Events(e => e.Change("account_name1").DataBound("accname1"))
+                                 .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal" })
+                                 .DataSource(source => { source.Read(read => { read.Action("AccNo1drop", "ReconSetup"); }).ServerFiltering(true); })
+                )
+            </div>
+            <div id="acc1" style="display:none">
+                <input class="form-control1" id="accname" name="accname" type="text" value="">
+            </div>
+        </div>
+        <div class="col-sm-5" id="acc2drop" style="display:none">
+            <label for="" class="form-label">Account 2&nbsp;</label>
+            <div>
+                @(Html.Kendo().DropDownList()
+                                 .Name("account2_desc")
+                                 .DataTextField("account2_desc")
+                                 .DataValueField("account2_desc")
+                                         .HtmlAttributes(new { style = "height:25px;width: 100%;font-weight: normal" })
+                                         .Events(e => e.Change("account_name2").DataBound("accname2"))
+                                 .DataSource(source => { source.Read(read => { read.Action("AccN02drop", "ReconSetup"); }).ServerFiltering(true); }))
+            </div>
+            <div id="acc2" style="display:none">
+                <input class="form-control1" id="accname2" name="accname2" type="text" value="">
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:3px;padding-top:5px;padding-left:5px;padding-right:5px">
+        <div class="col-sm-5">
+            <label for="" class="form-label">Status&nbsp;<span style="font-size: 12px;color: red;">*</span></label>
+            <div style="margin-left:2px;margin-top:5px">
+                <input type="radio" id="Status_code" name="Status_code" value="Y" checked>&nbsp;Active &nbsp;
+                <input type="radio" id="Status_code" name="Status_code" value="N" style="margin-left: 10px;">&nbsp;InActive&nbsp;
+            </div>
+        </div>
+    </div>
+    @*<div class="row" style="padding-bottom:3px;padding-top:5px;padding-left:5px;padding-right:5px">
+            <div class="col-sm-5">
+
+                <div style="margin-left:2px;margin-top:5px">
+                    <button type="button" id="btn_saveview" onclick="update_btn()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Update</button>
+                    <button type="button" id="btn_close" onclick="Close_btn()" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Cancel</button>
+                </div>
+            </div>
+        </div>*@
+</div>
+
+<script>
+    @*$(document).ready(function () {
+
+
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+    });*@
+</script>
+
+
+@*//    kendodate_format();
+     //    $("#period_from").kendoValidator({
+     //        rules: {
+     //            date: function (input) {
+     //                var d = kendo.parseDate(input.val(), "dd/MM/yyyy");
+     //                return d instanceof Date;
+     //            }
+     //        }
+     //    });
+     //    $("#period_to").kendoValidator({
+     //        rules: {
+     //            date: function (input) {
+     //                var d = kendo.parseDate(input.val(), "dd/MM/yyyy");
+     //                return d instanceof Date;
+     //            }
+     //        }
+     //    });
+    // });*@
+
+
+
+
+

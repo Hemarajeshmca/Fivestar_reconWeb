@@ -1,0 +1,279 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@model Recon_Model.AccountBlncRpt_model
+
+<!Doctype html>
+
+<html>
+<head>
+    <title></title>
+
+    <style>
+        .btnsubmit {
+            color: #fff;
+            border-radius: 5px;
+            padding: 8px 25px;
+            border: 0 none;
+            background-color: #337ab7;
+        }
+
+        .k-grid-content {
+            overflow-x: scroll;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        .k-header {
+            font-weight: bold;
+        }
+
+        
+    </style>
+    
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Account Balances - Verification</h3>
+                        </div>
+                        @using (Html.BeginForm("AccountBlncMatchingRpt", "AccountBlncMatchingRpt", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div class="row" style="margin-left:10px;margin-bottom:5px;">
+                                <div class="col-sm-2">
+                                    <label for="period_from" class="title">Tran Date</label><br />
+                                    <input class="cusDate" data-role='datepicker' id="Tran_date" name="Tran_date" style="font-weight:normal;" />
+                                </div>
+
+                            
+                                <div class="col-sm-2" style="width:208px;margin-top:-1px;margin-left:14px;">
+                                    <label for="filetype" class="title">Recon Name </label>&nbsp;
+                               
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .Events(events => events
+                                                .Change("onChange"))
+                                                        .HtmlAttributes(new { style = "width:100%" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+
+
+                                </div>
+                                <div class="col-sm-4" style="width:215px;margin-left:-9px;">
+                                    <label for="filetype" class="title">Account No</label>
+                                    @(Html.Kendo().DropDownList()
+                                                    .Name("account1_desc")
+                                                    .DataTextField("account2")
+                                                    .DataValueField("account1")
+                                                    .HtmlAttributes(new { style = "width:100%" })
+                                            .DataSource(source => { source.Read(read => { read.Action("AccNoonedrop", "ApplyRule").Data("getid"); }).ServerFiltering(true); }))
+                                </div>
+                                <div class="col-sm-3" style="margin-left:-14px;">
+                                    <label for="filetype" class="title">Status</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                    .Name("status_flag")
+                                                    .DataTextField("status_desc")
+                                                    .DataValueField("status_flag")
+                                                    .HtmlAttributes(new { style = "" })
+                                                    .DataSource(source => { source.Read(read => { read.Action("GetStatus_Flag", "AccountBlncMatchingRpt"); }).ServerFiltering(true); }))
+                                </div>
+                                <div class="col-sm-3" style="margin-top:-31px;margin-left:773px;">
+                                    <!--<input type="button"  value="Refresh" onclick="OnRefresh()" id="btn_submit" class="btnsubmit" /><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;<input type="button" onclick="OnClear()" id="btn_sendmail" class="btnsubmit" />Clear-->
+                                    <button type="button" id="btn_submit" onclick="OnRefresh()" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Refresh</button>&nbsp;
+                                   @* <button type="button" onclick="OnClear()" id="btn_sendmail" class="btn btn-primary"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;Clear</button>*@
+                                    <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                                </div>
+                            </div>
+                           
+
+                            <div id="title" style="display:none;font-weight:bold;color:#3c8dbc;"> Account Balance Matching Report</div>
+
+                            <div id="Grid" style="display:none;">
+                                @(Html.Kendo().Grid<Recon_Model.AccountBlncRpt_model>().Name("kgrid_AccBlncMatchRpt")
+                                .HtmlAttributes(new { style = "width:100%;height:450px;line-height:2em;font-weight:normal;" })
+
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.SlNo).Title("SL No.").Width(80);
+                                    columns.Bound(m => m.AccNo).Title("Account No").Width(150);
+                                    columns.Bound(m => m.AccName).Title("Account Name").Width(180);
+                                    columns.Bound(m => m.Tran_date_rpt).Title("Tran Date").Width(150);
+                                    columns.Bound(m => m.Tran_Balance_Amount).Title("Balance Amount").Width(150).HtmlAttributes(new { style = "text-align:right" });
+                                    columns.Bound(m => m.Arrived_amount).Title("Balance Arrived").Width(150).HtmlAttributes(new { style = "text-align:right" });
+                                    columns.Bound(m => m.status).Title("Status").Width(150);
+
+
+                                })
+                             .Editable(editable => { editable.Mode(GridEditMode.InLine); })                             
+                              .Excel(excel => excel
+                              .FileName("AccountBalanceMatching_Rpt.xlsx")
+                              )
+                             .Pageable(pageable => pageable
+                             .Refresh(true)
+                             .PageSizes(true)
+                             .ButtonCount(5))
+                             .Filterable()
+                              .Events(events => events
+                              .DataBound("onDataBound"))
+                             .Scrollable(s => s.Enabled(true).Height("auto"))
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                             .Model(model => model.Id(p => p.SlNo))
+                             .Read(read => read.Action("Get_BalanceMatching", "AccountBlncMatchingRpt").Data("GetMatchingRpt"))
+
+                             ))
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script>
+
+   
+    var reconid;
+    var refreshclick = 'N';
+    var add_or_edit;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'IMPACT',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    function onChange() {
+        debugger;
+        reconid = $('#ReconName_id').val();
+        $("#account1_desc").data("kendoDropDownList").dataSource.read();
+    }
+   
+    function getid() {
+        debugger;
+
+        //var reconid = $('#ReconName_id').val();
+
+        return {
+            id: reconid
+            
+        }
+    }
+
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+    function onDataBound(e) {
+        debugger;
+        var count = $("#kgrid_AccBlncMatchRpt").data("kendoGrid").dataSource.data().length;
+
+        if (refreshclick == 'Y') {
+            if (count == 0) {
+                var upload = document.getElementById("Grid");
+                upload.style.display = "none";
+
+                $.alert({
+                    title: 'IMPACT',
+                    content: 'No Records to Found.',
+                    type: 'red',
+                    animationSpeed: 700,
+                });
+            }
+        }
+    }
+
+    function GetMatchingRpt() {
+        debugger;
+
+        var AccountMatching = {};
+        AccountMatching.recon_gid = $('#ReconName_id').val();
+        AccountMatching.account1_desc = $("#account1_desc").val();
+        AccountMatching.status_flag = $("#status_flag").data("kendoDropDownList").value();
+        var Tran_date = $("#Tran_date").val();
+
+        var formatted_Tran_date = getFormated_StringDate(Tran_date);
+        if (Tran_date == "") {
+            AccountMatching.Tran_date = "01-01-0001";
+
+        }
+        else {
+            AccountMatching.Tran_date = formatted_Tran_date;
+
+        }
+
+        return {
+            AccountMatchingRpt: AccountMatching
+        }
+    }
+
+    function OnRefresh() {
+        debugger;
+        refreshclick = 'Y';
+        $("#kgrid_AccBlncMatchRpt").data("kendoGrid").dataSource.read();
+        var upload = document.getElementById("Grid");
+        upload.style.display = "block";
+        $("#exportExcel").show();
+    }
+
+
+
+    $(document).ready(function () {
+        debugger;
+        kendodate_format();
+        $("#Tran_date").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+      
+        var grid = $("#kgrid_AccBlncMatchRpt").data("kendoGrid");
+
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+            debugger;
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "Add" : "Edit");
+        });
+        $("#exportExcel").hide();
+    })
+
+</script>
+
+@*/*not allow numbers,characters*/*@
+<script>
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31)
+            return false;
+
+        return true;
+    }
+
+
+</script>

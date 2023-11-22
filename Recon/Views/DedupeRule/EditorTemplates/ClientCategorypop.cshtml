@@ -1,0 +1,47 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@*@model Recon_Model.AcMaster_model;*@
+<style>
+    div.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 40%;
+        font-weight: normal;
+    }
+     .form-horizontal .form-group {
+    margin-right: 25px;
+    margin-left: -15px;
+    }
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+    }
+</style>
+<form id="deputerule" class="form-horizontal" data-role="validator" novalidate="novalidate">
+    
+
+            <div class="form-group">
+                <label for="Reconname" class="col-sm-3">Sl.No</label>
+                <input class="text-box single-line" id="slno" name="AccountNo" type="text" value="" data-bind="value:AccountNo">
+            </div>
+            <div class="form-group">
+                <label for="Account1" class="col-sm-3">DB Alias Name</label>
+                @(Html.Kendo().DropDownList()
+                    .Name("code")
+                    .DataTextField("Name")
+                    .DataValueField("Code")
+                    .HtmlAttributes(new { style = "height:25px;width: 158px;font-weight: normal" })
+                    .DataSource(source => { source.Read(read => { read.Action("GetCmyRecordsdrop", "RuleDefinition"); }).ServerFiltering(true); }))
+            </div>          
+            <div class="form-group">
+                <label class="col-sm-3">Condition Criteria</label>
+                <input class="text-box single-line" id="ConditionCriteria" name="AccountNo" type="text" value="" data-bind="value:AccountNo">
+            </div>
+    
+</form>
+

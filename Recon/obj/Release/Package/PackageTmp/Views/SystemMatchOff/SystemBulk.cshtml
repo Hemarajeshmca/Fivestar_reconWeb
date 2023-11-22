@@ -1,0 +1,124 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:800px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">System Match Off Bulk</h3>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-4">                             
+                                    <label for="Actype" class="title">Recon Type</label><br />
+                                    <input type="radio" name="Actype" id="All" onchange="filetype()" value="Wacc" checked> All
+                                    <input type="radio" name="Actype" id="withaccount" onchange="filetype()" value="Wacc" checked> Within Account
+                                    <input type="radio" name="Actype" id="Betacc" onchange="filetype()" value="Bacc" style="margin-left: 10px"> Between Account                                
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group" id="ano">
+                                    <label for="filetype1" class="title">Account No</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                .Name("code1")
+                                .DataTextField("Name")
+                                .DataValueField("Code")
+                                .HtmlAttributes(new { style = "" })
+                                .DataSource(source => { source.Read(read => { read.Action("AccNo1drop", "ReconSetup"); }).ServerFiltering(true); })
+                                    )
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group" id="rname">
+                                    <label for="filetype1" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                .Name("code2")
+                                .DataTextField("Name")
+                                .DataValueField("Code")
+                                .HtmlAttributes(new { style = "" })
+                                .DataSource(source => { source.Read(read => { read.Action("AccMasCatdrop", "AcMaster"); }).ServerFiltering(true); }))
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-left:10px;">
+                            <div class="col-sm-4">
+                                <label for="period_from" class="title">Period From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="period_To" class="title">Period To</label>
+                                <input class="cusDate" data-role='datepicker' id="period_To" name="period_To" />
+                            </div>
+                            <div class="col-sm-4" style="margin-top:29px;">
+                                <button type="button" id="rundata" onclick="Run()" class="btn btn-primary">Match Off</button>
+                            </div>                            
+                        </div>
+                        <!--<div class=" form-group" style="padding-top:10px">
+                            <label for="period_from" class=" col-sm-2">Period From</label>
+                            <div class="col-sm-2" style="margin-left:-16px">
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" style="width:100%" />
+                            </div>
+                            <label for="period_To" class=" col-sm-2">Period To</label>
+                            <div class="col-sm-2">
+                                <input class="cusDate" data-role='datepicker' id="period_To" name="period_To" style="width:100%" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <button type="button" style="float:right;margin-right:60px" id="rundata" onclick="Run()" class="btn btn-primary">Match Off</button>
+                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        $("#period_To").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd/MM/yyyy"
+        });
+        filetype();
+    })
+    function filetype() {
+        var val = document.getElementById("withaccount").value
+        if (document.getElementById('withaccount').checked) {
+            $("#ano").show();
+            $("#rname").hide();
+        } else if (document.getElementById('Betacc').checked) {
+            $("#ano").hide();
+            $("#rname").show();
+        } else {
+            $("#ano").show();
+            $("#rname").show();
+        }
+    }
+</script>
+

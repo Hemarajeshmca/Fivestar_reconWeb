@@ -1,0 +1,10 @@
+D:\DMSdinesh\Recon\Recon_Web\Recon_Model\bin\Release\Recon_Model.dll
+D:\DMSdinesh\Recon\Recon_Web\Recon_Model\bin\Release\Recon_Model.pdb
+D:\DMSdinesh\Recon\Recon_Web\Recon_Model\obj\Release\Recon_Model.csprojResolveAssemblyReference.cache
+D:\DMSdinesh\Recon\Recon_Web\Recon_Model\obj\Release\Recon_Model.dll
+D:\DMSdinesh\Recon\Recon_Web\Recon_Model\obj\Release\Recon_Model.pdb
+D:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon_Model\bin\Release\Recon_Model.dll
+D:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon_Model\bin\Release\Recon_Model.pdb
+D:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon_Model\obj\Release\Recon_Model.csprojResolveAssemblyReference.cache
+D:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon_Model\obj\Release\Recon_Model.dll
+D:\DMSdinesh\Recon_OracleUAT\Recon_Web\Recon_Model\obj\Release\Recon_Model.pdb

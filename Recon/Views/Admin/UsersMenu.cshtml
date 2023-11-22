@@ -1,0 +1,484 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        html .k-dialog .k-window-titlebar {
+            padding-left: 17px;
+        }
+
+        .k-dialog .k-content {
+            padding: 17px;
+        }
+
+        .k-checkbox {
+            margin-left: 10px;
+        }
+
+            .k-checkbox:checked {
+                background: black;
+                color: white;
+            }
+        /*.k-treeview .k-item {
+            background-color: aqua;
+        }*/
+        span.k-icon.k-plus {
+            background-color: #367fa9;
+        }
+
+        span.k-icon.k-minus {
+            background-color: #367fa9;
+        }
+
+        #filterText {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px;
+            border-radius: 3px;
+            border: 1px solid #d9d9d9;
+        }
+
+        .selectAll {
+            margin: 17px 0;
+        }
+
+        #result {
+            color: #9ca3a6;
+            float: right;
+        }
+
+        #treeview {
+            height: auto;
+            overflow-y: scroll;
+            border: 1px solid #d9d9d9;
+        }
+
+        .k-popup.k-list-container {
+            width: 225px !important;
+        }
+
+        #openWindow {
+            min-width: 180px;
+        }
+         .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head> 
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:500px;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Access Privileges</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label for="filetype" class="form-label">User Type</label><br />
+                                @(Html.Kendo().DropDownList()
+                                             .Name("usergroup_gid")
+                                             .DataTextField("usergroup_code")
+                                             .DataValueField("usergroup_gid")
+                                             .Events(e => e.Change("onfieldchange"))
+                                             .HtmlAttributes(new { style = "height:25px;width: 182px;font-weight: normal" })
+                                             .DataSource(source => { source.Read(read => { read.Action("usergroupdrop", "Admin"); }).ServerFiltering(true); })
+                                )
+                            </div>
+                            <div class="col-sm-3" style="padding-top:25px;">
+                                <button type="button" id="btn_save" onclick="OnFilter()" class="btn btn-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;Save</button>
+                                <button type="button" id="btn_close" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>
+                            </div>
+
+                        </div>
+                        <div class="row" style="margin-top:0%;margin-left:-3%;">
+                            <div class="col-sm-4" style="margin-left:32px;height:30px;border-style:inset;margin-top:26px;width:95%;">
+                                <div class="selectAll" style="margin-top:-22px;margin-left:-11px;">
+                                    <button type="button" onclick="toggle()" class="plusone" id="=togglebutton" style="margin-top:24px;color:white;background-color:#357ab8;border:none;">+</button>
+
+                                    <label class="k-checkbox-label" for="chbAll" style="margin-left:3px;">Select All</label>
+                                    <input type="checkbox" id="chbAll" class="k-checkbox" onchange="chbAllOnChange()" />
+                                </div>
+                                <div class="treeclass">
+                                    <div id="treeview" style="width:103%;margin-top:2px;background:white;background-color:white;height:334px;margin-left:-15px;display:none;" />
+                                </div>
+                            </div>
+                        </div>
+                     
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+
+
+<script>
+    var arrayfinal = [];
+    var clicks = 0;
+    $(document).ready(function () {
+        debugger;
+
+     //   $("#treeview").hide();
+        var usergroup_gid = $("#usergroup_gid").val();
+        if (usergroup_gid == 0) {
+            usergroup_gid = 0;
+        }
+        var dialog = $("#dialog");
+        var multiSelect = $("#multiselect").data("kendoMultiSelect");
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            url: '@Url.Action("treeview", "Admin")',
+            data: "{ usergroup_gid:'" + usergroup_gid + "'}",
+            success: function (data) {
+                debugger;
+                var myDataSource = new kendo.data.HierarchicalDataSource({
+                    data: data
+                });
+                $("#treeview").kendoTreeView({
+                    loadOnDemand: false,
+                    checkboxes: {
+                        checkChildren: true
+                    },
+                    dataSource: myDataSource,
+                    check: onCheck,
+                    expand: onExpand
+                    //dataBound: function (e) {
+                    //    var treeView = $('#treeview').data('kendoTreeView');
+                    //    treeView.expand(".k-item");
+                    //}
+                });
+            }
+
+        });
+    });
+
+     function toggle() {
+        debugger;
+
+        clicks += 1;
+
+
+        if (clicks == 1) {
+            $("#treeview").show();
+            $(".treeclass").slideDown(300);
+            $(".plusone").text('-');
+        }
+
+        else {
+
+            if ($(".treeclass").is(':visible')) {
+                $(".treeclass").slideUp(300);
+                $(".plusone").text('+');
+            }
+
+            else {
+                $("#treeview").show();
+                $(".treeclass").slideDown(300);
+                $(".plusone").text('-');
+
+
+            }
+        }
+
+
+
+
+    }
+    function onOkClick(e) {
+        debugger;
+        var checkedNodes = [];
+        var treeView = $("#treeview").data("kendoTreeView");
+
+        getCheckedNodes(treeView.dataSource.view(), checkedNodes);
+        populateMultiSelect(checkedNodes);
+
+    }
+    $('#btn_close').click(function () {
+        debugger;
+        //location.href = "../Dashboard/Dashboard";
+        location.href = '@Url.Action("Dashboard", "Dashboard")';
+    });
+    function getCheckedNodes(nodes, checkedNodes) {
+       // debugger;
+
+        var node;
+
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+
+            if (node.checked) {
+                checkedNodes.push({ text: node.text, id: node.id });
+            }
+
+            if (node.hasChildren) {
+                getCheckedNodes(node.children.view(), checkedNodes);
+            }
+        }
+    }
+    function populateMultiSelect(checkedNodes) {
+        debugger;
+        var array = [];
+        if (checkedNodes.length > 0) {
+            for (var i = 0; i < checkedNodes.length; i++) {
+                var ids = checkedNodes[i].id;
+                var texts = checkedNodes[i].text.toString();
+                var rights = checkedNodes[i].rights_flag.toString();
+                if (rights == "1") {
+                    ids.set("checked", true)
+                }
+               array.push(ids);
+            }
+            arrrayfinal = array;
+        }
+    }
+
+    function checkUncheckAllNodes(nodes, checked) {
+        debugger;
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].set("checked", checked);
+
+            if (nodes[i].hasChildren) {
+                checkUncheckAllNodes(nodes[i].children.view(), checked);
+            }
+        }
+    }
+    function checkUncheckAllNodesnew(nodes, checked, response) {
+        debugger;
+        for (var i = 0; i < nodes.length; i++) {
+            if (response[i].parent_id == "0" && response[i].id == nodes[i].id) {
+                if (response[i].rights_flag != "0" && response[i].text=="Exception Theming")
+                {
+                    nodes[i].set("checked", checked);
+                }
+
+
+                if (nodes[i].hasChildren) {
+                    checkUncheckAllNodeschild(nodes[i].children.view(), checked, response[i]);
+                }
+            }
+            }
+    }
+    function checkUncheckAllNodeschild(nodes, checked, response) {
+        debugger;
+        for (var i = 0; i < nodes.length; i++) {
+            if (response.items[i].rights_flag != "0") {
+                nodes[i].set("checked", checked);
+            }
+        }
+    }
+
+    function chbAllOnChange() {
+        debugger;
+        var checkedNodes = [];
+        var treeView = $("#treeview").data("kendoTreeView");
+        var isAllChecked = $('#chbAll').prop("checked");
+
+       // $("input:checkbox[id='chbAll']").is(":checked") == true
+       //$("#Hflag").prop('checked', true);
+
+        checkUncheckAllNodes(treeView.dataSource.view(), isAllChecked)
+
+        if (isAllChecked) {
+            setMessage($('#treeview input[type="checkbox"]').length);
+        }
+        else {
+            setMessage(0);
+        }
+    }
+
+    function onCheck() {
+        debugger;
+        var checkedNodes = [];
+        var treeView = $("#treeview").data("kendoTreeView");
+
+        getCheckedNodes(treeView.dataSource.view(), checkedNodes);
+        //populateMultiSelect(checkedNodes);
+    }
+
+    function onExpand(e) {
+        debugger;
+        if ($("#filterText").val() == "") {
+            $(e.node).find("li").show();
+        }
+    }
+
+    function OnFilter() {
+        debugger;
+        var msg = "";
+        if ($("#usergroup_gid").data("kendoDropDownList").value() != "0") {
+
+        }
+        else {
+                msg += "Please Select UserGroup ";
+        }
+        if (msg == "") {
+            save();
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+
+    }
+
+
+
+    function save() {
+        debugger;
+        var checkedNodes = [];
+        var treeView = $("#treeview").data("kendoTreeView");
+        var node;
+        var nodes= treeView.dataSource.view()
+        var usergroup_gid = $("#usergroup_gid").val();
+        if (usergroup_gid == 0) {
+            usergroup_gid = 0;
+        }
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+
+            if (node.checked) {
+                checkedNodes.push({ text: node.text, id: node.id });
+            }
+
+            if (node.hasChildren) {
+                getCheckedNodes(node.children.view(), checkedNodes);
+            }
+        }
+        var array = [];
+        var arrayfinal = [];
+        if (checkedNodes.length > 0) {
+            for (var i = 0; i < checkedNodes.length; i++) {
+                var ids = checkedNodes[i].id;
+                var texts = checkedNodes[i].text.toString();
+                array.push(ids);
+
+                if (ids== "9" || ids== "11" || ids == "48")
+                {
+                    Admin = "1";
+                    array.push(Admin);
+                }
+
+                if (ids == "12" || ids == "13" || ids == "14" || ids == "15" || ids == "16" || ids == "17" || ids == "18" || ids == "19" || ids == "20" || ids == "21" || ids == "22")
+                {
+                    maientance = "2";
+                    array.push(maientance);
+                }
+
+                if(ids=="24"||ids=="25")
+                {
+                    Inputfile = "3";
+                    array.push(Inputfile);
+                }
+                if(ids=="26"||ids=="27")
+                {
+                    supportfile = "4";
+                    array.push(supportfile);
+                }
+                if(ids=="28"||ids=="29"||ids=="30"||ids=="31"||ids=="32"||ids=="51"||ids=="52")
+                {
+                    knockoff = "5";
+                    array.push(knockoff);
+                }
+                if(ids=="33"||ids=="50")
+                {
+                    utility = "7";
+                    array.push(utility);
+                }
+                if(ids="35"||ids=="36"||ids=="43")
+                {
+                    report = "8";
+                    array.push(report);
+                }
+
+            }
+            var arrayfinal = array;
+        }
+
+        var unique = [];
+        for (i = 0; i < arrayfinal.length; i++) {
+            if (unique.indexOf(arrayfinal[i]) === -1) {
+                unique.push(arrayfinal[i]);
+            }
+        }
+
+        arrayfinal = unique;
+
+
+
+        if (arrayfinal == "") {
+            $.dialog({
+                title: 'Impact',
+                content: "Select Menu Ids",
+                type: 'green',
+            });
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                data: '{usergroup_gid: "' + usergroup_gid + '",arrayfinal:"' + arrayfinal + '"}',
+               // url: "/Admin/usergrouptree_Save",
+                url: '@Url.Action("usergrouptree_Save", "Admin")',
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response[1] > 0) {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+
+                    }
+                    else {
+                        $.dialog({
+                            title: 'Impact',
+                            content: response[0],
+                            type: 'green',
+                        });
+                        var preventCloseOnSave = true;
+                    }
+
+
+                },
+
+            });
+        }
+    }
+    function onfieldchange() {
+        //field type
+        debugger;
+        var code1 = $("#usergroup_gid").data("kendoDropDownList").value();
+
+        $("#treeview .k-checkbox input").prop("checked", false).trigger("change");
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("treeview", "Admin")',
+            data: "{ usergroup_gid:'" + code1 + "'}",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                debugger;
+                var treeView = $("#treeview").data("kendoTreeView");
+                var nodes = treeView.dataSource.view();
+                checkUncheckAllNodesnew(nodes, true, response);
+            },
+            error: function (er) {
+
+            }
+
+        });
+
+    }
+
+</script>

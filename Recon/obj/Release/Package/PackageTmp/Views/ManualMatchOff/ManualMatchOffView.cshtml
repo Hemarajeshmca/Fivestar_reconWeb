@@ -1,0 +1,413 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+        div.k-window {
+            display: inline-block;
+            position: absolute;
+            z-index: 10001;
+            border-style: solid;
+            border-width: 1px;
+            padding-top: 1em;
+            width: 40%;
+            font-weight: normal;
+        }
+
+        .k-grid-header th.k-with-icon .k-link {
+            margin-right: -11px;
+        }
+
+        .k-edit-form-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .k-link {
+            color: #fff !important;
+        }    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Manual - Adhoc</h3>
+                        </div>
+                        <div class="row" style="padding-left:10px">
+                            <div class="col-sm-12">
+                                <div id="Matchoff">
+                                    <div class="form-group">
+                                        <div>
+                                            @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("MatchprocessGrid")
+                                                .HtmlAttributes(new { style = "width:100%;height:430px;margin-left: -5px;line-height:2em;font-weight:normal" })
+                                                    //.ToolBar(toolbar => toolbar.Create().Text("Add To Match Off"))
+                                                .Columns(columns =>
+                                                    {
+                                                         columns.Template(@<text>m.AccountNo</text>).ClientTemplate("<input type='checkbox' id='checkbox' name='chkbSlc_Formols' onchange='SelectedCheck()' class='chkFormols'  />").Title("Select").Width(60);
+                                                         columns.Bound(m => m.SlNo).Title("Sl. No").Width(60);
+                                                         columns.Bound(m => m.AccountNo).Title("Account No").Width(100);
+                                                         columns.Bound(m => m.recon_gid).Hidden();
+                                                         columns.Bound(m => m.TranDate).Title("Tran Date").Width(100);
+                                                         columns.Bound(m => m.ValueDate).Title("Value Date").Width(100);
+                                                         columns.Bound(m => m.Description).Title("Trans Desc").Width(400);
+                                                         columns.Bound(m => m.Accountmode).Title("A/c Mode").Width(100);
+                                                         columns.Bound(m => m.amount).Title("Amount").Width(100);
+                                                         columns.Bound(m => m.Exceptionamount).Title("Exception Amount").Width(100);
+                                                         columns.Bound(m => m.ko_amount).Title("Ko Amount").Width(100);
+                                                        //columns.Bound(m => m.Select).ClientTemplate("<input type='checkbox' id='checkbox' onclick='test()' #= Select == true ? checked='checked' : '' # />").Width(10);
+
+                                                    })
+                            .Editable(editable =>
+                                { editable.Mode(GridEditMode.InCell); })
+                            .Pageable(pageable => pageable
+                                .Refresh(true)
+
+                                .ButtonCount(5))
+        //.ToolBar(tools => tools.Excel().Text("XL Download"))
+                      .Excel(excel => excel
+                         .AllPages(true)
+                                 .FileName("Manual Match - Adhoc.xlsx"))
+                            .Filterable()
+                            .Scrollable()
+        //.Events(events => events.Save("Grid_OnRowSelectUID"))
+                            .Sortable()
+                            .Resizable(resize => resize.Columns(true))
+                            .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .PageSize(5000)
+                                //.Events(events => events.Error("error_handler"))
+                            .Model(model =>
+                                {
+                                    model.Id(p => p.SlNo);
+                                    model.Field(p => p.Select).Editable(false);
+                                    model.Field(p => p.SlNo).Editable(false);
+                                    model.Field(p => p.AccountNo).Editable(false);
+                                    model.Field(p => p.TranDate).Editable(false);
+                                    model.Field(p => p.ValueDate).Editable(false);
+                                    model.Field(p => p.Description).Editable(false);
+                                    model.Field(p => p.Accountmode).Editable(false);
+                                    model.Field(p => p.Exceptionamount).Editable(false);
+                                    model.Field(p => p.amount).Editable(false);
+                                })
+                            .Read(read => read.Action("ManualmatchSelect_Read", "ManualMatchOff").Data("getslno1"))
+                            ))
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left:10px;">
+                                <div class="col-sm-4">
+                                    <label for="AccountNo" class="title">Debit Total</label>
+                                    <input class="text-box single-line" id="debittotal" name="" type="text" value="" readonly>
+                                    <input type="hidden" id="sample">
+                                    <input type="hidden" id="sample1">
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="AccountNo" class="title">Credit Total</label>
+                                    <input class="text-box single-line" id="credittotal" name="" type="text" value="" readonly>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="AccountNo" class="title">Difference</label>
+                                    <input class="text-box single-line" id="difference" name="" type="text" value="" readonly>
+                                </div>
+                            </div>                          
+                            <div class="row" style="padding-top:10px">
+                                <div class="col-sm-2" style="margin-left:25px;">
+                                    <label for="remark" class="title">Reason</label>
+                                    <textarea class="text-box single-line" id="koreason" name=""  style="width: 283px;margin-left: 67px;margin-top: -31px;" ></textarea>
+                                </div>
+                                <div style="margin-left: 489px;">
+                                    <button type="button" id="Matchoff" onclick="validation()" class="btn btn-primary"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;Match Off</button>
+                                    <button type="button" id="clear" onclick="cleardata()" class="btn btn-primary"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;Clear</button>
+                                    <button type="button" id="selectall" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;Select All</button>
+                                    <button type="button" id="deselectall" class="btn btn-primary"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp;DeSelect All</button>
+                                    <a href="../ManualMatchOff/ManualMatchOff" type="button" class="btn btn-primary"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Cancel</a>
+                                    <button type="button" id="exportExcel" onclick="exportExcel()" class="btn btn-primary"><i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#MatchprocessGrid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#MatchprocessGrid").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+    })
+    function getslno1() {
+
+        //var user_code = "admin";
+        var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+
+        return { user_code: user_code }
+    }
+    function filetype() {
+        var val = document.getElementById("withaccount").value
+        if (document.getElementById('withaccount').checked) {
+            $("#ano").show();
+            $("#rname").hide();
+        } else if (document.getElementById('Betacc').checked) {
+            $("#ano").hide();
+            $("#rname").show();
+        }
+    }
+    function exportExcel() {
+        $("#MatchprocessGrid").getKendoGrid().saveAsExcel();
+    }
+    function SelectedCheck() {
+        debugger;       
+        $("#debittotal").val(0);
+        $("#credittotal").val(0);
+        $("#difference").val(0);
+        var grid = $("#MatchprocessGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");       
+        var item = grid.dataItem(checkedrows);
+        //var item = grid.dataItem($(event.target).closest("tr"));
+        for (var i = 0; i < checkedrows.length; i++) {
+            var item = grid.dataItem(checkedrows[i]);
+            if (item.Accountmode == "D") {
+                var GridID = item.ko_amount;
+                var sample = $("#debittotal").val();
+                if (sample == "") {
+                    sample = 0
+                }
+                var total = (parseFloat(GridID) + parseFloat(sample))
+                $("#debittotal").val(total);
+                //$("#sample").val(total);
+            } else {
+                var GridID = item.ko_amount;
+                var sample = $("#credittotal").val();
+                if (sample == "") {
+                    sample = 0
+                }
+                var total = (parseFloat(GridID) + parseFloat(sample))
+                $("#credittotal").val(total);
+                //$("#sample1").val(total);
+            }
+        }
+        if ($("#debittotal").val() == "") {
+            var debit = 0;
+        } else {
+            var debit = $("#debittotal").val();
+        }
+        if ($("#credittotal").val() == "") {
+            var credit = 0;
+        } else {
+            var credit = $("#credittotal").val();
+        }
+        var difftotal = (parseFloat(debit) - parseFloat(credit));
+        $("#difference").val(difftotal);
+    }
+    $('#selectall').click(function () {
+        $('.chkFormols').prop('checked', true);
+        total();
+    });
+    $('#deselectall').click(function () {
+        $('.chkFormols').prop('checked', false);
+        $("#difference").val(0);
+        $("#credittotal").val(0);
+        $("#debittotal").val(0);
+    });
+    function validation() {
+        var msg = "";
+        var grid = $("#MatchprocessGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        if (checkedrows.length > 0) {
+
+        }
+        else {
+            msg += "Please Select the match !!!";
+        }       
+        
+        if (msg == "") {
+            validation1()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function validation1() {
+        var msg = "";
+        if ($("#koreason").val() != "") {
+
+        }
+        else {
+            msg += "Please Enter KnockOff Reason";
+        }
+
+        if (msg == "") {
+            Matchoff()
+        } else {
+            $.dialog({
+                title: 'Impact',
+                content: msg,
+                type: 'green',
+            });
+        }
+        return msg;
+    }
+    function Matchoff() {
+        debugger;
+        var grid = $("#MatchprocessGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        var Attribid = [];
+        //var user_code = "admin";
+        var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+        var ko_amount = $("#debittotal").val();
+        if (ko_amount == "") {
+            ko_amount = 0;
+        }
+        for (var i = 0; i < checkedrows.length; i++) {
+            var item = grid.dataItem(checkedrows[i]);
+            var Examount = item.ko_amount
+            var slno = item.tranrecon_gid;
+            var combined = slno + "$" + Examount
+            Attribid.push(combined);
+        }
+        var item1 = grid.dataItem(checkedrows[0]);
+        var recongid = item1.recon_gid;
+        var matchoffreason = $("#koreason").val();
+        $.ajax({
+            type: "POST",
+            data: '{recongid: "' + recongid + '",koamount: "' + ko_amount + '",tranrecon: "' + Attribid + '",usercode: "' + user_code + '",matchoffreason: "' + matchoffreason + '"}',
+            url: "/ManualMatchOff/SelectedMatchOff",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {               
+                if (response[1] > 0) {
+                    $.dialog({
+                        title: 'Impact',
+                        content: response[0],
+                        type: 'green',                       
+                    });
+                   
+                    setTimeout(function () {
+                        window.location.reload(1);
+                    }, 2000);
+                }
+                else {
+                    $.dialog({
+                        title: 'Impact',
+                        content: response[0],
+                        type: 'green',
+                    });
+                    setTimeout(function () {
+                        window.location.reload(1);
+                    }, 2000);
+                }
+
+            }
+        });
+    }
+    function onRequestEnd(e) {
+
+    }
+    function total() {
+        debugger;
+        var grid = $("#MatchprocessGrid").data("kendoGrid");
+        var checkedrows = $("#checkbox:checked", grid.tbody).closest("tr");
+        var Attribid = [];
+        var Attribid1;
+        for (var i = 0; i < checkedrows.length; i++) {
+            var item = grid.dataItem(checkedrows[i]);
+            if (item.Accountmode == "D") {
+                var GridID = item.ko_amount;
+                var sample = $("#sample").val();
+                if (sample == "") {
+                    sample = 0
+                }
+                var total = (parseFloat(GridID) + parseFloat(sample))
+                $("#debittotal").val(total);
+                $("#sample").val(total);
+            } else {
+                var GridID = item.ko_amount;
+                var sample = $("#sample1").val();
+                if (sample == "") {
+                    sample = 0
+                }
+                var total = (parseFloat(GridID) + parseFloat(sample))
+                $("#credittotal").val(total);
+                $("#sample1").val(total);
+            }
+
+        }
+        if ($("#debittotal").val() == "") {
+            var debit = 0;
+        } else {
+            var debit = $("#debittotal").val();
+        }
+        if ($("#credittotal").val() == "") {
+            var credit = 0;
+        } else {
+            var credit = $("#credittotal").val();
+        }
+        var difftotal = (parseFloat(debit) - parseFloat(credit));
+        $("#difference").val(difftotal);
+    }
+    function cleardata() {
+        debugger;
+        $.confirm({
+            title: 'Message',
+            content: 'Are you sure to clear All Records',
+            buttons: {
+                confirm: function () {
+                    //var user_code = "admin";
+                    var user_code = '@System.Web.Configuration.WebConfigurationManager.AppSettings["usercode"]';
+                    $.ajax({
+                        type: "POST",
+                        data: '{usercode: "' + user_code + '"}',
+                        url: "/ManualMatchOff/SelectedMatchOffdel",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            //window.location.href = "../ManualMatchOff/ManualMatchOff";
+                            window.location.href = '@Url.Action("ManualMatchOff", "ManualMatchOff")';
+                        },
+                        error: function (er) {
+                        }
+                    });
+                },
+                cancel: {
+                    text: 'cancel',
+                    btnClass: 'btn-blue',
+                    keys: ['enter', 'shift'],
+                }
+            }
+        });
+
+    }
+
+</script>

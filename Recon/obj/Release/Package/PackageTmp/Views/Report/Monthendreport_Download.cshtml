@@ -1,0 +1,159 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.CategoryViewModel
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+
+    <style>
+         .k-grid-header th.k-header > .k-link {
+             font-size:14px;
+        }
+              .k-popup.k-list-container {
+    width:210px !important;
+    }
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+          .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+           .k-state-active {
+            display: block;
+        }
+
+        </style>
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Month End ReportDownload</h3>
+                        </div>
+                        <div class="row" style="padding-bottom:20px;margin-left:-11px;">
+
+
+                                <div class="col-sm-3">
+                                    <label for="filetype" class="title">Folders</label>&nbsp;
+
+
+                                    @(Html.Kendo().DropDownList()
+                                                                .Name("Sno")
+                                                                .DataTextField("Foldersname")
+                                                                .DataValueField("Foldersname")
+                                                                .Events(e => e.Change("gridread"))
+                                               .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                                            @*.DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))*@
+                                   .DataSource(source => { source.Read(read => { read.Action("monthendreport", "Report"); }).ServerFiltering(true); }))
+
+
+
+                                </div>
+                            </div>
+                                <div class="row" id="folderid" style="margin-left:5px;">
+                                    @(Html.Kendo().Grid<Recon_Model.Report_model>().Name("Foldergrid")
+                                                        .HtmlAttributes(new { style = "height:350px;line-height:2em;width:98%;font-weight:normal;font-size:14px;" })
+                                        .Columns(columns =>
+                                            {
+
+                                                columns.Bound(m => m.Sno).Title("Sl.No").Width(60) ;
+                                                columns.Bound(m => m.ExcelFiles).Title("ExcelFile").Width(100);
+                                                columns.Bound(m => m.Foldersname).ClientTemplate("<span class='glyphicon glyphicon-download-alt' style='font-size:15px;color:green;align:center' onclick=Downloadrecon(this)></span>").Width(20).Title("Action");
+                                                //columns.Command(cmd =>
+                                                //{
+                                                //    cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("Downloadrecon");
+                                                //}).Title("Action").Width(50);
+                                            })
+                                    .Editable(editable =>
+                                    { editable.Mode(GridEditMode.PopUp).TemplateName(""); })
+                                              .Pageable(pageable => pageable
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5))
+                                    .Excel(excel => excel
+                                    .AllPages(true)
+                                    .FileName("Remark suppport"))
+                                    .Filterable()
+                                    .Sortable()
+                                    .Scrollable()
+                                    .Resizable(resize => resize.Columns(true))
+                                    .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .PageSize(15)
+                                    .Model(model =>
+                                    {
+                                        model.Id(p => p.Sno);
+                                        model.Field(p => p.Select).Editable(false);
+                                    })
+                                           .Read(read => read.Action("excelfiles", "Report").Data("additionalinfo"))
+
+                                    ))
+
+                                </div>
+
+                        </div>
+                            </div>
+
+
+                        </div>
+
+
+
+
+        </section>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        //$("#Sno").data("kendoDropDownList").dataSource.read();
+        //$("#folderid").hide();
+
+    });
+
+    function Downloadrecon(e)
+    {
+        debugger;
+  
+        var grid = $("#Foldergrid").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        var foldername = model.Foldersname;
+        var excelfile = model.ExcelFiles;
+       
+
+        window.location.href = '@Url.Action("DownloadFile", "Report")?Subfolder=' + foldername + '&Excelfiles=' + excelfile + '';
+    }
+
+    function gridread()
+    {
+        debugger;
+        $("#Foldergrid").data("kendoGrid").dataSource.read();
+    }
+    function additionalinfo()
+    {
+        $("#folderid").show();
+        debugger;
+        var foldername = $("#Sno").data("kendoDropDownList").value();
+
+        return { subfolder: foldername }
+        debugger;
+    }
+</script>

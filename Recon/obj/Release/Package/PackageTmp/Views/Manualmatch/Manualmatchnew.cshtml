@@ -1,0 +1,359 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@*@model Recon_Model.AcMaster_model*@
+
+<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+         .Recon_tallied_no {
+        /*opacity:0.5;*/
+        pointer-events:none;
+        color:red;
+        }
+       .Recon_tallied_yes
+        {
+        
+        
+        }
+
+        .k-state-active {
+            display: none;
+        }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+           .k-webkit {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:auto;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">ManualMatch</h3>
+                            @*<meta http-equiv="refresh" content="5" />*@
+                        </div>
+
+
+
+                    </div>
+                    <div class="row" style="margin-left:1px;margin-top:-18px;">
+                        @using (Html.BeginForm("Manualmatch", "Manualmatch", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.ManualMatchoff_model>().Name("Manual_Match")
+                                .HtmlAttributes(new { style = "width:100%;line-height:2em;font-weight:normal;width:98%;height:450px;" })
+                                //.ToolBar(toolbar => toolbar.Create().Text("Add New Account"))
+                                .Columns(columns =>
+                                {
+                                    //columns.Bound(m => m.Job_gid).ClientTemplate("<span class='glyphicon glyphicon-download-alt' style='font-size:15px;color:green;align:center' onclick=downloadFile()></span>").Width(50).Title("Action");
+                                    //  columns.Bound(m => m.Job_gid).ClientTemplate("<i class='fa fa-undo fa_custom' style='font-size:15px;color:green;align:center' onclick=downloadFile()></i>").Width(50).Title("Action");
+                                    columns.Bound(m => m.file_name).Title("File Name").Width(80);
+                                    columns.Bound(m => m.recon_name).Title("Recon name").Width(100);
+                                    columns.Bound(m => m.recon_tallied).Title("ReconTallied").Width(100);
+                                    columns.Bound(m => m.total_records).Title("Total Records").Width(80);
+                                    columns.Bound(m => m.Debit_total).Title("Debit Total").Width(80);
+                                    columns.Bound(m => m.credit_total).Title("Credit Total").Width(80);
+                                    columns.Bound(m => m.Difference).Title("Difference").Width(80);
+                                   columns.Bound(m => m.file_gid).ClientTemplate("<span  style='font-size:15px;color:green;align:center;cursor:pointer;' onclick=KOChange()>Knockoff</span>").Width(50).Title("Action");
+                                   // columns.Bound(m => m.file_gid).ClientTemplate("<span  style='align:center' onclick=KOChange()>Knockoff</span>").Width(50).Title("Action");
+                                  //columns.Bound(m => m.file_gid).ClientTemplate("<a href='' onclick=KOChange()>Knockoff</a>").Width(50).Title("Action");
+                                   
+                                    columns.Bound(m => m.file_gid).Title("File ID ").Hidden();
+                                    columns.Bound(m => m.recon_gid).Title("Recon ID ").Hidden();
+
+
+                                })
+                                //span class='glyphicon glyphicon-download-alt' 
+                            //.Editable(editable =>
+                            // { editable.Mode(GridEditMode.PopUp).TemplateName("ProgressGridview"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                        .PageSizes(true)
+                                        .ButtonCount(5))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                              .Events(e => e.DataBound("onDataBound"))
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(10)
+                              .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.file_gid))
+
+                              .Read(read => read.Action("ManualmatchGrid_Readload", "Manualmatch"))
+
+                             ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        kendodate_format();
+        /* $("#initiate_from").kendoValidator({
+             rules: {
+                 date: function (input) {
+                     var d = kendo.parseDate(input.val(), "dd-MM-yyyy");
+                     return d instanceof Date;
+                 }
+             }
+         });
+         $("#initiate_to").kendoValidator({
+             rules: {
+                 date: function (input) {
+                     //var d = kendo.parseDate(input.val(), "yyyy-MM-dd");
+                     var d = kendo.parseDate(input.val(), "dd-MM-yyyy");
+                     return d instanceof Date;
+                 }
+             }
+         });*/
+
+        $("#initiate_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+        $("#initiate_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+
+        var grid = $("#Manual_Match").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind("edit", function (event) {
+
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit");
+        });
+
+
+    })
+
+    function getslno() {
+        // var jobtype = $("#jobtypecode").data("kendoDropDownList").value();
+        var from_date = $("#initiate_from").val();
+        var to_date = $("#initiate_to").val();
+        return { Jobtype: 'A', Fromdate: from_date, Todate: to_date, Job_status: "'C'" };
+    }
+
+    function KOChange() {
+        debugger;
+        var grid = $("#Manual_Match").data("kendoGrid");
+        var model = grid.dataItem($(event.target).closest("tr"));
+        $.confirm({
+            icon: 'fa fa-warnings',
+            title: 'knockoff',
+            //autoClose: 'cancel|10000',
+            //theme: 'dark',
+            animationSpeed: 700,
+            content: 'Are you sure you want to Knocoff',
+            type: 'blue',
+            buttons: {
+                confirm: function () {
+
+                    debugger;
+                    KO_chan(model);
+
+
+
+                },
+
+
+
+
+
+                cancel: function () {
+                    $.alert({
+                        icon: 'fa fa-success',
+                        title: 'Knockoff',
+                        //  theme: 'dark',
+                        content: 'Cancelled.!',
+                        type: 'blue',
+                        animationSpeed: 700,
+                    });
+
+                }
+            },
+        });
+
+
+    }
+
+    function KO_chan(modeldata) {
+        debugger;
+        var dataone = modeldata;
+        var filegid = (dataone.file_gid);
+        var user_code = '@Request.RequestContext.HttpContext.Session["usercode"]';
+        var url = '@System.Configuration.ConfigurationManager.AppSettings["URL1"]';
+        var ip = '@ViewBag.ip';
+        var obj = { "file_gid": filegid, "user_code": user_code, "ip_address": ip }
+
+        if (filegid != 0) {
+            $.alert({
+                title: 'Impact',
+                content: "Knock Off is in progress..." + "<br>" + "<br>" +
+                         "Please check 'Process in progress' under utility menu",
+                type: 'green',
+
+            });
+        }
+        else {
+
+        }
+
+        $.ajax({
+            type: "POST",
+            timeout: 3000,
+            data: JSON.stringify(obj),
+            async: true,
+            @*data: '{File_gid:"' + filegid + '"}',
+            url: '@Url.Action("Runmatchfile", "Manualmatch")',*@
+            url: url + "RunMatch_file",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            beforeSend: function (xhr) {
+                debugger;
+                xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Message');
+            },
+            //success: function (Data1) {
+            //    debugger;
+            //    result = Data1[1];
+            //    count = Data1[2];
+            //    // call();
+            //    if (Data1[1] != "0") {
+            //        $.alert({
+            //            icon: 'fa fa-success',
+            //            title: 'Impact',
+            //            content: Data1[0],
+            //            type: 'green',
+            //            animationSpeed: 700,
+            //        });
+            //    } else {
+            //        $.alert({
+            //            icon: 'fa fa-warning',
+            //            title: 'Impact',
+            //            content: Data1[0],
+            //            type: 'red',
+            //            animationSpeed: 700,
+            //        });
+            //    }
+
+
+            //},
+
+            //error: function (result) {
+            //    alert("Error" + result);
+            //    console.log(result);
+            //    $.alert({
+            //        icon: 'fa fa-success',
+            //        title: 'Impact',
+            //        content: result,
+            //        type: 'red',
+            //        animationSpeed: 700,
+            //    });
+            //}
+        });
+        hideProgress();
+    }
+
+
+
+
+    function onRequestEnd(e) {
+        debugger;
+        //Check request type
+        if (e.type == "create") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been created successfully!',
+                    type: 'green',
+                });
+                //setTimeout(function () {
+
+                //    window.location.reload(1);
+                //}, 2000);
+
+            }
+        }
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: 'Employee has been Edited successfully!',
+                    type: 'green',
+                })
+                //setTimeout(function () {
+
+                //    window.location.reload(1);
+                //}, 2000);
+            }
+        }
+    }
+
+    function onDataBound(e) {
+        debugger;
+        var grid = this;
+        var currentRecords = grid.dataSource.view();
+
+        for (var i = 0; i < currentRecords.length; i++) {
+            //currentRecords[i] is the current dataItem
+            if (currentRecords[i].recon_tallied == "Yes") {
+
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_yes");
+            }
+
+            else {
+               
+                grid.tbody.find("tr[data-uid='" + currentRecords[i].uid + "']").addClass("Recon_tallied_no");
+            }
+        }
+    }
+   
+
+</script>
+

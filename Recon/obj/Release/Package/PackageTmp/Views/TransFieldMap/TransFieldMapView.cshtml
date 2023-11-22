@@ -1,0 +1,258 @@
+﻿<!Doctype html>
+<html>
+<head>
+    <title></title>
+    <style>
+         .k-header.k-grid-toolbar.k-grid-top{
+         background: none;
+        }
+
+         .k-pager-sizes{
+             display: inline-flex !important;
+            margin-left: 0% !important;
+            margin-top: -4% !important;
+            width: 24% !important;
+         }
+    </style>
+    <style>
+        .error_show {
+            color: red;
+            margin-left: 10px;
+        }
+
+        .k-state-active {
+            display: none;
+        }
+        span.k-link {
+        color: #fff !important;
+        position: relative;        
+    }
+        a.k-button.k-button-icontext.k-grid-Edit, a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+         .k-state-active {
+            display: block;
+        }
+           .k-webkit {
+            overflow: hidden !important;
+        }
+       
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:100%;padding:10px">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Field Mapping</h3>
+                        </div>
+                        @using (Html.BeginForm("TransFieldMap", "TransFieldMapView", FormMethod.Post, new { @id = "form1" }))
+                        {
+                            <div>
+                                @(Html.Kendo().Grid<Recon_Model.TransFieldmap_model>().Name("TransMap")
+                                .HtmlAttributes(new { style = "width:100%;height:450px;line-height:2em;font-weight:normal" })
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.slno).Title("SlNo").Width(50).Hidden();
+                                    columns.Bound(m => m.DBfieldName).Title("Field Name").Width(80);
+                                    columns.Bound(m => m.Alias).Title("Alias Name").Width(100);
+                                    columns.Bound(m => m.Type).Title("Type").Width(80);
+                                    columns.Bound(m => m.Length).Title("Length").Width(80).Hidden();
+                                    columns.Bound(m => m.Format).Title("Format").Width(100);
+                                    columns.Bound(m => m.temflag).Title("Templateflag").Width(10).Hidden();
+                                    columns.Bound(m => m.temflag_dummy).Title("Templateflag").Width(100);
+                                    columns.Command(cmd =>
+                                    {
+                                        cmd.Edit().Text("<span class='fa fa-pencil' style='color:#357ab8;font-size: 12px;margin-left: 27px;'>");
+                                        //cmd.Custom("View").Text("<span class='fa fa-eye' style='color:#357ab8;font-size: 12px;'>").Click("ViewMode");
+                                        //cmd.Custom("Delete").Text("<span class='fa fa-trash' style='color:#357ab8;font-size: 12px;'>");
+                                    }).Title("Action").Width(50);
+
+                                })
+                            .Editable(editable =>
+                             { editable.Mode(GridEditMode.PopUp).TemplateName("maptransdropdown"); })
+                             .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                      
+                                        .ButtonCount(5))
+                                        .ToolBar(tools => tools.Excel().Text("XL Download"))
+                                        .Excel(excel => excel
+                                                             .AllPages(true)
+                                                                     .FileName("Field Mapping.xlsx"))
+                            .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                             .Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+                             .PageSize(100)
+                              .Events(events => events.Error("error_handler"))
+                             .Model(model => model.Id(p => p.slno))
+                             .Create(Create => Create.Action("SaveEmployee", "AcMaster"))
+                             .Read(read => read.Action("TransFieldGrid_Read", "TransFieldMap"))
+                             .Update(update => update.Action("TransFieldGrid_Update", "TransFieldMap"))
+                             ))
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    var preventCloseOnSave = false;
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            $.alert({
+                title: 'Impact',
+                content: message,
+                type: 'red',
+            });
+        }
+    }
+
+    $(document).ready(function () {
+       
+        $("#TransMap").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
+        var grid = $("#TransMap").data("kendoGrid");
+        //function for changing kendo popup title.
+        grid.bind('dataBound', function (e) {
+            this.element.find('.k-edit').remove();
+        })
+        grid.bind("edit", function (event) {
+            
+            event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepop()" style="float:right;border:none;background-color: #357ab8;cursor:pointer;color:white;">x</button>');
+            var editWindow1 = this.editable.element.data("kendoWindow");
+            editWindow1.unbind("close");
+            editWindow1.bind("close", onWindowEditClose);
+        });
+        var onWindowEditClose = function (e) {
+            debugger;
+            if (preventCloseOnSave) {
+                e.preventDefault();
+                preventCloseOnSave = false;
+            }
+            else {
+                $("#TransMap").data("kendoGrid").dataSource.read();
+            }
+        };
+
+    })
+
+    function closepop() {
+        debugger;
+        $("#TransMap").data("kendoGrid").dataSource.read();
+    }
+
+    function onRequestEnd(e) {
+        
+        //Check request type
+        if (e.type == "update") {
+            //check for errors in the response
+            if (e.response == null || e.response.Errors == null) {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response,
+                    type: 'green',
+                });
+            }
+            else {
+                $.dialog({
+                    title: 'Impact',
+                    content: e.response[0],
+                    type: 'green',
+                });
+                preventCloseOnSave = true;
+            }
+        }
+        }
+
+
+   
+    function filter_combobox(id, datasource) {
+        
+        $("#" + id).kendoComboBox({
+            dataTextField: "desc",
+            dataValueField: "code",
+            filter: "contains",
+            autoBind: false,
+            minLength: 1,
+            dataSource: datasource,
+            change: function () {
+                //  setColorforcombo();
+                var value = this.value();
+                var text = this.text();
+                if (value && this.selectedIndex == -1) {
+                    this.value("");
+                }
+                if (id == "cmb_user") {
+                    setroleforinternal(text);
+                }
+            },
+            dataBound: setColorforcombo,
+            // dataBinding: setColor,
+        });
+        list_in = "";
+    }
+
+
+    function mul_filter_combobox(id, datasource) {
+        $("#" + id).kendoMultiSelect({
+            dataTextField: "desc",
+            dataValueField: "code",
+            autoClose: false,
+            dataSource: datasource
+        });
+        list_in = "";
+    }
+
+    function setColorforcombo() {
+
+        for (var i = 0; i < this.dataSource._data.length; i++) {
+            var val = this.dataSource._data[i].status;
+            var desc = this.dataSource._data[i].desc;
+            var row = $(this.list.find('li')[i]);
+            if (val == "Active") {
+                row.css('color', 'black')
+            }
+            else if (val == "Inactive") {
+                row.css('color', 'red')
+            }
+            
+        }
+    }//filtercombo
+    function filter_combobox_code(id, datasource) {
+        $("#" + id).kendoComboBox({
+            dataTextField: "code",
+            dataValueField: "code",
+            filter: "contains",
+            autoBind: false,
+            minLength: 1,
+            dataSource: datasource
+        });
+        list_in = "";
+    }
+    function ViewMode(e) {
+        var grid = this,
+        selectedRow = $(e.target).closest("tr")[0];
+        grid.editRow(selectedRow);
+        $(".k-grid-update").hide();
+        $(".k-window-title").text("View");
+
+    }
+</script>
+

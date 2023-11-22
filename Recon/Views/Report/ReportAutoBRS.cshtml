@@ -1,0 +1,114 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@{
+    ViewBag.Title = "ReportAutoBRS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!Doctype html>
+<html>
+
+<head>
+    <title></title>
+    <style>
+       
+
+     .k-popup.k-list-container {
+    width:210px !important;
+    }
+
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-orange" style="height:600px;padding:10px;">
+                        <div class="box-header text-center with-border">
+                            <h3 class="box-title">Recon-AutoBRS</h3>
+                        </div>
+                        <div class="row" style="margin-left:-15px">
+                            <div class="col-sm-3">
+                                <label for="period_from" class="title">Date From</label>
+                                <input class="cusDate" data-role='datepicker' id="period_from" name="period_from" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="period_to" class="title">Date To</label><br />
+                                <input class="cusDate" data-role='datepicker' style="width:100%" id="period_to" name="period_to" />
+                            </div>
+
+                            <div class="col-sm-3">
+                             
+                                    <label for="filetype1" class="title">Recon Name</label><br />
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal" })
+                                                        .DataSource(source => { source.Read(read => { read.Action("ApplyRecontype_drop", "ApplyRule"); }).ServerFiltering(true); }))
+                        
+                            </div>
+                            <div class="col-sm-2" style="margin-top:24px;">
+                                <button type="button" id="Auto_BRS" onclick="Autobrs()" class="btn btn-primary" >Knockoff MIS&nbsp;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+
+        kendodate_format();
+        $("#period_from").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "01-01-2000"
+        });
+        $("#period_to").kendoDatePicker({
+            value: new Date(),// sets max date
+            format: "dd-MM-yyyy"
+        });
+
+
+    })
+
+    function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
+        if (date != "" || date != undefined) {
+            var d = date.split("-");
+            return d[2] + "-" + d[1] + "-" + d[0];
+        }
+    }
+
+    function Autobrs()
+    {
+       
+        var period_from = getFormated_StringDate($("#period_from").val());
+        var period_to = getFormated_StringDate($("#period_to").val());
+        var recon_id = $("#ReconName_id").data("kendoDropDownList").value();
+
+        debugger;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("report_AutoBRS", "Report")',
+            dataType: "json",
+            data: '{period_from:"' + period_from + '",period_to:"' + period_to + '",Recongid:'+recon_id+'}',
+            contentType: 'application/json; charset=utf-8',
+            success: function (Data1) {
+
+             }
+        });
+
+    }
+
+
+
+</script>

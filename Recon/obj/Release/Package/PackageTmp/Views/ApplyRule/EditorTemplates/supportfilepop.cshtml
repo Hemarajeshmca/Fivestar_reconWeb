@@ -1,0 +1,297 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.UI.Fluent;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Resources;
+@model Recon_Model.ApplyRule_model
+<style>
+    label {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .k-popup.k-list-container {
+        width: 230px !important;
+    }
+   
+    .k-pager-sizes {
+        display: inline-flex !important;
+        margin-left: 0% !important;
+        margin-top: -4% !important;
+        width: 24% !important;
+    }
+
+    .k-window-titlebar.k-header {
+        width: 100%;
+    }
+
+    .k-window-titlebar {
+        width: 100%;
+    }
+     .k-widget.k-window  {
+        /*display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;*/
+        width: auto;
+        height: 450px;
+        font-weight: normal;
+    }
+    /*.k-window {
+        display: inline-block;
+        position: absolute;
+        z-index: 10001;
+        border-style: solid;
+        border-width: 1px;
+        padding-top: 1em;
+        width: 100%;
+        height:445px;
+        font-weight: normal;
+    }*/
+
+    .k-edit-form-container {
+        position: relative;
+        width: 100%;
+        height: 60%;
+    }
+
+    .k-grid-content {
+        overflow-x: scroll;
+        height:100px !important;
+    }
+
+    /*.k-window > div.k-popup-edit-form {
+        padding: 1em 0;
+        overflow: hidden;
+        width: 100%;
+        height: 90%;
+    }*/
+
+    a.k-button.k-button-icontext.k-grid-edit, a.k-button.k-button-icontext.k-grid-View, a.k-button.k-button-icontext.k-grid-Delete {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    span.k-icon.k-edit {
+        display: none;
+    }
+
+    .k-edit-form-container {
+        margin-left: 38px;
+    }
+    /*.k-grid-content{
+        height:140px;
+    }*/
+</style>
+<style>
+    .k-edit-form-container .k-edit-buttons {
+        visibility: hidden !important;
+    }
+</style>
+<div class="container" style="width:971px;">
+    <input class="text-box single-line" id="slnobase" name="slnobase" type="hidden" value="" data-bind="value:slnobase">
+    <input type="hidden" id="listslno2" name="listslno" value="" data-bind="value:listslno">
+    <input type="hidden" id="slno2" name="slno" value="" data-bind="value:slno">
+    <input type="hidden" id="alias_name" name="Accountmode_alias_name" value="" data-bind="value:Accountmode_alias_name">
+    @Html.HiddenFor(model => model.Order, new { @style = "" })
+    <div class="row" style="padding-bottom:34px;padding-left:5px;padding-right:5px;margin-left:-75px;">
+        <div class="col-md-12">
+            <div class="col-sm-1" style="margin-top:4px;">
+                <label for="" class="form-label">Account No</label>
+            </div>
+            <div class="col-sm-2" style="width:24%;margin-left:-27px;">
+                @(Html.Kendo().DropDownList()
+                                             .Name("acc_no")
+                                    .DataTextField("acc_desc")
+                                    .DataValueField("acc_no")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                            .Value("1")
+                                               .DataSource(source => { source.Read(read => { read.Action("AccNo1drop", "ApplyRule").Data("dropaddition"); }).ServerFiltering(true); }))
+            </div>
+
+
+            <div class="col-sm-2" id="withaccount" style="margin-left:-2%;margin-top:5px;">
+                <label for="" class="form-label">Account Mode</label>
+            </div>
+            <div class="col-sm-2" style="margin-left:-100px;">
+                @(Html.Kendo().DropDownList()
+                                        .Name("Accountmode")
+                                        .DataTextField("Text")
+                                                        .DataValueField("Value")
+                        .BindTo(new List<SelectListItem>()
+                        {
+                             new SelectListItem()
+                            {
+                                Text = "",
+                                Value = ""
+                            },
+                            new SelectListItem()
+                            {
+                                Text = "Debit",
+                                Value = "D"
+                            },
+                            new SelectListItem()
+                            {
+                                Text = "Credit",
+                                Value = "C"
+                            }
+                        })
+                       .Value("1")
+                )
+            </div>
+
+
+            <div class="col-sm-1" style="margin-left:-15px;margin-top:4px;">
+                <label for="" class="form-label" style="margin-top:2px;">Status</label>
+            </div>
+            <div class="col-sm-2" style="margin-left:-71px;margin-top:1px;">
+                <input type="radio" id="status2" name="status" value="Y" checked style="margin-top:7px;"> Active
+                <input type="radio" id="status2" name="status" value="N" style="margin-left: 10px;"> InActive
+            </div>
+
+            <div class="col-sm-2" style="margin-top:-27px;margin-left:183px;">
+                <button type="button" class="btn btn-orange btnsubmit" id="btn_submit" onclick="SaveSupportingFile();"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Update</button>&nbsp;
+                @*<button type="button" class="btn btn-danger" value="Close" id="btn_Close" style="margin-top: -52px;margin-left: 114px;" onclick="return CloseBaseFilterPopup();"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close</button>*@
+            </div>
+        </div>
+    </div>
+    <div class="accordion_container" style="width:961px;margin-top:-28px;margin-left:-43px;">
+        <div class="accordion_head" id="accord_head" style="width:996px;"><span style="margin-left:-200px;align-content:flex-start">Identity Info </span> <span class="plusminus">+</span> </div>
+        <div class="accordion_body" id="accord_body" style="margin-left:-25px;height:215px;overflow:auto;width:107%;">
+            <div class="panel-body" style="padding-right:50px;width:117%;max-height:100%">
+
+                <div id="Partialoneshow" style="margin:auto;height:200px;overflow:auto;width:104%;">
+                    @Html.Partial("EditApplyruleBaseFilter")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div id="Partialoneshow" style="margin:auto;height:142px;overflow:auto;width:104%;">
+            @Html.Partial("Editviewone")
+        </div>*@
+
+    <div style="padding-top:5px;width:1254px;height:170px;margin-left:-47px;">
+        <button type="button" class="btn btn-orange" id="btn_Add" style="height:10px" onclick="AddMode();">+</button>
+        @(Html.Kendo().Grid<Recon_Model.ApplyRule_model>().Name("ApplyRuleBaseFilter")
+                                .HtmlAttributes(new { style = "width:80%;height:100%line-height:2em;font-weight:normal" })
+                //.ToolBar(toolbar => toolbar.Create().Text("Add"))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(m => m.slnobaseFilter).Title("Sl No").Width(20).Hidden();
+                                    columns.Bound(m => m.filter_appliedon_desc).Title("Filter Applied On").Width(50);
+                                    columns.Bound(m => m.field_alias_name).Title("Filter Field").Width(50);
+                                    columns.Bound(m => m.BaseCriteria).Title("Filter Criteria").Width(50);
+                                    columns.Bound(m => m.Identitycriteria).Title("Identifier Criteria").Width(50);
+                                    columns.Bound(m => m.TargetField).Title("Identifier value").Width(50);
+                                    columns.Bound(m => m.ComparisonCriteria).Title("ident Criteria").Width(50).Hidden();
+                                    columns.Bound(m => m.status_desc).Title("Status").Width(50);
+                                    columns.Bound(m => m.slnobase).Title("SlNo").Width(50).Hidden();
+                                    columns.Command(command =>
+                                    {
+                                        // command.Edit().Text("edit");
+                                        //command.Custom("Add").Text("+").Click("AddMode");
+
+                                        //command.Custom("<span class='fa fa-pencil'; >").Click("EditMode");
+                                        //command.Custom("<span class='fa fa-eye'; >").Click("ViewMod");
+
+                                        command.Custom("E").Text("<span class='fa fa-pencil';>").Click("EditModeon");
+                                        // command.Custom("V").Text("<span class='fa fa-eye';>").Click("ViewMod");
+                                        command.Custom("D").Text("<span class='fa fa-trash';>").Click("DelMod");
+                                        //command.Custom("<span class='fa fa-eye'; >");
+                                    }).Title("Action").Width(20);
+                                })
+
+                             //  .Editable(editable =>
+                //{ editable.Mode(GridEditMode.PopUp).TemplateName("EditApplyruleBaseFilter"); })
+
+                             .Filterable()
+                             .Sortable()
+                             .Scrollable()
+                //.Resizable(resize => resize.Columns(true))
+                             .DataSource(dataSource => dataSource
+                             .Ajax()
+
+                             //.PageSize(5)
+                             .Events(events => events.Error("error_handler"))
+                                     .Model(model =>
+                                     {
+                                         model.Id(p => p.slnobaseFilter);
+                                         model.Field(p => p.Select).Editable(false);
+                                     })
+                                 //.Create(Create => Create.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule"))
+                                           .Read(read => read.Action("ApplyRuleGrid_ReadBaseFilterRule", "ApplyRule").Data("getbaseFilterGid"))
+                //    .Update(update => update.Action("ApplyRuleGrid_UpdateBaseFilter", "ApplyRule"))
+                             ))
+    </div>
+    <hr />
+    @(Html.Kendo().Window()
+    .Name("wndWindow")
+            .Title("Add")
+            .Visible(false)
+            .Draggable(true)
+            .Width(1050)
+            .Height(300)
+            .Modal(true)
+            .Resizable()
+    .Content(@<text>
+                <div id="wndContent">
+
+                </div>
+    </text>)
+    )
+
+</div>
+
+<script>
+
+    $(".accordion_head").click(function () {
+        debugger;
+        if ($('.accordion_body').is(':visible')) {
+            $(".accordion_body").slideUp(300);
+            $(".plusminus").text('+');
+        }
+        if ($(this).next(".accordion_body").is(':visible')) {
+            $(this).next(".accordion_body").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+    });
+    $(document).ready(function () {
+        debugger;
+
+        if ($(this).next(".accordion_body").is(':visible')) {
+            $(this).next(".accordion_body").slideUp(300);
+            $(this).children(".plusminus").text('+');
+        } else {
+            $(this).next(".accordion_body").slideDown(300);
+            $(this).children(".plusminus").text('-');
+        }
+
+    });
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
