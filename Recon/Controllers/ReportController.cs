@@ -2100,7 +2100,7 @@ namespace Recon.Controllers
 
 
                     //Inserting  Table1 Total
-                    formulaTxt = "=sum(H21:H" + (20 + Table1.Rows.Count).ToString() + ")";
+                    formulaTxt = "=sum(I21:I" + (20 + Table1.Rows.Count).ToString() + ")";
                     row = 20 + Table1.Rows.Count + 1;
                     cellTxt = "I" + row.ToString() + "";
                     ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2112,7 +2112,7 @@ namespace Recon.Controllers
 
                     //Inserting calculation
                     calcCellTxt = "I7";
-                    formulaTxt = "=+(" + calcCellTxt + "*-1)-" + cellTxt;
+                    formulaTxt = "=+(" + calcCellTxt + "*1)-" + cellTxt;
 
                     row = row + 1;
                     cellTxt = "I" + row.ToString() + "";
@@ -2142,7 +2142,7 @@ namespace Recon.Controllers
 
 
                     //Inserting  Table2 Total
-                    formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table2.Rows.Count).ToString() + ")";
+                    formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table2.Rows.Count).ToString() + ")";
                     row = row + Table2.Rows.Count + 1;
                     cellTxt = "I" + row.ToString() + "";
                     ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2179,7 +2179,7 @@ namespace Recon.Controllers
                     ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                     //Inserting  Table3 Total
-                    formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table3.Rows.Count).ToString() + ")";
+                    formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table3.Rows.Count).ToString() + ")";
                     row = row + Table3.Rows.Count + 1;
                     cellTxt = "I" + row.ToString() + "";
                     ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2216,7 +2216,7 @@ namespace Recon.Controllers
                     ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                     //Inserting  Table4 Total
-                    formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table4.Rows.Count).ToString() + ")";
+                    formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table4.Rows.Count).ToString() + ")";
                     row = row + Table4.Rows.Count + 1;
                     cellTxt = "I" + row.ToString() + "";
                     ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2540,8 +2540,8 @@ namespace Recon.Controllers
                 finyear1 = result_data.Tables[0].Copy();
 
                 int recon_summary = 1;
-                string Month = DateTime.ParseExact(TranDate, "yyyy/MM/dd", null).ToString("MMMyyyy");
-                string filetime = DateTime.ParseExact(Filetime, "yyyy/MM/dd HH:mm:ss", null).ToString("dd_MMM_yyy HH_mm_ss");
+                string Month = DateTime.ParseExact(TranDate, "yyyy-MM-dd", null).ToString("MMMyyyy");
+                string filetime = DateTime.ParseExact(Filetime, "yyyy-MM-dd HH:mm:ss", null).ToString("dd_MMM_yyy HH_mm_ss");
 
                 for (int j = 0; j < recons.Count; j++)
                 {
@@ -2811,7 +2811,7 @@ namespace Recon.Controllers
 
 
                         //Inserting  Table1 Total
-                        formulaTxt = "=sum(H21:H" + (20 + Table1.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I21:I" + (20 + Table1.Rows.Count).ToString() + ")";
                         row = 20 + Table1.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2823,7 +2823,7 @@ namespace Recon.Controllers
 
                         //Inserting calculation
                         calcCellTxt = "I7";
-                        formulaTxt = "=+(" + calcCellTxt + "*-1)-" + cellTxt;
+                        formulaTxt = "=+(" + calcCellTxt + "*1)-" + cellTxt;
 
                         row = row + 1;
                         cellTxt = "I" + row.ToString() + "";
@@ -2853,7 +2853,7 @@ namespace Recon.Controllers
 
 
                         //Inserting  Table2 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table2.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table2.Rows.Count).ToString() + ")";
                         row = row + Table2.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2890,7 +2890,7 @@ namespace Recon.Controllers
                         ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                         //Inserting  Table3 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table3.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table3.Rows.Count).ToString() + ")";
                         row = row + Table3.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -2927,7 +2927,7 @@ namespace Recon.Controllers
                         ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                         //Inserting  Table4 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table4.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table4.Rows.Count).ToString() + ")";
                         row = row + Table4.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -3354,7 +3354,7 @@ namespace Recon.Controllers
 
 
                         //Inserting  Table1 Total
-                        formulaTxt = "=sum(H21:H" + (20 + Table1.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I21:I" + (20 + Table1.Rows.Count).ToString() + ")";
                         row = 20 + Table1.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -3366,7 +3366,7 @@ namespace Recon.Controllers
 
                         //Inserting calculation
                         calcCellTxt = "I7";
-                        formulaTxt = "=+(" + calcCellTxt + "*-1)-" + cellTxt;
+                        formulaTxt = "=+(" + calcCellTxt + "*1)-" + cellTxt;
 
                         row = row + 1;
                         cellTxt = "I" + row.ToString() + "";
@@ -3396,7 +3396,7 @@ namespace Recon.Controllers
 
 
                         //Inserting  Table2 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table2.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table2.Rows.Count).ToString() + ")";
                         row = row + Table2.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -3433,7 +3433,7 @@ namespace Recon.Controllers
                         ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                         //Inserting  Table3 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table3.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table3.Rows.Count).ToString() + ")";
                         row = row + Table3.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
@@ -3470,7 +3470,7 @@ namespace Recon.Controllers
                         ws.Range(cellTxt1).Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
 
                         //Inserting  Table4 Total
-                        formulaTxt = "=sum(H" + (row + 1).ToString() + ":H" + (row + Table4.Rows.Count).ToString() + ")";
+                        formulaTxt = "=sum(I" + (row + 1).ToString() + ":I" + (row + Table4.Rows.Count).ToString() + ")";
                         row = row + Table4.Rows.Count + 1;
                         cellTxt = "I" + row.ToString() + "";
                         ws.Cell(cellTxt).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
