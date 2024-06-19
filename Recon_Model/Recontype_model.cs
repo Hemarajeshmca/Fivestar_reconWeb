@@ -35,6 +35,7 @@ namespace Recon_Model
         public string ip_address { get; set; }
         public string user_code { get; set; }
         public string recon_tallied { get; set; }
+
         public Recontype_model()
         {
             string hostName = Dns.GetHostName(); // Retrive the Name of HOST 

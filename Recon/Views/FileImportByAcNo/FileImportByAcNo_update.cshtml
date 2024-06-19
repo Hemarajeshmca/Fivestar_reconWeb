@@ -64,10 +64,10 @@
                                         @(Html.Kendo().DropDownList()
                                         .Name("AccType")
                                                 .DataTextField("AccType")
-                                                .DataValueField("filetype_val")
+                                        .DataValueField("filetype_val")
                                         .HtmlAttributes(new { style = "height:25px;width:100%;font-weight: normal;" })
                                         .Events(e => e.Change("filetype"))
-                                        .DataSource(source => { source.Read(read => { read.Action("getfiletype", "FileImportByAcNo").Data("get_filetype"); }).ServerFiltering(true); }))
+                                                        .DataSource(source => { source.Read(read => { read.Action("getfiletype", "FileImportByAcNo").Data("get_filetype"); }).ServerFiltering(true); }).Value("E"))
 
 
                                         @*<input type="radio" name="AccType" onchange="filetype()" value="T" id="AccType" checked> Trans. File
@@ -118,7 +118,8 @@
                                                 //.Events(e => e.Change("onChangetemplateid"))
                                                   .Events(e => e.Change("onChangetemplateid"))
                                                 .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
-                                        .DataSource(source => { source.Read(read => { read.Action("FileTemplate", "FileImportByAcNo"); }).ServerFiltering(true); }))
+                                        //.DataSource(source => { source.Read(read => { read.Action("FileTemplate", "FileImportByAcNo"); }).ServerFiltering(true); })
+                                        )
                                         @*<input class="text-box single-line col-sm-4" id="Template" name="Template" type="text" value="">*@
                                     </div>
                                 </div>
@@ -297,7 +298,26 @@
             }
         }
     }
+
+
     function filetype() {
+        var AccType = $("#AccType").data("kendoDropDownList").value();
+        $.ajax({
+            type: "POST",
+            data: '{file_type: "' + AccType + '"}',
+            //url: "/FileImportByAcNo/GetReconAccNo",
+            url: '@Url.Action("gettemplate_frotype", "FileImportByAcNo")',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                $("#TemplateType_desc").data("kendoDropDownList").dataSource.data(response);
+            },
+            error: function (er) {
+            }
+        });
+    }
+
+    function filetype_old() {
         debugger;
         //var val = document.getElementById("supportfile").value
         //var AccType = $("input[name='AccType']:checked").val();

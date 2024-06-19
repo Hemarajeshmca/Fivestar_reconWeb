@@ -31,6 +31,7 @@ namespace Recon_Model
         public int file_gid { get; set; }
         public string file_name { get; set; }
         public int report_gid{ get; set; }
+        public string active_status { get; set; }
 
         public string particular { get; set; }
         public string amount { get; set; }
@@ -74,6 +75,7 @@ namespace Recon_Model
         public int Sno { get; set; }
 
         public string Foldersname { get; set; }
+        public string subFoldersname { get; set; }
         public string ExcelFiles { get; set; }
 
         public string glcode { get; set; }
@@ -82,6 +84,12 @@ namespace Recon_Model
         {
             string hostName = Dns.GetHostName(); // Retrive the Name of HOST 
             ip_address = Dns.GetHostByName(hostName).AddressList[0].ToString();
+        }
+
+        public class report_type
+        {
+            public string type_code { get; set; }
+            public string type_name { get; set; }
         }
     }
 }

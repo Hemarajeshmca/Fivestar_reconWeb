@@ -85,7 +85,7 @@
                         </div>
                         <div class="col-md-3" style="margin-top:0px;width:30%;">
 
-                            @(Html.Kendo().DropDownList()
+                            @*@(Html.Kendo().DropDownList()
                                         .Name("ReconName_id")
                                         .HtmlAttributes(new { style = "width:180px" })
                                         .DataTextField("ReconName")
@@ -100,7 +100,22 @@
                                                 //read.Action("ApplyRecontype_drop", "ApplyRule");
                                                 read.Action("getuserrecon", "Dashboard");
                                             });
+                                        }))*@
+
+                            
+                            @(Html.Kendo().DropDownList()
+                                                        .Name("ReconName_id")
+                                                        .DataTextField("ReconName")
+                                                        .DataValueField("ReconName_id")
+                                                        .HtmlAttributes(new { style = "width: 90%;font-weight: normal" })
+                                                            @*.DataSource(source => { source.Read(read => { read.Action("Recon_type_desc", "ApplyRule", new { fieldtype = "W", process="Y" }); }).ServerFiltering(true); }))*@
+                                                        .DataSource(source => { source.Read(read =>  { read.Action("getuserrecon", "Dashboard");  });
                                         }))
+
+
+
+
+                          
 
                         </div>
                         <div class="col-md-3">
@@ -191,81 +206,82 @@
 <script>
     var dataone = [];
 
-    (function ($) {
-        var MultiSelectBox = window.kendo.ui.DropDownList.extend({
-            _select: function (li) { },//Prevents highlighting
-            _blur: function () { },//Prevents auto close
-        });
+    //(function ($) {
+    //    var MultiSelectBox = window.kendo.ui.DropDownList.extend({
+    //        _select: function (li) { },//Prevents highlighting
+    //        _blur: function () { },//Prevents auto close
+    //    });
 
-        window.kendo.ui.plugin(MultiSelectBox);
-    })(jQuery);
-
-    function onSelect(e) {
-        debugger;
-
-        var cbs = document.getElementsByName("cb");
-        var checkboxes = document.getElementsByTagName('input');
-        var ddl = $("#ReconName_id").data("kendoDropDownList");
-        var id = ddl.element.attr("ReconName_id");
-        multiselect();
-        var item = e.item;
-        var index = item.index();
-        if (index == 0) {
-            for (var i = 1; i < cbs.length; i++) {
-                var selectAll = cbs[0].checked;
-                if (cbs[0].checked) {
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        if (checkboxes[i].type == 'checkbox') {
-                            checkboxes[i].checked = true;
-                        }
-                    }
-                    multiselect();
-                }
-
-                else {
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        if (checkboxes[i].type == 'checkbox') {
-                            checkboxes[i].checked = false;
-                        }
-                    }
-                    multiselect();
-                }
-            }
-        }
-
-    }
-
-    function multiselect() {
-        debugger;
-        // var dataItem = this.dataItem(e.item);
-        var ddl = $("#ReconName_id").data("kendoDropDownList");
-        var isAllChecked = $('#cb').prop("checked");
-        var cbs = document.getElementsByName("cb");
-        var display;
-
-        var list = [];
-        for (var i = 1; i < cbs.length; i++) {
-            if (cbs[i].checked) {
-                list.push(cbs[i].value);
-            }
-
-        }
+    //    window.kendo.ui.plugin(MultiSelectBox);
+    //})(jQuery);
 
 
-        if (list.length == 0) {
-            display = "-- SelectAll --";
+    //function onSelect(e) {
+    //    debugger;
 
-            $("#ReconAttr").html("Recon - All");
-        }
-        else {
+    //    var cbs = document.getElementsByName("cb");
+    //    var checkboxes = document.getElementsByTagName('input');
+    //    var ddl = $("#ReconName_id").data("kendoDropDownList");
+    //    var id = ddl.element.attr("ReconName_id");
+    //    multiselect();
+    //    var item = e.item;
+    //    var index = item.index();
+    //    if (index == 0) {
+    //        for (var i = 1; i < cbs.length; i++) {
+    //            var selectAll = cbs[0].checked;
+    //            if (cbs[0].checked) {
+    //                for (var i = 0; i < checkboxes.length; i++) {
+    //                    if (checkboxes[i].type == 'checkbox') {
+    //                        checkboxes[i].checked = true;
+    //                    }
+    //                }
+    //                multiselect();
+    //            }
 
-            display = list.join(", ");
-            $("#ReconAttr").html("Recon - " + display + "");
-        }
+    //            else {
+    //                for (var i = 0; i < checkboxes.length; i++) {
+    //                    if (checkboxes[i].type == 'checkbox') {
+    //                        checkboxes[i].checked = false;
+    //                    }
+    //                }
+    //                multiselect();
+    //            }
+    //        }
+    //    }
 
-        ddl.text(display);
+    //}
 
-    }
+    //function multiselect() {
+    //    debugger;
+    //    // var dataItem = this.dataItem(e.item);
+    //    var ddl = $("#ReconName_id").data("kendoDropDownList");
+    //    var isAllChecked = $('#cb').prop("checked");
+    //    var cbs = document.getElementsByName("cb");
+    //    var display;
+
+    //    var list = [];
+    //    for (var i = 1; i < cbs.length; i++) {
+    //        if (cbs[i].checked) {
+    //            list.push(cbs[i].value);
+    //        }
+
+    //    }
+
+
+    //    if (list.length == 0) {
+    //        display = "-- SelectAll --";
+
+    //        $("#ReconAttr").html("Recon - All");
+    //    }
+    //    else {
+
+    //        display = list.join(", ");
+    //        $("#ReconAttr").html("Recon - " + display + "");
+    //    }
+
+    //    ddl.text(display);
+
+    //}
 
 
     function subtractMonths(date, months) {
@@ -277,7 +293,7 @@
         call();
         debugger;
 
-        $("#ReconName_id").data("kendoDropDownList").text("All");
+        //$("#ReconName_id").data("kendoDropDownList").text("All");
 
 
         //var texts = document.querySelector('#chart').querySelectorAll('text'); //replace "googleLineChart" with your chart's name/id
@@ -411,12 +427,12 @@
 
         }
         arrstring = Attribid.join(", ");
-
+        var recon_gid = $("#ReconName_id").data("kendoDropDownList").value();
         $.ajax({
             type: "POST",
             url: '@Url.Action("Dashboard_read", "Dashboard")',
             dataType: "json",
-            data: '{period_from:"' + period_from + '",period_to:"' + period_to + '",Recongid:"' + arrstring + '"}',
+            data: '{period_from:"' + period_from + '",period_to:"' + period_to + '",Recongid:"' + recon_gid + '"}',
             contentType: 'application/json; charset=utf-8',
             success: function (Data1) {
                 debugger;

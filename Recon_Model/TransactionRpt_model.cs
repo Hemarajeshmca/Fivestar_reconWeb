@@ -20,6 +20,9 @@ namespace Recon_Model
 
         public string Trandate { get; set; }
 
+        public string fromdate { get; set; }
+        public string todate { get; set; }
+
         public int MappedAmount { get; set; }
 
         public string TranDescription { get; set; }

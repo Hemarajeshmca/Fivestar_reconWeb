@@ -562,7 +562,7 @@
 
         var joinsvalidation = $("#contbtn" + clicks).val();
 
-        if (joinsvalidation != '') {
+        if (joinsvalidation != '' && joinsvalidation != undefined) {
             $.alert({
                 title: 'Impact',
                 content: "Last Row Joins To be Blank..!",

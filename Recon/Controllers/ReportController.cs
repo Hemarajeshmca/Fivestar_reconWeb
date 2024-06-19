@@ -83,6 +83,10 @@ namespace Recon.Controllers
         {
             return View();
         }
+        public ActionResult Recon_between_acc()
+        {
+            return View();
+        }
         public ActionResult TransactionReport()
         {
             ViewBag.tokenvalue = token;
@@ -494,7 +498,7 @@ namespace Recon.Controllers
                 Report_model report = new Report_model();
 
                 report.recon_gid = 0 ;
-
+                report.active_status = "Y";
                 List<Report_model> objcat_lst = new List<Report_model>();
                 DataTable result = new DataTable();
                 string post_data = objcommon.getApiResult(JsonConvert.SerializeObject(report), "ReportBrsRead_new");
@@ -2506,7 +2510,8 @@ namespace Recon.Controllers
                 DataTable Table4 = new DataTable();
                 DataTable Table6 = new DataTable();
                 DataTable Table7 = new DataTable();
-
+                string fin_year = "";
+                string show_fin_year = "";
                 long row = 0;
                 long col = 0;
                 int worksheetcount = 1;
@@ -2589,22 +2594,45 @@ namespace Recon.Controllers
                     filename_tran = recon_name1.Substring(0, 5);
 
                     var acc_no1 = Table.Rows[0]["acc_no1"].ToString();
+                    string Acc2date = "";
+                    string Acc1date = "";
                     //  string s2 = Regex.Replace(recon_name, @"[^A-Z]+", String.Empty);
                     var acc_no2 = Table.Rows[0]["acc_no2"].ToString();
-                    string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
-                    string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                    //string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                    //string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
                     Decimal acc1Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no1_bal_amount"].ToString());
                     Decimal acc2Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no2_bal_amount"].ToString());
                     Decimal accno1_drtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_dr_total"].ToString());
                     Decimal accno2_drtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_dr_total"].ToString());
                     Decimal accno1_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_cr_total"].ToString());
                     Decimal accno2_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_cr_total"].ToString());
+                    if (accno2_crtotal == 0 && accno1_crtotal == 0 && accno2_drtotal == 0 && accno1_drtotal == 0 && acc1Bal_amount == 0 && acc2Bal_amount == 0)
+                    {
+                        int year = DateTime.Now.Year;
+                        int month = DateTime.Now.Month;
+                        DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        Acc2date = lastDayOfMonth.ToString("dd-MM-yyyy");
+                        Acc1date = lastDayOfMonth.ToString("dd-MM-yyyy");
 
+                    }
+                    else
+                    {
+                        Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                        Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                    }
                     var val = Convert.ToDateTime(TranDate);
 
-
+                    int pMonth;
                     int pYear = val.Year;
-                    int pMonth = val.Month - 1;
+                    int checkpMonth = val.Month - 1;
+                    if (checkpMonth == 0) {
+                       // pMonth = val.Month;
+                        pMonth = 12;
+                        pYear = val.Year - 1;
+                    } else {
+                        pMonth = checkpMonth;
+                        pYear = val.Year;
+                    }
                     DateTime lastDayPrevMonth = new DateTime(pYear, pMonth, DateTime.DaysInMonth(pYear, pMonth));
 
                     var lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
@@ -2633,10 +2661,11 @@ namespace Recon.Controllers
                             ws.Cell("F1").SetValue(name); ws.Cell("F1").Style.Font.Bold = true;
                             ws.Cell("F1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             ws.Cell("F1").Style.Font.Underline.ToString(); ws.Cell("F1").Style.Font.Underline = XLFontUnderlineValues.Single;
-                            ws.Range("A1:E1").Row(1).Merge();
-                            ws.Range("G1:L1").Row(1).Merge();
+                            //ws.Range("A1:E1").Row(1).Merge();
+                            //ws.Range("G1:L1").Row(1).Merge();
 
-                            var fin_year = finyear1.Rows[0]["v_finyear_code"].ToString();
+                            fin_year = finyear1.Rows[0]["v_finyear_code"].ToString();
+                            show_fin_year = fin_year;
                             fin_year = "Financial Year " + fin_year;
                             ws.Cell("F2").SetValue(fin_year); ws.Cell("F2").Style.Font.Bold = true;
                             ws.Cell("F2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
@@ -2954,11 +2983,36 @@ namespace Recon.Controllers
                         cellTxt = "B" + row.ToString() + "";
                         ws.Cell(cellTxt).SetValue("Balance as per bank pass book").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
 
+                        //Hema edit
+
+                        row = row + 1;
+                        cellTxt = "B" + row.ToString() + "";
+                        ws.Cell(cellTxt).SetValue("Bank Statement Month Closing Balance").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
+
+                        formulaTxt = "I17";
+
+                        cellTxt = "I" + row.ToString() + "";
+
+                        cellFormulaCalc = ws.Cell(cellTxt);
+                        cellFormulaCalc.FormulaA1 = formulaTxt; cellFormulaCalc.Style.NumberFormat.Format = "###0.00";
+                        cellFormulaCalc.Style.Font.Bold = true;
+                        cellFormulaCalc.Style.Border.BottomBorder = XLBorderStyleValues.Double;
+                        cellFormulaCalc.Style.Border.BottomBorderColor = XLColor.Black;
+                        cellFormulaCalc.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                        
+                        // Edit ends
+
                         row = row + 2;
                         cellTxt = "B" + row.ToString() + "";
                         ws.Cell(cellTxt).SetValue("Difference").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
 
-                        formulaTxt = "=+" + calcCellTxt + "-I17";
+
+                        //Hema Edit start
+                        // formulaTxt = "=+" + calcCellTxt + "-I" + "-I17";
+
+                        formulaTxt = "=+" + calcCellTxt + "-I" + Convert.ToString((Convert.ToInt32(calcCellTxt.Split('I')[1])+1));
+
+                        //Hema Edit ends
 
                         cellTxt = "I" + row.ToString() + "";
 
@@ -3006,12 +3060,12 @@ namespace Recon.Controllers
                 }
                 using (MemoryStream stream = new MemoryStream())
                 {
-                   
-                    
-                    string directoryPath = "D:\\MonthEndReport\\" + Month + "\\";
+
+
+                    string directoryPath = "D:\\MonthEndReport\\" + show_fin_year + "\\" + Month + "\\";
                     string filePath = Path.Combine(directoryPath, fileName);
 
-                    wb.SaveAs("D:\\MonthEndReport\\" + Month + "\\" + fileName + "");
+                    wb.SaveAs("D:\\MonthEndReport\\" + show_fin_year + "\\" + Month + "\\" + fileName + "");
                      using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                      {
                          fileStream.CopyTo(stream);
@@ -3035,9 +3089,11 @@ namespace Recon.Controllers
 
         public ActionResult MonthBRS_Download_1(string TranDate, string recon_gid)
         {
-
+            
             try
             {
+                string fin_year = "";
+                string show_fin_year = "";
                 List<TransactionRpt_model> objcat_3st = new List<TransactionRpt_model>();
                 DataSet result2 = new DataSet();
                 DataSet result_data = new DataSet();
@@ -3135,10 +3191,12 @@ namespace Recon.Controllers
                     filename_tran = recon_name1.Substring(0, 5);
 
                     var acc_no1 = Table.Rows[0]["acc_no1"].ToString();
+                    string Acc2date = "";
+                    string Acc1date = "";
                     //  string s2 = Regex.Replace(recon_name, @"[^A-Z]+", String.Empty);
                     var acc_no2 = Table.Rows[0]["acc_no2"].ToString();
-                    string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
-                    string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                    //string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                    //string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
                     Decimal acc1Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no1_bal_amount"].ToString());
                     Decimal acc2Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no2_bal_amount"].ToString());
                     Decimal accno1_drtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_dr_total"].ToString());
@@ -3146,9 +3204,36 @@ namespace Recon.Controllers
                     Decimal accno1_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_cr_total"].ToString());
                     Decimal accno2_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_cr_total"].ToString());
 
+                    if (accno2_crtotal == 0 && accno1_crtotal == 0 && accno2_drtotal == 0 && accno1_drtotal == 0 && acc1Bal_amount == 0 && acc2Bal_amount == 0)
+                    {
+                        int year = DateTime.Now.Year;
+                        int month = DateTime.Now.Month;
+                        DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        Acc2date = lastDayOfMonth.ToString("dd-MM-yyyy");
+                        Acc1date = lastDayOfMonth.ToString("dd-MM-yyyy");
+
+                    }
+                    else
+                    {
+                        Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                        Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                    }
+                    int pMonth;
                     var val = Convert.ToDateTime(TranDate);
                     int pYear = val.Year;
-                    int pMonth = val.Month - 1;
+                   //int pMonth = val.Month - 1;
+                    int checkpMonth = val.Month - 1;
+                    if (checkpMonth == 0)
+                    {
+                        //pMonth = val.Month;
+                        pMonth = 12;
+                        pYear = val.Year - 1;
+                    }
+                    else
+                    {
+                        pMonth = checkpMonth;
+                        pYear = val.Year;
+                    }
                     DateTime lastDayPrevMonth = new DateTime(pYear, pMonth, DateTime.DaysInMonth(pYear, pMonth));
                     var lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
 
@@ -3176,10 +3261,11 @@ namespace Recon.Controllers
                             ws.Cell("F1").SetValue(name); ws.Cell("F1").Style.Font.Bold = true;
                             ws.Cell("F1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             ws.Cell("F1").Style.Font.Underline.ToString(); ws.Cell("F1").Style.Font.Underline = XLFontUnderlineValues.Single;
-                            ws.Range("A1:E1").Row(1).Merge();
-                            ws.Range("G1:L1").Row(1).Merge();
+                            //ws.Range("A1:E1").Row(1).Merge();
+                            //ws.Range("G1:L1").Row(1).Merge();
 
-                            var fin_year = finyear1.Rows[0]["v_finyear_code"].ToString();
+                            fin_year = finyear1.Rows[0]["v_finyear_code"].ToString();
+                            show_fin_year = fin_year;
                             fin_year = "Financial Year " + fin_year;
                             ws.Cell("F2").SetValue(fin_year); ws.Cell("F2").Style.Font.Bold = true;
                             ws.Cell("F2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
@@ -3497,11 +3583,39 @@ namespace Recon.Controllers
                         cellTxt = "B" + row.ToString() + "";
                         ws.Cell(cellTxt).SetValue("Balance as per bank pass book").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
 
+                        //Hema edit
+
+                        row = row + 1;
+                        cellTxt = "B" + row.ToString() + "";
+                        ws.Cell(cellTxt).SetValue("Bank Statement Month Closing Balance").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
+
+                        formulaTxt = "I17";
+
+                        cellTxt = "I" + row.ToString() + "";
+
+                        cellFormulaCalc = ws.Cell(cellTxt);
+                        cellFormulaCalc.FormulaA1 = formulaTxt; cellFormulaCalc.Style.NumberFormat.Format = "###0.00";
+                        cellFormulaCalc.Style.Font.Bold = true;
+                        cellFormulaCalc.Style.Border.BottomBorder = XLBorderStyleValues.Double;
+                        cellFormulaCalc.Style.Border.BottomBorderColor = XLColor.Black;
+                        cellFormulaCalc.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                        // Edit ends
+
+
+
                         row = row + 2;
                         cellTxt = "B" + row.ToString() + "";
                         ws.Cell(cellTxt).SetValue("Difference").SetActive(); ws.Cell(cellTxt).Style.Font.Bold = true;
 
-                        formulaTxt = "=+" + calcCellTxt + "-I17";
+                        //Hema Edit start
+                        //formulaTxt = "=+" + calcCellTxt + "-I17";
+
+                        formulaTxt = "=+" + calcCellTxt + "-I" + Convert.ToString((Convert.ToInt32(calcCellTxt.Split('I')[1]) + 1));
+
+                        //Hema Edit ends
+
+                        
 
                         cellTxt = "I" + row.ToString() + "";
 
@@ -3633,6 +3747,8 @@ namespace Recon.Controllers
                 Decimal accno2_drtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_dr_total"].ToString());
                 Decimal accno1_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_cr_total"].ToString());
                 Decimal accno2_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_cr_total"].ToString());
+
+                
 
                 dt = result2.Copy();
                 dt.Tables.Remove("Table");
@@ -4393,8 +4509,8 @@ namespace Recon.Controllers
            
         }
 
-        public ActionResult monthendreport()
-       {
+        public ActionResult monthendreportFolder()
+        {
             Report_model model = new Report_model();
             List<Report_model> objcat_3st = new List<Report_model>();
             string rootPath = @"D:\MonthEndReport";
@@ -4409,6 +4525,7 @@ namespace Recon.Controllers
 
             List<string> subfolders = new List<string>();
             Dictionary<string, object> str = new Dictionary<string, object>();
+
             string filename = "";
             for (int i = 0; i < count; i++)
             {
@@ -4429,7 +4546,7 @@ namespace Recon.Controllers
                 subfolders_count += 1;
             }
 
-            model.Sno=0;
+            model.Sno = 0;
             model.Foldersname = "Select";
             objcat_3st.Add(model);
 
@@ -4441,88 +4558,207 @@ namespace Recon.Controllers
                 objcat_3st.Add(model);
             }
             return Json(objcat_3st, JsonRequestBehavior.AllowGet);
+            return View(str);
+        }
+
+
+       // public ActionResult monthendreport()
+       //{
+       //     Report_model model = new Report_model();
+       //     List<Report_model> objcat_3st = new List<Report_model>();
+       //     string rootPath = @"D:\MonthEndReport";
+       //     DataRow dr;
+       //     DirectoryInfo Dictiontory = new DirectoryInfo(rootPath);
+       //     int count = Dictiontory.GetDirectories().Length;
+       //     DirectoryInfo[] Dir = Dictiontory.GetDirectories();
+       //     DataTable dt = new DataTable();
+       //     dt.Columns.Add("Sno", typeof(int));
+       //     dt.Columns.Add("Foldersname", typeof(string));
+
+
+       //     List<string> subfolders = new List<string>();
+       //     Dictionary<string, object> str = new Dictionary<string, object>();
+
+       //     //loadsubdir(rootPath, subfolders);
+
+           
+            
+       //     string filename = "";
+       //     for (int i = 0; i < count; i++)
+       //     {
+       //         var excelfiles = new List<string>();
+       //         string ds = Dir[i].ToString();
+       //         subfolders.Add(ds);
+
+       //     }
+            
+       //     int subfolders_count = 1;
+
+       //     for (int j = 0; j < subfolders.Count; j++)
+       //     {
+       //         dr = dt.NewRow();
+       //         dr["Sno"] = subfolders_count;
+       //         dr["Foldersname"] = subfolders[j];
+       //         dt.Rows.Add(dr);
+       //         subfolders_count += 1;
+       //     }
+
+       //     model.Sno=0;
+       //     model.Foldersname = "Select";
+       //     objcat_3st.Add(model);
+
+       //     for (int i = 0; i < dt.Rows.Count; i++)
+       //     {
+       //         model = new Report_model();
+       //         model.Sno = Convert.ToInt32(dt.Rows[i]["Sno"].ToString());
+       //         model.Foldersname = dt.Rows[i]["Foldersname"].ToString();
+       //         objcat_3st.Add(model);
+       //     }
+       //     return Json(objcat_3st, JsonRequestBehavior.AllowGet);
+
+
+       //     return View(str);
+          
+       // }
+
+        public ActionResult getsubfolderName(string Subfolder)
+       {
+            Report_model model = new Report_model();
+            List<Report_model> objcat_3st = new List<Report_model>();
+            string rootPath = @"D:\MonthEndReport\" + Subfolder;
+            DataRow dr;
+            DirectoryInfo Dictiontory = new DirectoryInfo(rootPath);
+            int count = Dictiontory.GetDirectories().Length;
+            DirectoryInfo[] Dir = Dictiontory.GetDirectories();
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Sno", typeof(int));
+            dt.Columns.Add("subFoldersname", typeof(string));
+
+
+            List<string> subfolders = new List<string>();
+            Dictionary<string, object> str = new Dictionary<string, object>();         
+            
+            string filename = "";
+            for (int i = 0; i < count; i++)
+            {
+                var excelfiles = new List<string>();
+                string ds = Dir[i].ToString();
+                subfolders.Add(ds);
+
+            }
+            
+            int subfolders_count = 1;
+
+            for (int j = 0; j < subfolders.Count; j++)
+            {
+                dr = dt.NewRow();
+                dr["Sno"] = subfolders_count;
+                dr["subFoldersname"] = subfolders[j];
+                dt.Rows.Add(dr);
+                subfolders_count += 1;
+            }
+
+            model.Sno=0;
+            model.subFoldersname = "Select";
+            objcat_3st.Add(model);
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                model = new Report_model();
+                model.Sno = Convert.ToInt32(dt.Rows[i]["Sno"].ToString());
+                model.subFoldersname = dt.Rows[i]["subFoldersname"].ToString();
+                objcat_3st.Add(model);
+            }
+            return Json(objcat_3st, JsonRequestBehavior.AllowGet);
 
 
             return View(str);
           
         }
 
-        public ActionResult excelfiles([DataSourceRequest] DataSourceRequest request,string subfolder)
+
+        public ActionResult excelfiles([DataSourceRequest] DataSourceRequest request, string foldername, string subfolder)
         {
-            string filename = "";
-            DataTable dt = new DataTable();
-            Report_model model = new Report_model();
-            List<Report_model> objcat_3st = new List<Report_model>();
-            DataRow dr;
-            string rootPath = @"D:\MonthEndReport";
-            List<string> list = new List<string>();
-            Dictionary<string, object> str = new Dictionary<string, object>();
-            DirectoryInfo Dictiontory = new DirectoryInfo(rootPath);
-            int count = Dictiontory.GetDirectories().Length;
-            DirectoryInfo[] Dir = Dictiontory.GetDirectories();
-
-            String[] all = Directory.GetDirectories(rootPath);
-            int sublen = all.Length;
-            for (int j = 0; j < count; j++)
+            if (foldername != "Select")
             {
-                var excelfiles = new List<string>();
-                string ds = Dir[j].ToString();
-                var sub1 = all[j];
-                DirectoryInfo objDirectoryInfo = new DirectoryInfo(sub1);
-                FileInfo[] allFiles = objDirectoryInfo.GetFiles("*.*", SearchOption.TopDirectoryOnly);
-                for (int k = 0; k < allFiles.Length; k++)
-                {
-                    filename = allFiles[k].ToString();
-                    excelfiles.Add(filename);
-                }
-                str.Add(ds, excelfiles);
-            }
+                string filename = "";
+                DataTable dt = new DataTable();
+                Report_model model = new Report_model();
+                List<Report_model> objcat_3st = new List<Report_model>();
+                DataRow dr;
+                string rootPath = @"D:\MonthEndReport\" + foldername;
+                List<string> list = new List<string>();
+                Dictionary<string, object> str = new Dictionary<string, object>();
+                DirectoryInfo Dictiontory = new DirectoryInfo(rootPath);
+                int count = Dictiontory.GetDirectories().Length;
+                DirectoryInfo[] Dir = Dictiontory.GetDirectories();
 
-            dt.Columns.Add("Sno", typeof(int));
-            dt.Columns.Add("ExcelFiles", typeof(string));
-            int Filescnt = 1;
-
-            foreach (var item in str)
-            {
-                if (item.Key == subfolder)
+                String[] all = Directory.GetDirectories(rootPath);
+                int sublen = all.Length;
+                for (int j = 0; j < count; j++)
                 {
-                    var values = item.Value;
-                    var result = ((IEnumerable)values).Cast<object>().ToList();
-                    for (int j = 0; j < result.Count; j++)
+                    var excelfiles = new List<string>();
+                    string ds = Dir[j].ToString();
+                    var sub1 = all[j];
+                    DirectoryInfo objDirectoryInfo = new DirectoryInfo(sub1);
+                    FileInfo[] allFiles = objDirectoryInfo.GetFiles("*.*", SearchOption.TopDirectoryOnly);
+                    for (int k = 0; k < allFiles.Length; k++)
                     {
-                        string Files = result[j].ToString();
-                        dr = dt.NewRow();
-                        dr["Sno"] = Filescnt;
-                        dr["ExcelFiles"] = Files;
-                        dt.Rows.Add(dr);
-                        Filescnt += 1;
+                        filename = allFiles[k].ToString();
+                        excelfiles.Add(filename);
+                    }
+                    str.Add(ds, excelfiles);
+                }
+
+                dt.Columns.Add("Sno", typeof(int));
+                dt.Columns.Add("ExcelFiles", typeof(string));
+                int Filescnt = 1;
+
+                foreach (var item in str)
+                {
+                    if (item.Key == subfolder)
+                    {
+                        var values = item.Value;
+                        var result = ((IEnumerable)values).Cast<object>().ToList();
+                        for (int j = 0; j < result.Count; j++)
+                        {
+                            string Files = result[j].ToString();
+                            dr = dt.NewRow();
+                            dr["Sno"] = Filescnt;
+                            dr["ExcelFiles"] = Files;
+                            dt.Rows.Add(dr);
+                            Filescnt += 1;
+                        }
                     }
                 }
-            }
 
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                model = new Report_model();
-                model.Sno = Convert.ToInt32(dt.Rows[i]["Sno"].ToString());
-                model.ExcelFiles = dt.Rows[i]["ExcelFiles"].ToString();
-                model.Foldersname = subfolder;
-                objcat_3st.Add(model);
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    model = new Report_model();
+                    model.Sno = Convert.ToInt32(dt.Rows[i]["Sno"].ToString());
+                    model.ExcelFiles = dt.Rows[i]["ExcelFiles"].ToString();
+                    model.Foldersname = subfolder;
+                    objcat_3st.Add(model);
+                }
+                return Json(objcat_3st.ToDataSourceResult(request));
+                return View();
             }
-            return Json(objcat_3st.ToDataSourceResult(request));
-            return View();
+            else
+            {
+                return Json("");
+            }
+            
         }
 
         public ActionResult DownloadFile(string Subfolder, string Excelfiles)
         {
             string Result = "";
             byte[] filebyte;
-             string filepath1 = @"D:\MonthEndReport\"+ Subfolder +"\\" + Excelfiles + "";
-            //string filepath1 = @"D:\MonthEndReport\July2023\2.xlsx";
+            string filepath1 = @"D:\MonthEndReport\"+ Subfolder.Replace('/','\\') +"\\" + Excelfiles + "";
             string subDirectory = filepath1;
-
             try
             {
-                filebyte = GetFile(subDirectory);
+                filebyte = GetFile(filepath1);
                 return File(filebyte, System.Net.Mime.MediaTypeNames.Application.Octet, "Recons.xlsx");
             }
             catch (Exception ex)
@@ -4676,6 +4912,139 @@ namespace Recon.Controllers
         //    return View();
 
         //}
+
+
+        // Hema changes
+
+
+
+        public ActionResult getReportType()
+        {
+            try
+            {
+
+                List<Report_model.report_type> objcat_3st = new List<Report_model.report_type>();
+
+                //Report_model.report_type objcat = new Report_model.report_type();
+                //objcat.type_code = "";
+                //objcat.type_name = "-- Select --";
+                //objcat_3st.Add(objcat);
+
+                Report_model.report_type objcat1 = new Report_model.report_type();
+                objcat1.type_code = "month_brs";
+                objcat1.type_name = "Month Brs";
+                objcat_3st.Add(objcat1);
+
+                Report_model.report_type objcat2 = new Report_model.report_type();
+                objcat2.type_code = "daily_brs";
+                objcat2.type_name = "Daily Brs";
+                objcat_3st.Add(objcat2);
+                
+                Report_model.report_type objcat3 = new Report_model.report_type();
+                objcat3.type_code = "recon_percentage";
+                objcat3.type_name = "Recon Percentage";
+                objcat_3st.Add(objcat3);                
+                return Json(objcat_3st, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(e.Message);
+            }
+           
+        }
+
+        public ActionResult Reconpercentage_new(string fromdate, string todate, string recon_gid)
+        {
+            try
+            {
+                List<TransactionRpt_model> objcat_3st = new List<TransactionRpt_model>();
+                DataSet result2 = new DataSet();
+                DataSet result_data = new DataSet();
+                string fileName = "";
+                DataSet dt = new DataSet();
+                DataTable reconsummary = new DataTable();
+                DataTable finyear1 = new DataTable();
+                DataTable Table = new DataTable();
+                DataTable Table1 = new DataTable();
+                DataTable Table2 = new DataTable();
+                DataTable Table3 = new DataTable();
+                DataTable Table4 = new DataTable();
+                DataTable Table6 = new DataTable();
+                DataTable Table7 = new DataTable();
+
+                long row = 0;
+                long col = 0;
+                int worksheetcount = 1;
+                string cellTxt = "";
+                string cellTxt1 = "";
+                string filename_tran = "";
+                string formulaTxt = "";
+                string calcCellTxt = "";
+                var recon_name1 = "";
+
+                List<int> recons = recon_gid.Split(',').Select(int.Parse).ToList();
+                for (int i = 0; i < recons.Count; i++)
+                {
+                    if (recons[i] == 0)
+                    {
+                        recons.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                int no_of_recons = recons.Count;
+
+                //getting recon summary table
+                TransactionRpt_model DedupList = new TransactionRpt_model();
+                DedupList.fromdate = fromdate;
+                DedupList.todate = todate;
+                DedupList.Recon_gid = recon_gid;
+                DedupList.no_of_recons = no_of_recons;
+                string post_data = objcommon.getApiResult(JsonConvert.SerializeObject(DedupList), "Reportpercentage_new");
+                result_data = (DataSet)JsonConvert.DeserializeObject(post_data, result2.GetType());
+                Table1 = result_data.Tables[1].Copy();
+                Table2 = result_data.Tables[0].Copy();
+                string Date = Table2.Rows[0]["Date1"].ToString();
+                string entity_name = Table2.Rows[0]["v_entity_name"].ToString();
+                string name = entity_name.Trim('\'');
+
+                using (XLWorkbook wb = new XLWorkbook())
+                {
+
+                    var ws = wb.AddWorksheet(Date);
+
+                    //Insrting Table1 Data
+                    ws.Cell("A1").SetValue(name); ws.Cell("A1").Style.Font.Bold = true;
+                    ws.Cell("A3").InsertTable(Table1);
+                    wb.Worksheet(1).Table(0).ShowAutoFilter = false;// Disable AutoFilter.
+                    wb.Worksheet(1).Table(0).Theme = XLTableTheme.None;
+                    wb.Worksheet(1).Table(0).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                    wb.Worksheet(1).Table(0).Style.Border.BottomBorderColor = XLColor.Black;
+                    wb.Worksheet(1).Table(0).Style.Border.TopBorder = XLBorderStyleValues.Thin;
+                    wb.Worksheet(1).Table(0).Style.Border.TopBorderColor = XLColor.Black;
+                    wb.Worksheet(1).Table(0).Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+                    wb.Worksheet(1).Table(0).Style.Border.LeftBorderColor = XLColor.Black;
+                    wb.Worksheet(1).Table(0).Style.Border.RightBorder = XLBorderStyleValues.Thin;
+                    wb.Worksheet(1).Table(0).Style.Border.RightBorderColor = XLColor.Black;
+                    ws.Range("A3:L3").Style.Font.Bold = true;
+                    ws.Range("A3:L3").Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1, 0.5);
+
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        wb.SaveAs(stream);
+                        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                return Json(e.Message, JsonRequestBehavior.AllowGet);
+            }
+
+            return View();
+        }
+    
     }
 }
 

@@ -2669,6 +2669,73 @@ namespace Recon.Controllers
             }
             return View();
         }
+
+
+        public ActionResult gettemplate_frotype(string file_type)
+        {
+            List<FileImport_model> objcat_lst = new List<FileImport_model>();
+            DataTable result = new DataTable();
+            FileImport_model fileImport = new FileImport_model();
+            fileImport.FileType = file_type;
+            fileImport.active_status = "Y";
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    try
+                    {
+                        client.BaseAddress = new Uri(url);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        HttpContent content = new StringContent(JsonConvert.SerializeObject(fileImport), UTF8Encoding.UTF8, "application/json");
+                        var response = client.PostAsync("FileTemplateList_fromtype", content).Result;
+                        Stream data = response.Content.ReadAsStreamAsync().Result;
+                        StreamReader reader = new StreamReader(data);
+                        string post_data = reader.ReadToEnd();
+                        result = (DataTable)JsonConvert.DeserializeObject(post_data, result.GetType());
+
+                        FileImport_model objcat = new FileImport_model();
+                         objcat.Template_gid = 0;
+                         objcat.Template_name = "Select";
+                        objcat.TemplateType_desc = "";
+                        objcat_lst.Add(objcat);
+                        for (int i = 0; i < result.Rows.Count; i++)
+                        {
+                            objcat = new FileImport_model();
+                            objcat.Template_gid = Convert.ToInt64(result.Rows[i][0]);
+                            objcat.Template_name = result.Rows[i][1].ToString();
+                            objcat.TemplateType_desc = result.Rows[i][3].ToString();
+                            objcat.FileSeperator = result.Rows[i]["csv_seperator"].ToString();
+                            objcat.FileType = result.Rows[i][4].ToString();
+                            // objcat.FileType_desc = result.Rows[i][5].ToString();
+                            objcat.Hflag = result.Rows[i]["header_flag"].ToString();
+                            objcat.Acflag = result.Rows[i]["acc_no_flag"].ToString();
+                            objcat.Blflag = result.Rows[i]["bal_amount_flag"].ToString();
+                            objcat.Transaction_Amount_type = result.Rows[i]["tran_amount_type"].ToString();
+                            objcat.Balance_Amount_type = result.Rows[i]["bal_amount_type"].ToString();
+                            objcat.Transaction_Amount_type_desc = result.Rows[i]["tran_amount_type_desc"].ToString();
+                            objcat.Balance_Amount_type_desc = result.Rows[i]["bal_amount_type_desc"].ToString();
+                            objcat.Csv_Columns = Convert.ToInt32(result.Rows[i]["csv_columns"].ToString());
+                            objcat_lst.Add(objcat);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string control = this.ControllerContext.RouteData.Values["controller"].ToString(); LogHelper.WriteLog(ex.ToString(), control);
+                    }
+                    return Json(objcat_lst, JsonRequestBehavior.AllowGet);
+                    //return Json(result1);
+                }
+            }
+            catch (Exception ex)
+            {
+                string control = this.ControllerContext.RouteData.Values["controller"].ToString(); LogHelper.WriteLog(ex.ToString(), control);
+            }
+            return View();
+
+        }
+    
     }
 
 }

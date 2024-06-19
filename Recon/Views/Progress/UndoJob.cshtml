@@ -192,9 +192,10 @@
         if (jobtype == "Manual Matching")
         {
             jobtype = "M";
-        }
-        else {
+        } else if (jobtype == "Auto Matching") {
             jobtype = "A";
+        } else if (jobtype == "Posting Supporing File") {
+            jobtype = "S";
         }
         var from_date = $("#initiate_from").val();
         var to_date = $("#initiate_to").val();
@@ -204,7 +205,16 @@
     function job_search() {
         debugger;
         //var jobtype = $("#jobtypecode").data("kendoDropDownList").value();
-        var jobtype = 'A';
+       // var jobtype = 'A';
+        var jobtype = $("#Dropdownkoid").data("kendoDropDownList").text();
+        if (jobtype == "Manual Matching") {
+            jobtype = "M";
+        } else if (jobtype == "Auto Matching") {
+            jobtype = "A";
+        }
+        else if (jobtype == "Posting Supporing File") {
+            jobtype = "S";
+        }
         var from_date = $("#initiate_from").val();
         var to_date = $("#initiate_to").val();
 

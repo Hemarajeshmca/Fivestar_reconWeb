@@ -155,15 +155,15 @@
 
 
     (function ($) {
+        debugger;
         var MultiSelectBox = window.kendo.ui.DropDownList.extend({
             _select: function (li) { },//Prevents highlighting
             _blur: function () { },//Prevents auto close
         });
 
-        // window.kendo.ui.plugin(MultiSelectBox);
+        //window.kendo.ui.plugin(MultiSelectBox);
 
     })(jQuery);
-
 
     function onSelect(e) {
         debugger;
@@ -172,7 +172,7 @@
         var checkboxes = document.getElementsByTagName('input');
         var ddl = $("#ReconName_id").data("kendoDropDownList");
         // var id = ddl.element.attr("ReconName_id");
-        multiselect();
+       // multiselect();
         var item = e.item;
         var index = item.index();
         if (index == 0) {
@@ -182,32 +182,32 @@
                     for (var i = 0; i < checkboxes.length; i++) {
                         if (checkboxes[i].type == 'checkbox') {
                             checkboxes[i].checked = true;
+                            $("#ReconName_id").data("kendoDropDownList").trigger("change");
                         }
+
                     }
-                    multiselect();
+                    //multiselect();
                 }
 
                 else {
                     for (var i = 0; i < checkboxes.length; i++) {
                         if (checkboxes[i].type == 'checkbox') {
                             checkboxes[i].checked = false;
+                            $("#ReconName_id").data("kendoDropDownList").trigger("change");
                         }
                     }
-                    multiselect();
+                    //multiselect();
                 }
             }
         }
-
     }
 
     function getid() {
-        debugger;
         var Attribid = [];
         var arrstring = "";
         var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
         var reconarray = Config_MetricType.dataSource.data();
         var cbs = document.getElementsByName("dropdowncheck");
-
         for (var i = 0; i < cbs.length; i++) {
             if (cbs[i].checked) {
                 var item = reconarray[i].ReconName_id;
@@ -225,7 +225,6 @@
     }
 
     function multiselect() {
-        debugger;
         // var dataItem = this.dataItem(e.item);
         var ddl = $("#ReconName_id").data("kendoDropDownList");
         var isAllChecked = $('#cb').prop("checked");
@@ -237,10 +236,7 @@
             if (cbs[i].checked) {
                 list.push(cbs[i].value);
             }
-
         }
-
-
         if (list.length == 0) {
             display = "-- Select --";
         }
@@ -254,9 +250,6 @@
     }
 
     $(document).ready(function () {
-
-        debugger;
-
         $("#usergrid").data("kendoGrid").dataSource.bind("requestEnd", onRequestEnd);
         var grid = $("#usergrid").data("kendoGrid");
         //function for changing kendo popup title.
@@ -268,14 +261,12 @@
             event.container.parent().find('.k-window-title').text(event.model.isNew() ? "New" : "Edit").append('<button id="btnMoveMe"  onclick="closepop()" style="margin-left:92%;border:none;background-color:#357ab8;cursor:pointer;color:white;">x</button>');
             var editWindow1 = this.editable.element.data("kendoWindow");
             editWindow1.unbind("close");
-            editWindow1.bind("close", onWindowEditClose);
+           editWindow1.bind("close", onWindowEditClose);
             filetype();
             var usercode = event.model["user_code"];
             window.setTimeout(function () {
                 kendocheckboxbinding(usercode);
             }, 1000);
-
-
             if (event.model.isNew()) {
                 $("#user_code").attr('disabled', false);
             } else {
@@ -285,24 +276,20 @@
         kendodate_format();
     });
     var onWindowEditClose = function (e) {
-        debugger;
         if (preventCloseOnSave) {
             e.preventDefault();
             preventCloseOnSave = false;
         }
         else {
-            debugger;
             $("#usergrid").data("kendoGrid").dataSource.read();
         }
     };
 
     function closepop() {
-        debugger;
         $("#usergrid").data("kendoGrid").dataSource.read();
     }
 
     function kendocheckboxbinding(usercode) {
-        debugger;
         var user_code = usercode;
         var dropodwn_list = $("#ReconName_id").data("kendoDropDownList");
 
@@ -315,7 +302,6 @@
             data: '{usercode:"' + user_code + '"}',
             contentType: 'application/json; charset=utf-8',
             success: function (Data1) {
-                debugger;
                 var Config_MetricType = $("#ReconName_id").data("kendoDropDownList");
                 var reconarray = Config_MetricType.dataSource.data();
                 for (var i = 0; i < Data1.length; i++) {
@@ -332,7 +318,6 @@
     }
     function onRequestEnd(e) {
         //Check request type
-        debugger;
         if (e.type == "create") {
             //check for errors in the response
             if (e.response[1] > 0) {
@@ -415,7 +400,6 @@
     }
     function filetype() {
         var val = $("input[name='MappingType_code']:checked").val();
-        debugger;
         if (val == "P") {
             $("#acc2drop").hide();
 
@@ -424,9 +408,7 @@
         }
     }
     function ViewMode(e) {
-        debugger;
         var grid = this,
-
         selectedRow = $(e.target).closest("tr")[0];
         grid.editRow(selectedRow);
         $(".k-grid-update").hide();
