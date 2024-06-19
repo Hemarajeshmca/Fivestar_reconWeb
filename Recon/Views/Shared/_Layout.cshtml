@@ -489,7 +489,7 @@
             window.location.href = url;
         }
         function getFormated_StringDate(date) {   //get DD/MM/YYYY or MM/DD/YYYYY
-            if (date != "" || date != undefined) {
+            if (date != "" && date != undefined && date != "undefined") {
                 var d = date.split("-");
                 return d[2] + "-" + d[1] + "-" + d[0];
             }

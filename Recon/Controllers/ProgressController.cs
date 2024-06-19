@@ -589,6 +589,11 @@ namespace Recon.Controllers
             objcat3.Dropdownkovalue = "Manual Matching";
             objcat_3st.Add(objcat3);
 
+
+            objcat3 = new TransactionRpt_model();
+            objcat3.Dropdownkoid = 3;
+            objcat3.Dropdownkovalue = "Posting Supporing File";
+            objcat_3st.Add(objcat3);
             return Json(objcat_3st, JsonRequestBehavior.AllowGet);
 
             return View();

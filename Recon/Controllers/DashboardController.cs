@@ -61,9 +61,9 @@ namespace Recon.Controllers
                 result2 = (DataTable)JsonConvert.DeserializeObject(post_data, result2.GetType());
 
                 DashboardModel objcat3 = new DashboardModel();
-                objcat3.ReconName_id = 0;
-                objcat3.ReconName = "SelectAll";
-                objcat_3st.Add(objcat3);
+                //objcat3.ReconName_id = 0;
+                //objcat3.ReconName = "SelectAll";
+                // objcat_3st.Add(objcat3);
 
                 for (int i = 0; i < result2.Rows.Count; i++)
                 {

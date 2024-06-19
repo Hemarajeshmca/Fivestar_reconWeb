@@ -432,8 +432,6 @@
 
                                 <div class="col-sm-3">
                                     <label for="filetype" class="title">Recon Name </label>&nbsp;
-
-
                                     @(Html.Kendo().DropDownList()
                                                         .Name("ReconName_id")
                                                         .DataTextField("ReconName")
@@ -795,7 +793,7 @@
     function confirm() {
 
         debugger;
-   
+        var table_name = "recon_trn_vtranrecon"
         var checkflag = "";
         var reportcondition = "";
         var reportgid = 0;
@@ -876,7 +874,7 @@
                             debugger;
                             $.ajax({
                                 type: "POST",
-                                data: '{table_name: "' + Table_Name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '",Recon_gid:' + Recon_gid + '}',
+                                data: '{table_name: "' + table_name + '",condition:  "' + orgindata + '",radio_checked:"' + radiochecked + '",recon_id:"' + Rec_id + '",Recon_gid:' + Recon_gid + '}',
                                 //   url: "/Report/ReportExpenceGrid_Read",
                                 //  url: '@Url.Action("ReportExpenceGrid_Read", "Report")',
                                 url: '@Url.Action("ManualFirstgridload", "ManualMatchOff")',
@@ -1003,6 +1001,7 @@
                     var wnd1 = $("#dialog1").data("kendoWindow");
                     if (wnd1) {
                         wnd1.close();
+                        confirm();
                     }
                 }
                 else {

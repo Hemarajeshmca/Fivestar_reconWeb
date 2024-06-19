@@ -211,7 +211,15 @@
         //    var per=periodfrom.split("/").re
 
         //}
-       
+        var status_code = "";
+        var radio1 = document.getElementById("Status_code_y");
+        var radio2 = document.getElementById("Status_code_n");
+        if (radio1.checked){
+            status_code = "Y";
+        }
+        else {
+            status_code = "N";
+        }
         
         var Deptmodel = {};
             Deptmodel.ReconName = $("#ReconName").val();
@@ -220,7 +228,8 @@
             Deptmodel.untillactive = untillactive;
            //Deptmodel.Recon_type = ;
             Deptmodel.MappingType_code = mapping;// $("#MappingType_code").val();
-            Deptmodel.Status_code = $("#Status_code").val();
+            
+            Deptmodel.Status_code = status_code;//$("#Status_code").val();
             Deptmodel.period_from = periodfrom;
             Deptmodel.period_to = periodto;
             Deptmodel.recon_id = $("#recon_id").val();

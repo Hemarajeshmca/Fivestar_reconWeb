@@ -1199,12 +1199,23 @@
                 matchoffMan = "N"
             }
             var period_from = $('#period_from').val();
-            var period_to = $("#period_to").val();
             var formatted_period_from = getFormated_StringDate(period_from);
-            var formatted_period_to = getFormated_StringDate(period_to);
-            if (formatted_period_to == "undefined-undefined-") {
-                formatted_period_to =null;
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
             }
+            else {
+                var untillactive = 'N';
+            }
+            if (untillactive == 'N') {
+                var formatted_period_to = getFormated_StringDate(period_to);
+            } else {
+                var formatted_period_to = "";
+            }
+            var period_to = $("#period_to").val();
+            //var formatted_period_to = getFormated_StringDate(period_to);
+            //if (formatted_period_to == "undefined-undefined-") {
+            //    formatted_period_to =null;
+            //}
             if ($("input:radio[id='status_yes']").is(":checked")) {
                 status = "Y";
             }
@@ -1273,12 +1284,23 @@
                 matchoffMan = "N"
             }
             var period_from = $('#period_from').val();
-            var period_to = $("#period_to").val();
             var formatted_period_from = getFormated_StringDate(period_from);
-            var formatted_period_to = getFormated_StringDate(period_to);
-            if (formatted_period_to == "undefined-undefined-") {
-                formatted_period_to = null;
+            if ($('#untillactive').is(":checked")) {
+                var untillactive = $('#untillactive').val();
             }
+            else {
+                var untillactive = 'N';
+            }
+            if (untillactive == 'N') {
+                var formatted_period_to = getFormated_StringDate(period_to);
+            } else {
+                var formatted_period_to = "";
+            }
+            var period_to = $("#period_to").val();
+            //var formatted_period_to = getFormated_StringDate(period_to);
+            //if (formatted_period_to == "undefined-undefined-") {
+            //    formatted_period_to =null;
+            //}
             if ($("input:radio[id='status_yes']").is(":checked")) {
                 status = "Y";
             }
