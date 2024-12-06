@@ -114,7 +114,7 @@
                                         @(Html.Kendo().DropDownList()
                                                 .Name("TemplateType_desc")
                                                 .DataTextField("Template_name")
-                                                .DataValueField("TemplateType_desc")
+                                                        .DataValueField("Template_gid")
                                                 //.Events(e => e.Change("onChangetemplateid"))
                                                   .Events(e => e.Change("onChangetemplateid"))
                                                 .HtmlAttributes(new { style = "width:100%;font-weight: normal" })
@@ -140,7 +140,7 @@
                                     <div class="form-group">
                                         <label for="acno" class="title">A/c No</label><br />
                                         @(Html.Kendo().DropDownList()
-                                            .Name("account1_desc")
+                                                    .Name("account1_desc")
                                                     .DataTextField("account1_desc")
                                                     .DataValueField("account1_code")
                                                     .HtmlAttributes(new { style = "width:100%;font-weight: normal", @disabled = true })
@@ -310,6 +310,36 @@
             contentType: 'application/json; charset=utf-8',
             success: function (response) {
                 $("#TemplateType_desc").data("kendoDropDownList").dataSource.data(response);
+                if (AccType == "S") {
+                    var reconname = $("#recon_gid").data("kendoDropDownList");
+                    reconname.enable(true);
+
+                    var accno = $("#tranbrkptype_gid").data("kendoDropDownList");
+                    accno.enable(true);
+                } else if (AccType == "M" || AccType == "P") {
+
+                    if (AccType == "P") {
+                        var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+                        tranbrkptype_gid.enable(true);
+                    }
+
+                    var reconname = $("#recon_gid").data("kendoDropDownList");
+                    reconname.enable(true);
+
+                    var accno = $("#account1_desc").data("kendoDropDownList");
+                    accno.enable(false);
+                    $("#account1_desc").data("kendoDropDownList").value('');
+                    $("#TemplateType_desc").data("kendoDropDownList").value('');
+                }
+
+                else {
+                    var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+                    tranbrkptype_gid.enable(false);
+
+                    var recon_gid = $("#recon_gid").data("kendoDropDownList");
+                    recon_gid.enable(false);
+                    recon_gid.value("Select");
+                }
             },
             error: function (er) {
             }
@@ -471,6 +501,7 @@
 
     function FileImport() {
         debugger;
+        templateid = $("#TemplateType_desc").data("kendoDropDownList").value();
         var filesize = $('#File_Import').val();
         var AccType = $("#AccType").data("kendoDropDownList").value();
         //  var AccType = $("input[name='AccType']:checked").val();

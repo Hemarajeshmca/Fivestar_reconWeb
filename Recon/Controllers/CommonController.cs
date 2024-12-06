@@ -45,9 +45,11 @@ namespace Recon.Controllers
                 {
                     client.BaseAddress = new Uri(url);
                     client.DefaultRequestHeaders.Accept.Clear();
+                    client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpContent content = new StringContent(SerializedString, UTF8Encoding.UTF8, "application/json");
+
                     content.Headers.Add("user_code", "12345");
                     var response = client.PostAsync(ApiMethodName, content).Result;
                     if (response.StatusCode.ToString() == "Unauthorized")
