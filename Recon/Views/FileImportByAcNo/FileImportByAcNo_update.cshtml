@@ -311,6 +311,37 @@
             contentType: 'application/json; charset=utf-8',
             success: function (response) {
                 $("#TemplateType_desc").data("kendoDropDownList").dataSource.data(response);
+                if (AccType == "S") {
+                    var reconname = $("#recon_gid").data("kendoDropDownList");
+                    reconname.enable(true);
+
+                    var accno = $("#tranbrkptype_gid").data("kendoDropDownList");
+                    accno.enable(true);
+                } else if (AccType == "M" || AccType == "P") {
+
+                    if (AccType == "P") {
+                        var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+                        tranbrkptype_gid.enable(true);
+                    }
+
+                    var reconname = $("#recon_gid").data("kendoDropDownList");
+                    reconname.enable(true);
+
+                    var accno = $("#account1_desc").data("kendoDropDownList");
+                    accno.enable(false);
+                    $("#account1_desc").data("kendoDropDownList").value('');
+                    $("#TemplateType_desc").data("kendoDropDownList").value('');
+                }
+
+                else {
+                    var tranbrkptype_gid = $("#tranbrkptype_gid").data("kendoDropDownList");
+                    tranbrkptype_gid.enable(false);
+
+                    var recon_gid = $("#recon_gid").data("kendoDropDownList");
+                    recon_gid.enable(false);
+                    recon_gid.value("Select");
+                }
+
             },
             error: function (er) {
             }
