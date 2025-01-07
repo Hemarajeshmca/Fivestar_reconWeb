@@ -2013,6 +2013,7 @@ namespace Recon.Controllers
                 var acc_no1 = Table.Rows[0]["acc_no1"].ToString();
                 //  string s2 = Regex.Replace(recon_name, @"[^A-Z]+", String.Empty);
                 var acc_no2 = Table.Rows[0]["acc_no2"].ToString();
+                var acc_no0 = Table.Rows[0]["acc_no0"].ToString();
                 string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
                 string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
                 Decimal acc1Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no1_bal_amount"].ToString());
@@ -2044,11 +2045,15 @@ namespace Recon.Controllers
                     ws.Cell("A2").Style.Font.Bold = true;
                     ws.Range("A2:F2").Row(1).Merge();
 
-                    ws.Cell("A3").SetValue("CC A/c No.").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
-                    ws.Range("A3:B3").Row(1).Merge();
+                    ws.Cell("A3").SetValue(acc_no0).SetActive(); 
+                    ws.Cell("A3").Style.Font.Bold = true;
+                    ws.Range("A3:D3").Row(1).Merge();
 
-                    ws.Cell("C3").SetValue(acc_no1).SetActive(); ws.Cell("C3").Style.Font.Bold = true;
-                    ws.Range("C3:F3").Row(1).Merge();
+                    //ws.Cell("A3").SetValue("CC A/c No.").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
+                    //ws.Range("A3:B3").Row(1).Merge();
+
+                    //ws.Cell("C3").SetValue(acc_no1).SetActive(); ws.Cell("C3").Style.Font.Bold = true;
+                    //ws.Range("C3:F3").Row(1).Merge();
 
                     ws.Cell("A4").SetValue("Bank Reconciliation Statement as on date " + Acc1date + "").SetActive();
                     ws.Cell("A4").Style.Font.Bold = true;
@@ -2558,9 +2563,6 @@ namespace Recon.Controllers
                     string post_data1 = objcommon.getApiResult(JsonConvert.SerializeObject(DedupList), "ReportMonthbrs_Download");
                     result2 = (DataSet)JsonConvert.DeserializeObject(post_data1, result2.GetType());
 
-
-
-
                     TransactionRpt_model objcat3 = new TransactionRpt_model();
                     Table = result2.Tables[0].Copy();
                     Table1 = result2.Tables[1].Copy();
@@ -2573,17 +2575,16 @@ namespace Recon.Controllers
                     Table4.Columns["Column1"].ColumnName = "-";
                     Table6 = result2.Tables[6].Copy();
                     Table7 = result2.Tables[7].Copy();
-
+                    string Acc2date = "";
+                    string Acc1date = "";
+                    var lastday = "";
                     var entity_name = Table.Rows[0]["entity"].ToString();
                     var recon_name = Table.Rows[0]["recon_name"].ToString();
                     int i = recon_name.Length;
-
                     if (i >= 30)
                     {
                         recon_name1 = recon_name.Substring(0, 30);
-                        recon_name1 = Regex.Replace(recon_name1, @"[^0-9a-zA-Z\._]", string.Empty);
-                        
-
+                        recon_name1 = Regex.Replace(recon_name1, @"[^0-9a-zA-Z\._]", string.Empty);                   
                     }
                     else
                     {
@@ -2592,14 +2593,9 @@ namespace Recon.Controllers
                     }
 
                     filename_tran = recon_name1.Substring(0, 5);
-
                     var acc_no1 = Table.Rows[0]["acc_no1"].ToString();
-                    string Acc2date = "";
-                    string Acc1date = "";
-                    //  string s2 = Regex.Replace(recon_name, @"[^A-Z]+", String.Empty);
                     var acc_no2 = Table.Rows[0]["acc_no2"].ToString();
-                    //string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
-                    //string Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                    var acc_no0 = Table.Rows[0]["acc_no0"].ToString();
                     Decimal acc1Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no1_bal_amount"].ToString());
                     Decimal acc2Bal_amount = Convert.ToDecimal(Table.Rows[0]["acc_no2_bal_amount"].ToString());
                     Decimal accno1_drtotal = Convert.ToDecimal(Table.Rows[0]["acc_no1_dr_total"].ToString());
@@ -2608,39 +2604,92 @@ namespace Recon.Controllers
                     Decimal accno2_crtotal = Convert.ToDecimal(Table.Rows[0]["acc_no2_cr_total"].ToString());
                     if (accno2_crtotal == 0 && accno1_crtotal == 0 && accno2_drtotal == 0 && accno1_drtotal == 0 && acc1Bal_amount == 0 && acc2Bal_amount == 0)
                     {
+                        var trandate = Convert.ToDateTime(TranDate);
                         int year = DateTime.Now.Year;
-                        int month = DateTime.Now.Month;
-                        DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-                        Acc2date = lastDayOfMonth.ToString("dd-MM-yyyy");
-                        Acc1date = lastDayOfMonth.ToString("dd-MM-yyyy");
-
+                        int month = DateTime.Now.Month;                                  
+                        //DateTime TemplastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        //Acc2date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                        //Acc1date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                        string accNo2BalDateString = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                        string accNo1BalDateString = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                        DateTime accNo2BalDate;
+                        DateTime accNo1BalDate;
+                        bool accNo2DateParsed = DateTime.TryParse(accNo2BalDateString, out accNo2BalDate);
+                        bool accNo1DateParsed = DateTime.TryParse(accNo1BalDateString, out accNo1BalDate);
+                        int year1 = DateTime.Now.Year;
+                        int month1 = DateTime.Now.Month - 1;
+                        if (month1 == 0)
+                        {
+                            month1 = 12; // Set to December
+                            year1 -= 1;  // Move to the previous year
+                        }
+                        if (accNo2DateParsed || accNo1DateParsed)
+                        {
+                            DateTime TemplastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                            DateTime lastDayOfPrevMonth = new DateTime(year1, month1, DateTime.DaysInMonth(year1, month1));
+                            if ((accNo2BalDate.CompareTo(TemplastDayOfMonth) < 0) ||
+                                (accNo1BalDate.CompareTo(TemplastDayOfMonth) < 0))
+                            {
+                                Acc2date = lastDayOfPrevMonth.ToString("dd-MM-yyyy");
+                                Acc1date = lastDayOfPrevMonth.ToString("dd-MM-yyyy");
+                            }
+                            else
+                            {
+                                Acc2date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                                Acc1date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                            }
+                        }
                     }
                     else
                     {
                         Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
                         Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
                     }
-                    var val = Convert.ToDateTime(TranDate);
 
+                    var val = Convert.ToDateTime(TranDate);
                     int pMonth;
                     int pYear = val.Year;
                     int checkpMonth = val.Month - 1;
-                    if (checkpMonth == 0) {
-                       // pMonth = val.Month;
+                    if (checkpMonth == 0)
+                    {
                         pMonth = 12;
                         pYear = val.Year - 1;
-                    } else {
+                    }
+                    else
+                    {
                         pMonth = checkpMonth;
                         pYear = val.Year;
                     }
                     DateTime lastDayPrevMonth = new DateTime(pYear, pMonth, DateTime.DaysInMonth(pYear, pMonth));
+                    lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
 
-                    var lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
+                    //int tranMonth = val.Month;
+                    //int tranYear = val.Year;
+                    //DateTime tranDate;
+                    //bool isValidDate = DateTime.TryParse(TranDate, out tranDate);
+                    //if (isValidDate)
+                    //{
+                        //if (tranDate.Month < 1 || tranDate.Month > 12)
+                        //{
+                        //    Console.WriteLine("Invalid month value: " + tranDate.Month);
+                        //}
+                        //else
+                        //{
+                        //    int year = tranDate.Year;
+                        //    int month = tranDate.Month;
+                        //    DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        //    lastday  = lastDayOfMonth.ToString("dd-MM-yyyy"); // Change the format if needed
+                            
+                        //}
+                    //    DateTime lastDayPrevMonth = new DateTime(tranYear, tranMonth, DateTime.DaysInMonth(tranMonth, tranYear));
+
+                    //    lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
+                    //}
+                   
 
                     dt = result2.Copy();
                     dt.Tables.Remove("Table");
 
-                    //fileName = acc_no1 + ".xlsx";
                     fileName = "AllReconsMonth_Brs_Summary "+ filetime +".xlsx";
 
                     using (wb)// wb.Worksheets.Add(dt);
@@ -2762,6 +2811,10 @@ namespace Recon.Controllers
                             row_total = "M" + row_cal.ToString() + "";
                             ws.Cell(row_total).SetValue(sum); ws.Cell(row_total).Style.Font.Bold = true;
                             ws.Cell(row_total).Style.Font.Underline = XLFontUnderlineValues.Double;
+
+                            // ws.Column("N").Hide();
+                            ws.Column("N").Delete();
+                           
                         }
 
 
@@ -2780,8 +2833,12 @@ namespace Recon.Controllers
                         ws.Cell("A2").Style.Font.Bold = true;
                         ws.Range("A2:F2").Row(1).Merge();
 
-                        ws.Cell("A3").SetValue("CC A/c No." + acc_no1 + "").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
-                        ws.Range("A3:B3").Row(1).Merge();
+                        ws.Cell("A3").SetValue(acc_no0).SetActive(); 
+                        ws.Cell("A3").Style.Font.Bold = true;
+                        ws.Range("A3:D3").Row(1).Merge();
+
+                        //ws.Cell("A3").SetValue("CC A/c No." + acc_no1 + "").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
+                        //ws.Range("A3:B3").Row(1).Merge();
 
                         //ws.Cell("C3").SetValue(acc_no1).SetActive(); ws.Cell("C3").Style.Font.Bold = true;
                         //ws.Range("C3:F3").Row(1).Merge();
@@ -3191,8 +3248,10 @@ namespace Recon.Controllers
                     filename_tran = recon_name1.Substring(0, 5);
 
                     var acc_no1 = Table.Rows[0]["acc_no1"].ToString();
+                    var acc_no0 = Table.Rows[0]["acc_no0"].ToString();
                     string Acc2date = "";
                     string Acc1date = "";
+                    var lastday = "";
                     //  string s2 = Regex.Replace(recon_name, @"[^A-Z]+", String.Empty);
                     var acc_no2 = Table.Rows[0]["acc_no2"].ToString();
                     //string Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
@@ -3206,26 +3265,55 @@ namespace Recon.Controllers
 
                     if (accno2_crtotal == 0 && accno1_crtotal == 0 && accno2_drtotal == 0 && accno1_drtotal == 0 && acc1Bal_amount == 0 && acc2Bal_amount == 0)
                     {
+                        var trandate = Convert.ToDateTime(TranDate);
                         int year = DateTime.Now.Year;
                         int month = DateTime.Now.Month;
-                        DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-                        Acc2date = lastDayOfMonth.ToString("dd-MM-yyyy");
-                        Acc1date = lastDayOfMonth.ToString("dd-MM-yyyy");
+                        //DateTime TemplastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        //Acc2date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                        //Acc1date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                        string accNo2BalDateString = Table.Rows[0]["acc_no2_bal_date"].ToString();
+                        string accNo1BalDateString = Table.Rows[0]["acc_no1_bal_date"].ToString();
+                        DateTime accNo2BalDate;
+                        DateTime accNo1BalDate;
+                        bool accNo2DateParsed = DateTime.TryParse(accNo2BalDateString, out accNo2BalDate);
+                        bool accNo1DateParsed = DateTime.TryParse(accNo1BalDateString, out accNo1BalDate);
 
+                        int year1 = DateTime.Now.Year;
+                        int month1 = DateTime.Now.Month - 1;
+                        if (month1 == 0)
+                        {
+                            month1 = 12; // Set to December
+                            year1 -= 1;  // Move to the previous year
+                        }
+                        if (accNo2DateParsed || accNo1DateParsed)
+                        {
+                            DateTime TemplastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                            DateTime lastDayOfPrevMonth = new DateTime(year1, month1, DateTime.DaysInMonth(year1, month1));
+                            if ((accNo2BalDate.CompareTo(TemplastDayOfMonth) < 0) ||
+                                (accNo1BalDate.CompareTo(TemplastDayOfMonth) < 0))
+                            {
+                                Acc2date = lastDayOfPrevMonth.ToString("dd-MM-yyyy");
+                                Acc1date = lastDayOfPrevMonth.ToString("dd-MM-yyyy");
+                            }
+                            else
+                            {
+                                Acc2date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                                Acc1date = TemplastDayOfMonth.ToString("dd-MM-yyyy");
+                            }
+                        }
                     }
                     else
                     {
                         Acc2date = Table.Rows[0]["acc_no2_bal_date"].ToString();
                         Acc1date = Table.Rows[0]["acc_no1_bal_date"].ToString();
                     }
-                    int pMonth;
+
                     var val = Convert.ToDateTime(TranDate);
+                    int pMonth;
                     int pYear = val.Year;
-                   //int pMonth = val.Month - 1;
                     int checkpMonth = val.Month - 1;
                     if (checkpMonth == 0)
                     {
-                        //pMonth = val.Month;
                         pMonth = 12;
                         pYear = val.Year - 1;
                     }
@@ -3235,8 +3323,33 @@ namespace Recon.Controllers
                         pYear = val.Year;
                     }
                     DateTime lastDayPrevMonth = new DateTime(pYear, pMonth, DateTime.DaysInMonth(pYear, pMonth));
-                    var lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
+                    lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
 
+                    //int tranMonth = val.Month;
+                    //int tranYear = val.Year;
+                    //DateTime tranDate;
+                    //bool isValidDate = DateTime.TryParse(TranDate, out tranDate);
+                    //if (isValidDate)
+                    //{
+                        //if (tranDate.Month < 1 || tranDate.Month > 12)
+                        //{
+                        //    Console.WriteLine("Invalid month value: " + tranDate.Month);
+                        //}
+                        //else
+                        //{
+                        //    int year = tranDate.Year;
+                        //    int month = tranDate.Month;
+                        //    DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        //    lastday = lastDayOfMonth.ToString("dd-MM-yyyy"); // Change the format if needed
+
+                        //}
+                    //DateTime lastDayPrevMonth = new DateTime(tranYear, tranMonth, DateTime.DaysInMonth(tranMonth, tranYear));
+
+                    //lastday = lastDayPrevMonth.ToString("dd-MM-yyyy");
+                  
+                   // }
+
+                    
                     dt = result2.Copy();
                     dt.Tables.Remove("Table");
 
@@ -3362,11 +3475,9 @@ namespace Recon.Controllers
                             row_total = "M" + row_cal.ToString() + "";
                             ws.Cell(row_total).SetValue(sum); ws.Cell(row_total).Style.Font.Bold = true;
                             ws.Cell(row_total).Style.Font.Underline = XLFontUnderlineValues.Double;
-                        }
-
-                       
+                            ws.Column("N").Delete();                         
+                        }                     
                         
-                       
                         ws = wb.AddWorksheet(recon_name1);
                         string reconbrs = entity_name.Trim('\'');
                         ws.FirstCell().SetValue(reconbrs); ws.Cell("A1").Style.Font.Bold = true;
@@ -3380,8 +3491,12 @@ namespace Recon.Controllers
                         ws.Cell("A2").Style.Font.Bold = true;
                         ws.Range("A2:F2").Row(1).Merge();
 
-                        ws.Cell("A3").SetValue("CC A/c No."+acc_no1+"").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
-                        ws.Range("A3:B3").Row(1).Merge();
+                        ws.Cell("A3").SetValue(acc_no0).SetActive(); 
+                        ws.Cell("A3").Style.Font.Bold = true;
+                        ws.Range("A3:D3").Row(1).Merge();
+
+                        //ws.Cell("A3").SetValue("CC A/c No."+acc_no1+"").SetActive(); ws.Cell("A3").Style.Font.Bold = true;
+                        //ws.Range("A3:B3").Row(1).Merge();
 
                         //ws.Cell("C3").SetValue(acc_no1).SetActive(); ws.Cell("C3").Style.Font.Bold = true;
                         //ws.Range("C3:F3").Row(1).Merge();
@@ -5044,7 +5159,7 @@ namespace Recon.Controllers
 
             return View();
         }
-    
+
     }
 }
 
